@@ -8,8 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = introCard.querySelector('.flip-card');
         if (card) {
           card.classList.add('flipped');
-          // Prevent flip interactions but allow back-side buttons to work
-          card.style.pointerEvents = 'none';
+          // Prevent further flip interactions while allowing back-side buttons
+          const front = card.querySelector('.flip-front');
+          if (front) front.style.pointerEvents = 'none';
         }
       },
       { once: true }
