@@ -216,6 +216,12 @@ html, body {
   cursor: pointer;
 }
 
+.thank-you-message {
+  margin: 0;
+  padding: 0.5rem 0;
+  color: var(--emerald-border);
+}
+
 /* Link on the flip card back */
 .cant-attend-btn {
   display: inline-block;
