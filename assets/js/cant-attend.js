@@ -1,33 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
   const trigger = document.getElementById('showCantAttendForm');
-  const container = document.querySelector('.attendance-form-container');
-  const closeBtn = document.getElementById('closeCantAttendForm');
-  const form = container ? container.querySelector('form') : null;
+  const backContent = document.getElementById('backContent');
+  const formContainer = document.getElementById('cantAttendFormContainer');
+  const form = formContainer ? formContainer.querySelector('form') : null;
+  const introCard = document.getElementById('introCard');
+  const thankYou = document.getElementById('thankYouMessage');
 
-  if (trigger && container) {
+  if (trigger && backContent && formContainer) {
     trigger.addEventListener('click', () => {
-      container.style.display = 'block';
+      backContent.style.display = 'none';
+      formContainer.style.display = 'block';
     });
   }
 
-  if (closeBtn && container) {
-    closeBtn.addEventListener('click', () => {
-      container.style.display = 'none';
-    });
-  }
-
-  if (form && container) {
+  if (form && introCard && thankYou) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
       try {
         await fetch(form.action, { method: 'POST', body: formData, mode: 'no-cors' });
-        window.location.href = 'thankyou.html';
+        introCard.remove();
+        thankYou.style.display = 'flex';
       } catch (err) {
-        container.innerHTML = '<p class="thank-you-message">Submission failed. Please try again later.</p>';
-        setTimeout(() => {
-          container.style.display = 'none';
-        }, 2000);
+        formContainer.innerHTML = '<p class="thank-you-message">Submission failed. Please try again later.</p>';
       }
     });
   }

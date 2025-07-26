@@ -26,25 +26,31 @@
           <div id="countdown"></div>
         </div>
         <div class="flip-back">
-          <p>Wedding details and site coming soon, please plan in advance. We will release room blocks in a few months. Out of towners should plan on a weekend trip. If you definitely cannot make it please inform Chris or Lorraine.</p>
-          <button id="showCantAttendForm" class="cant-attend-btn">Can't Attend</button>
+          <div id="backContent">
+            <p>Wedding details and site coming soon, please plan in advance. We will release room blocks in a few months. Out of towners should plan on a weekend trip. If you definitely cannot make it please inform Chris or Lorraine.</p>
+            <button id="showCantAttendForm" class="cant-attend-btn">Can't Attend</button>
+          </div>
+          <div id="cantAttendFormContainer" class="card-form-container" style="display:none;">
+            <form action="https://script.google.com/macros/s/AKfycbw1oW3-NLd95psh53-YJFoUoa80b1jeyw9oEXX0TWffxMEyauwYvn6aVOn0UjdZgZF2IQ/exec" method="post">
+              <label>
+                Name: <input type="text" name="name" required>
+              </label><br>
+              <label>
+                Email: <input type="email" name="email" required>
+              </label><br>
+              <button type="submit">Send</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="attendance-form-container">
-    <button id="closeCantAttendForm" class="close-btn">Close</button>
-    <form action="https://script.google.com/macros/s/AKfycbw1oW3-NLd95psh53-YJFoUoa80b1jeyw9oEXX0TWffxMEyauwYvn6aVOn0UjdZgZF2IQ/exec" method="post">
-      <label>
-        Name: <input type="text" name="name" required>
-      </label><br>
-      <label>
-        Email: <input type="email" name="email" required>
-      </label><br>
-      <button type="submit">Send</button>
-    </form>
-    <p id="submissionMessage" class="thank-you-message" style="display:none;">Thank you for your submission!</p>
+
+  <div id="thankYouMessage" class="thank-you-container" style="display:none;">
+    <div class="thank-you-card">
+      <p>Thank you for submitting and we are sorry you will not be able to attend the wedding. We will email you the wedding site once it is available so you can still engage and be a part of the celebration.</p>
+    </div>
   </div>
 
   <script src="assets/js/save-the-date.js"></script>
