@@ -34,7 +34,19 @@
   </div>
 
   <div class="attendance-form-container">
-    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScGdTfx__6jFHMsRKHKUjf5zOgI6gxTwXoOPUi9-rVrFdoMfg/viewform?embedded=true" width="640" height="554" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+    <form action="https://script.google.com/macros/s/AKfycbw1oW3-…/exec" method="post">
+      <label>
+        Name: <input type="text" name="name" required>
+      </label><br>
+      <label>
+        Email: <input type="email" name="email" required>
+      </label><br>
+      <label>
+        Message:<br>
+        <textarea name="message" rows="4"></textarea>
+      </label><br>
+      <button type="submit">Send</button>
+    </form>
   </div>
 
   <script src="assets/js/save-the-date.js"></script>
