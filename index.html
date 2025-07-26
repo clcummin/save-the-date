@@ -34,6 +34,7 @@
   </div>
 
   <div class="attendance-form-container">
+    <button id="closeCantAttendForm" class="close-btn">Close</button>
     <form action="https://script.google.com/macros/s/AKfycbw1oW3-NLd95psh53-YJFoUoa80b1jeyw9oEXX0TWffxMEyauwYvn6aVOn0UjdZgZF2IQ/exec" method="post">
       <label>
         Name: <input type="text" name="name" required>
@@ -43,6 +44,7 @@
       </label><br>
       <button type="submit">Send</button>
     </form>
+    <p id="submissionMessage" class="thank-you-message" style="display:none;">Thank you for your submission!</p>
   </div>
 
   <script src="assets/js/save-the-date.js"></script>
