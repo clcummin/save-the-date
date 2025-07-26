@@ -2,9 +2,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const introCard = document.getElementById('introCard');
   if (introCard) {
     setTimeout(() => introCard.classList.add('visible'), 3000);
-    introCard.addEventListener('click', () => {
-      introCard.querySelector('.flip-card')?.classList.toggle('flipped');
-    });
+    introCard.addEventListener(
+      'click',
+      () => {
+        const card = introCard.querySelector('.flip-card');
+        if (card) {
+          card.classList.add('flipped');
+          // Prevent any further interactions once flipped
+          introCard.style.pointerEvents = 'none';
+        }
+      },
+      { once: true }
+    );
   }
 
   const countdownEl = document.getElementById('countdown');
