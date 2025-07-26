@@ -22,10 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData(form);
       try {
         await fetch(form.action, { method: 'POST', body: formData, mode: 'no-cors' });
-        container.innerHTML = '<p class="thank-you-message">Thank you for your submission!</p>';
-        setTimeout(() => {
-          container.style.display = 'none';
-        }, 2000);
+        window.location.href = 'thankyou.html';
       } catch (err) {
         container.innerHTML = '<p class="thank-you-message">Submission failed. Please try again later.</p>';
         setTimeout(() => {

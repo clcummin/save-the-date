@@ -232,3 +232,24 @@ html, body {
   text-decoration: none;
   border-radius: var(--btn-radius);
 }
+
+/* Thank you page styles */
+.thank-you-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+.thank-you-card {
+  background: var(--white);
+  color: #222;
+  border-radius: var(--card-radius);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  border: 1.5px solid var(--gray-light);
+  padding: 2rem;
+  max-width: 380px;
+  text-align: center;
+  line-height: 1.4;
+}
