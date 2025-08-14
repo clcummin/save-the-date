@@ -1,8 +1,9 @@
-/* Styles for Save the Date page */
+/* Minimal styles for save the date page */
 @import url('https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative&display=swap');
 
 :root {
+  /* colors */
   --bg-emerald-dark: #002d1f;
   --emerald-overlay: rgba(0, 0, 0, 0.22);
   --emerald-border: #014421;
@@ -10,19 +11,21 @@
   --emerald-accent: #00975c;
   --white: #fff;
   --gray-light: #e4e4e4;
+  /* fonts */
   --font-body: "Spectral", serif;
   --font-heading: "Cinzel Decorative", cursive;
-  --font-nav: "Cinzel Decorative", cursive;
+  /* sizing */
   --card-radius: 20px;
-  --photo-size: 96px;
   --btn-radius: 28px;
+  /* transitions */
   --t-fast: 0.18s;
   --t-med: 0.7s;
   --ease: ease;
   --ease-med: ease;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -33,14 +36,16 @@ html, body {
   color: var(--white);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
+/* video background */
 .background-video {
   position: fixed;
   inset: 0;
-  background: url('../video-fallback.jpg') center/cover no-repeat;
   overflow: hidden;
   z-index: 0;
 }
@@ -51,8 +56,10 @@ html, body {
   height: 100%;
   object-fit: cover;
   transition: opacity var(--t-med) var(--ease-med);
+  background: var(--bg-emerald-dark);
 }
 
+/* overlay */
 .video-overlay {
   position: fixed;
   inset: 0;
@@ -61,6 +68,7 @@ html, body {
   pointer-events: none;
 }
 
+/* intro card container */
 .intro-card-container {
   position: fixed;
   inset: 0;
@@ -94,6 +102,7 @@ html, body {
     opacity var(--t-med) var(--ease-med);
 }
 
+/* flip card structure */
 .flip-card {
   background: transparent;
   width: 320px;
@@ -124,7 +133,7 @@ html, body {
   justify-content: center;
 }
 .flip-front:hover {
-  box-shadow: 0 12px 48px rgba(1,68,33,0.18);
+  box-shadow: 0 12px 48px rgba(1, 68, 33, 0.18);
   transform: translateY(-2px) scale(1.02);
 }
 .flip-back {
@@ -136,15 +145,13 @@ html, body {
   font-size: 2.7rem;
   font-weight: 600;
   margin: 0 0 1rem;
-  letter-spacing: .07em;
+  letter-spacing: 0.07em;
   color: var(--emerald-border);
   text-align: center;
 }
 .wedding-date {
   font-size: 1.18rem;
   color: var(--emerald-accent);
-  margin-bottom: 2.3rem;
-  letter-spacing: .04em;
   text-align: center;
 }
 
@@ -154,7 +161,7 @@ html, body {
   margin: 0;
 }
 
-/* Form displayed inside the intro card when user cannot attend */
+/* can't attend form */
 .card-form-container {
   display: none;
   color: #222;
@@ -166,7 +173,8 @@ html, body {
   border-radius: var(--btn-radius);
   margin-right: 0.4rem;
 }
-.card-form-container button {
+.card-form-container button,
+.cant-attend-btn {
   padding: 0.35rem 0.8rem;
   border: none;
   border-radius: var(--btn-radius);
@@ -174,32 +182,11 @@ html, body {
   color: var(--white);
   cursor: pointer;
 }
-
-@media (max-width: 600px) {
-  .flip-card {
-    width: 90%;
-  }
-}
-
-
-.thank-you-message {
-  margin: 0;
-  padding: 0.5rem 0;
-  color: var(--emerald-border);
-}
-
-/* Link on the flip card back */
 .cant-attend-btn {
-  display: inline-block;
   margin-top: 1rem;
-  padding: 0.4rem 0.8rem;
-  background: var(--emerald-accent);
-  color: var(--white);
-  text-decoration: none;
-  border-radius: var(--btn-radius);
 }
 
-/* Thank you page styles */
+/* thank you message */
 .thank-you-container {
   position: fixed;
   inset: 0;
@@ -215,3 +202,21 @@ html, body {
   line-height: 1.4;
   cursor: default;
 }
+
+/* utility */
+.fade-out {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+.no-scroll,
+.no-scroll html {
+  overflow: hidden;
+  height: 100vh;
+}
+
+@media (max-width: 600px) {
+  .flip-card {
+    width: 90%;
+  }
+}
+
