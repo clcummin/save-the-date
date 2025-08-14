@@ -1,21 +1,24 @@
 /* Styles for Save the Date page */
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Allura&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative&display=swap');
 
 :root {
   --bg-emerald-dark: #002d1f;
-  --emerald-overlay: rgba(0,0,0,0.22);
+  --emerald-overlay: rgba(0, 0, 0, 0.22);
   --emerald-border: #014421;
   --emerald-hover: #015e3c;
   --emerald-accent: #00975c;
   --white: #fff;
   --gray-light: #e4e4e4;
-  --font-body: 'Raleway', sans-serif;
-  --font-heading: 'Allura', cursive;
+  --font-body: "Spectral", serif;
+  --font-heading: "Cinzel Decorative", cursive;
+  --font-nav: "Cinzel Decorative", cursive;
   --card-radius: 20px;
+  --photo-size: 96px;
   --btn-radius: 28px;
   --t-fast: 0.18s;
   --t-med: 0.7s;
+  --ease: ease;
   --ease-med: ease;
 }
 
