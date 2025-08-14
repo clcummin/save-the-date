@@ -220,3 +220,100 @@ body {
   }
 }
 
+/* Flip clock countdown styles */
+.flip-clock {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.flip-digit {
+  position: relative;
+  width: 40px;
+  height: 60px;
+  background: var(--white);
+  border-radius: 6px;
+  border: 2px solid var(--emerald-border);
+  color: var(--emerald-border);
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.separator {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  line-height: 60px;
+  color: var(--emerald-border);
+}
+
+.flip-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.digit-row {
+  display: flex;
+}
+
+.flip-label {
+  margin-top: 4px;
+  color: var(--emerald-border);
+  font-family: var(--font-heading);
+  letter-spacing: 0.05em;
+}
+
+/* Size modifiers */
+.flip-clock.flip-small .flip-digit {
+  width: 32px;
+  height: 48px;
+  font-size: 1.6rem;
+}
+
+.flip-clock.flip-small .separator {
+  font-size: 1.8rem;
+  line-height: 48px;
+}
+
+.flip-clock.flip-small .flip-label {
+  font-size: 0.85rem;
+}
+
+.flip-clock.flip-large .flip-digit {
+  width: 60px;
+  height: 90px;
+  font-size: 3rem;
+}
+
+.flip-clock.flip-large .separator {
+  font-size: 3.2rem;
+  line-height: 90px;
+}
+
+.flip-clock.flip-large .flip-label {
+  font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+  #countdown.flip-clock {
+    gap: 2px;
+  }
+  #countdown.flip-clock.flip-small .flip-digit {
+    width: 20px;
+    height: 30px;
+    font-size: 1.2rem;
+  }
+  #countdown.flip-clock.flip-small .separator {
+    font-size: 1.4rem;
+    line-height: 30px;
+  }
+  #countdown.flip-clock.flip-small .flip-label {
+    font-size: 0.7rem;
+  }
+}
+
