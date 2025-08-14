@@ -105,8 +105,8 @@ body {
 /* flip card structure */
 .flip-card {
   background: transparent;
-  width: 320px;
-  height: 360px;
+  width: 360px;
+  height: 420px;
   perspective: 1000px;
 }
 .flip-inner {
@@ -153,6 +153,7 @@ body {
   font-size: 1.18rem;
   color: var(--emerald-accent);
   text-align: center;
+  white-space: nowrap;
 }
 
 .flip-back p {
@@ -216,7 +217,8 @@ body {
 
 @media (max-width: 600px) {
   .flip-card {
-    width: 90%;
+    width: 95%;
+    height: 420px;
   }
 }
 
