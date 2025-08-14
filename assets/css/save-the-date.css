@@ -17,6 +17,7 @@
   /* sizing */
   --card-radius: 20px;
   --btn-radius: 28px;
+  --photo-size: 92px;
   /* transitions */
   --t-fast: 0.18s;
   --t-med: 0.7s;
@@ -42,10 +43,11 @@ body {
   box-sizing: border-box;
 }
 
-/* video background */
+/* Video background & fallback */
 .background-video {
   position: fixed;
   inset: 0;
+  background: url("../video-fallback.jpg") center/cover no-repeat;
   overflow: hidden;
   z-index: 0;
 }
@@ -56,10 +58,9 @@ body {
   height: 100%;
   object-fit: cover;
   transition: opacity var(--t-med) var(--ease-med);
-  background: var(--bg-emerald-dark);
 }
 
-/* overlay */
+/* Dim overlay */
 .video-overlay {
   position: fixed;
   inset: 0;
@@ -68,7 +69,7 @@ body {
   pointer-events: none;
 }
 
-/* intro card container */
+/* Intro card container */
 .intro-card-container {
   position: fixed;
   inset: 0;
@@ -85,21 +86,32 @@ body {
   pointer-events: auto;
 }
 
-/* base card styling */
+/* Card component inside intro */
 .card {
   background: var(--white);
   color: #222;
   border-radius: var(--card-radius);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
-  border: 2px solid var(--emerald-border);
-  font-family: var(--font-heading);
+  border: 1.5px solid var(--gray-light);
+  padding: 3rem 2.5rem 2.5rem;
+  max-width: 460px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-decoration: none;
   cursor: pointer;
   transition:
-    background var(--t-fast) var(--ease-med),
-    color var(--t-fast) var(--ease-med),
-    transform var(--t-fast) var(--ease-med),
+    box-shadow 0.23s,
+    border 0.2s,
+    transform 0.16s,
     opacity var(--t-med) var(--ease-med);
+}
+.card:hover,
+.card:focus {
+  box-shadow: 0 12px 48px rgba(1, 68, 33, 0.18);
+  border: 2px solid var(--emerald-border);
+  transform: translateY(-2px) scale(1.02);
 }
 
 /* flip card structure */
@@ -132,12 +144,18 @@ body {
   align-items: center;
   justify-content: center;
 }
-.flip-front:hover {
-  box-shadow: 0 12px 48px rgba(1, 68, 33, 0.18);
-  transform: translateY(-2px) scale(1.02);
-}
 .flip-back {
   transform: rotateY(180deg);
+}
+
+.circle-photo {
+  width: var(--photo-size);
+  height: var(--photo-size);
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--white);
+  box-shadow: 0 2px 10px rgba(1, 68, 33, 0.07);
+  margin-bottom: 1rem;
 }
 
 .wedding-names {
@@ -152,8 +170,9 @@ body {
 .wedding-date {
   font-size: 1.18rem;
   color: var(--emerald-accent);
+  margin-bottom: 2.3rem;
+  letter-spacing: 0.04em;
   text-align: center;
-  white-space: nowrap;
 }
 
 .flip-back p {
@@ -204,11 +223,14 @@ body {
   cursor: default;
 }
 
-/* utility */
+/* Fade-out helper */
 .fade-out {
   opacity: 0 !important;
   pointer-events: none;
+  transition: opacity var(--t-med) var(--ease-med);
 }
+
+/* Scroll-lock only when <body class="no-scroll"> */
 .no-scroll,
 .no-scroll html {
   overflow: hidden;
@@ -219,6 +241,20 @@ body {
   .flip-card {
     width: 95%;
     height: 420px;
+  }
+  .card {
+    padding: 1.4rem 0.5rem;
+    max-width: 98%;
+  }
+  .circle-photo {
+    width: 68px;
+    height: 68px;
+  }
+  .wedding-names {
+    font-size: 2rem;
+  }
+  .wedding-date {
+    font-size: 1rem;
   }
 }
 
