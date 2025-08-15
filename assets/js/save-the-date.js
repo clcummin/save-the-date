@@ -7,8 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const adjustCardSize = () => {
       if (!flipCard || !front || !back) return;
-      const width = Math.max(front.scrollWidth, back.scrollWidth);
-      const height = Math.max(front.scrollHeight, back.scrollHeight);
+      const buffer = 20; // Add extra space to prevent text from spilling over
+      const width = Math.max(front.scrollWidth, back.scrollWidth) + buffer;
+      const height = Math.max(front.scrollHeight, back.scrollHeight) + buffer;
       flipCard.style.width = `${width}px`;
       flipCard.style.height = `${height}px`;
     };
