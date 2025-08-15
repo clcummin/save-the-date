@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Save the Date</title>
+  <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+  <link rel="stylesheet" href="assets/css/save-the-date.css">
+</head>
+<body class="no-scroll">
+  <div class="background-video">
+    <video autoplay muted loop playsinline poster="../assets/video-fallback.jpg">
+      <source src="../assets/video.mp4" type="video/mp4">
+      <img src="../assets/video-fallback.jpg" alt="Video fallback" style="width:100%;height:100%;object-fit:cover">
+    </video>
+  </div>
+  <div class="video-overlay"></div>
+
+  <div class="intro-card-container" id="introCard">
+    <div class="flip-card">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <h1 class="wedding-names">Christopher<br>&amp;<br>Lorraine</h1>
+          <div class="wedding-date">September 12, 2026&nbsp;&bull;&nbsp;Portola, CA</div>
+          <div id="countdown"></div>
+        </div>
+        <div class="flip-back">
+          <div id="backContent">
+            <p>Wedding details and site coming soon, please plan in advance. We will release room blocks in a few months. Out of towners should plan on a weekend trip. If you definitely cannot make it please inform Chris or Lorraine.</p>
+            <button id="showCantAttendForm" class="cant-attend-btn">Can't Attend</button>
+          </div>
+          <div id="cantAttendFormContainer" class="card-form-container" style="display:none;">
+            <form action="https://script.google.com/macros/s/AKfycbw1oW3-NLd95psh53-YJFoUoa80b1jeyw9oEXX0TWffxMEyauwYvn6aVOn0UjdZgZF2IQ/exec" method="post">
+              <label>
+                Name: <input type="text" name="name" required>
+              </label><br>
+              <label>
+                Email: <input type="email" name="email" required>
+              </label><br>
+              <button type="submit">Send</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="thankYouMessage" class="thank-you-container" style="display:none;">
+    <div class="thank-you-card">
+      <p>Thank you for submitting and we are sorry you will not be able to attend the wedding. We will email you the wedding site once it is available so you can still engage and be a part of the celebration.</p>
+    </div>
+  </div>
+
+  <script src="assets/js/save-the-date.js"></script>
+  <script src="assets/js/cant-attend.js"></script>
+</body>
+</html>
