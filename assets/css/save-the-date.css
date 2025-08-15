@@ -92,6 +92,14 @@ html, body {
   pointer-events: auto;
 }
 
+.intro-card-container .flip-card {
+  transform: scale(0) rotate(-360deg);
+}
+
+.intro-card-container.visible .flip-card {
+  animation: spinIn var(--t-med) var(--ease-med) forwards;
+}
+
 .flip-card {
   background: transparent;
   width: 340px;
@@ -228,6 +236,15 @@ button.loading::after {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes spinIn {
+  from {
+    transform: scale(0) rotate(-360deg);
+  }
+  to {
+    transform: scale(1) rotate(0deg);
   }
 }
 
