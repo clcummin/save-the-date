@@ -1,6 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
   const introCard = document.getElementById('introCard');
   if (introCard) {
+    const flipCard = introCard.querySelector('.flip-card');
+    const front = flipCard?.querySelector('.flip-front');
+    const back = flipCard?.querySelector('.flip-back');
+
+    const adjustCardSize = () => {
+      if (!flipCard || !front || !back) return;
+      const width = Math.max(front.scrollWidth, back.scrollWidth);
+      const height = Math.max(front.scrollHeight, back.scrollHeight);
+      flipCard.style.width = `${width}px`;
+      flipCard.style.height = `${height}px`;
+    };
+
+    adjustCardSize();
+    window.addEventListener('resize', adjustCardSize);
+
     setTimeout(() => introCard.classList.add('visible'), 3000);
     introCard.addEventListener('click', () => {
       introCard.querySelector('.flip-card')?.classList.toggle('flipped');
