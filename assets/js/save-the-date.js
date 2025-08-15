@@ -17,13 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
       preCountdown.style.fontFamily = 'var(--font-heading)';
       preCountdown.style.transition = 'font-size 0.7s var(--ease-med)';
       preCountdown.style.fontSize = `${(11 - n) * (11 - n) * 0.5}rem`;
-      if (n === 1) {
+      if (n <= 1) {
         clearInterval(timer);
-        preCountdown.classList.add('hidden');
-        video?.play();
-      } else {
-        n--;
+        setTimeout(() => {
+          preCountdown.classList.add('hidden');
+          video?.play();
+        }, 500);
       }
+      n--;
     };
     render();
     timer = setInterval(render, 1000);
