@@ -1,6 +1,5 @@
 /* Styles for Save the Date page */
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Allura&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Spectral:wght@400;700&display=swap');
 
 :root {
   --bg-emerald-dark: #002d1f;
@@ -10,8 +9,8 @@
   --emerald-accent: #00975c;
   --white: #fff;
   --gray-light: #e4e4e4;
-  --font-body: 'Raleway', sans-serif;
-  --font-heading: 'Allura', cursive;
+  --font-body: 'Spectral', serif;
+  --font-heading: 'Cinzel Decorative', serif;
   --card-radius: 20px;
   --btn-radius: 28px;
   --t-fast: 0.18s;
@@ -120,7 +119,7 @@ html, body {
 .wedding-names {
   font-family: var(--font-heading);
   font-size: 2.7rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0 0 1rem;
   letter-spacing: .07em;
   color: var(--emerald-border);
@@ -152,8 +151,8 @@ html, body {
   border-radius: var(--btn-radius);
   margin-right: 0.4rem;
 }
-.card-form-container button {
-  padding: 0.35rem 0.8rem;
+button {
+  padding: 0.4rem 0.8rem;
   border: none;
   border-radius: var(--btn-radius);
   background: var(--emerald-accent);
@@ -178,11 +177,10 @@ html, body {
 .cant-attend-btn {
   display: inline-block;
   margin-top: 1rem;
-  padding: 0.4rem 0.8rem;
-  background: var(--emerald-accent);
-  color: var(--white);
   text-decoration: none;
-  border-radius: var(--btn-radius);
+}
+button:hover {
+  background: var(--emerald-hover);
 }
 
 /* Thank you page styles */
