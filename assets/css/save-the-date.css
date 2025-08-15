@@ -25,7 +25,9 @@
   --ease-med: ease;
 }
 
-/* Base / Reset */
+/* =========================
+   Base / Reset
+   ========================= */
 html,
 body {
   margin: 0;
@@ -37,6 +39,7 @@ body {
   font-family: var(--font-body);
   color: var(--white);
 }
+
 *,
 *::before,
 *::after { box-sizing: border-box; }
@@ -45,12 +48,14 @@ body {
 .no-scroll,
 .no-scroll html { overflow: hidden; height: 100vh; }
 
-/* ===== Cards (single source of truth) ===== */
+/* =========================
+   Card (single source of truth)
+   ========================= */
 .card {
   background: var(--white);
   color: #222;
   border-radius: var(--card-radius);
-  border: 2px solid var(--emerald-border); /* consistent, visible */
+  border: 2px solid var(--emerald-border); /* visible emerald frame */
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
   text-decoration: none;
   cursor: pointer;
@@ -61,7 +66,10 @@ body {
     opacity var(--t-med) var(--ease-med),
     box-shadow var(--t-fast) var(--ease-med),
     border-color var(--t-fast) var(--ease-med);
+  overflow: hidden;        /* keep everything inside the border */
+  margin: 0 auto;          /* also center in non-flex/grid contexts */
 }
+
 .card:hover,
 .card:focus-visible {
   box-shadow: 0 12px 48px rgba(1, 68, 33, 0.18);
@@ -70,20 +78,24 @@ body {
   outline: none;
 }
 
-/* ===== Flip clock countdown ===== */
+/* =========================
+   Flip clock countdown
+   ========================= */
 .flip-clock {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   gap: 8px;
+  margin: 0 auto;
 }
+
 .flip-digit {
   position: relative;
   width: 40px;
   height: 60px;
   background: var(--white);
   border-radius: 6px;
-  border: 2px solid var(--emerald-border);
+  border: 2px solid var(--emerald-border); /* digits keep emerald border */
   color: var(--emerald-border);
   font-family: var(--font-heading);
   font-size: 2rem;
@@ -92,35 +104,63 @@ body {
   justify-content: center;
   overflow: hidden;
 }
+
+/* Labels & ":" — green pill background, NO border */
 .separator,
 .flip-label {
   background: var(--emerald-border);
   color: var(--white);
+  border: none !important;     /* ensure no outline/border anywhere */
+  box-shadow: none !important;
   border-radius: 4px;
-  padding: 0 4px;
+  padding: 0 6px;
 }
+
 .separator {
   font-family: var(--font-heading);
   font-size: 2.2rem;
-  line-height: 60px;
+  line-height: 60px;           /* aligns with digit height */
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.flip-group { display: flex; flex-direction: column; align-items: center; }
+
+.flip-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .digit-row { display: flex; }
+
 .flip-label {
   margin-top: 4px;
   font-family: var(--font-heading);
   letter-spacing: 0.05em;
+  font-size: 0.95rem;
 }
 
 /* Size modifiers */
-.flip-clock.flip-small .flip-digit { width: 32px; height: 48px; font-size: 1.6rem; }
-.flip-clock.flip-small .separator { font-size: 1.8rem; line-height: 48px; }
+.flip-clock.flip-small .flip-digit {
+  width: 32px;
+  height: 48px;
+  font-size: 1.6rem;
+}
+.flip-clock.flip-small .separator {
+  font-size: 1.8rem;
+  line-height: 48px;           /* match small digit height */
+}
 .flip-clock.flip-small .flip-label { font-size: 0.85rem; }
 
-/* ===== Intro page (index.html) ===== */
+/* Countdown placement: inside the card, below date */
+#countdown {
+  position: static !important;
+  margin-top: 0.6rem;
+}
+
+/* =========================
+   Intro page (index.html)
+   ========================= */
 
 /* Background video & fallback */
 .background-video {
@@ -149,13 +189,12 @@ body {
   pointer-events: none;
 }
 
-/* Intro card container */
+/* Intro card container — hard center the card */
 .intro-card-container {
   position: fixed;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;               /* grid makes centering bulletproof */
+  place-items: center;
   z-index: 2;
   opacity: 0;
   transition: opacity var(--t-med) var(--ease-med);
@@ -168,11 +207,11 @@ body {
   padding: 3rem 2.5rem 2.5rem;
   max-width: 460px;
   width: 90%;
-  /* Optional: a gentle floor to reduce jump if back face is taller */
-  /* min-height: 340px; */
 }
 
-/* ===== Flip card behavior (grid-stacked faces; no absolute) ===== */
+/* =========================
+   Flip card behavior (grid-stacked faces)
+   ========================= */
 .flip-card { perspective: 1000px; }
 
 .flip-card .card-inner {
@@ -180,25 +219,27 @@ body {
   display: grid;               /* stack faces so height follows content */
   transform-style: preserve-3d;
   transition: transform 0.6s var(--ease);
-  /* IMPORTANT: do NOT set fixed height here */
 }
 
 .flip-card.flipped .card-inner { transform: rotateY(180deg); }
 
-/* Faces occupy the same grid cell, not absolute */
+/* Faces share the same grid cell (not absolute) */
 .flip-card .card-face {
   grid-area: 1 / 1;
   backface-visibility: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;     /* center content nicely */
+  justify-content: center;
   text-align: center;
-  /* Remove any 'position:absolute; inset:0;' from old CSS */
+  padding: 0 1rem;             /* breathing room so content doesn't hug border */
 }
+
 .flip-card .card-back { transform: rotateY(180deg); }
 
-/* ===== "Can't attend" button and form ===== */
+/* =========================
+   "Can't attend" button and form
+   ========================= */
 .cant-attend-btn {
   margin-top: 1rem;
   padding: 0.6rem 1.2rem;
@@ -211,7 +252,10 @@ body {
   transition: background var(--t-fast) var(--ease);
 }
 .cant-attend-btn:hover,
-.cant-attend-btn:focus-visible { background: var(--emerald-accent); outline: none; }
+.cant-attend-btn:focus-visible {
+  background: var(--emerald-accent);
+  outline: none;
+}
 
 #cantAttendFormContainer form {
   display: flex;
@@ -246,7 +290,9 @@ body {
   outline: none;
 }
 
-/* ===== Headings & date in intro card ===== */
+/* =========================
+   Headings & date in intro card
+   ========================= */
 .wedding-names {
   font-family: var(--font-heading);
   font-size: 2.7rem;
@@ -259,16 +305,21 @@ body {
 .wedding-date {
   font-size: 1.18rem;
   color: var(--emerald-accent);
-  margin-bottom: 2.3rem;
+  margin-bottom: 1.2rem; /* bring countdown closer */
   letter-spacing: 0.04em;
   text-align: center;
 }
 
-/* ===== Responsive ===== */
+/* =========================
+   Responsive
+   ========================= */
 @media (max-width: 600px) {
-  .intro-card { padding: 1.4rem 0.5rem; max-width: 98%; }
+  .intro-card {
+    padding: 1.4rem 0.5rem;
+    max-width: 98%;
+  }
   .wedding-names { font-size: 2rem; }
-  .wedding-date { font-size: 1rem; }
+  .wedding-date  { font-size: 1rem; }
 
   /* Ensure countdown fits within the intro card */
   #countdown.flip-clock { gap: 2px; }
