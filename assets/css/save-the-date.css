@@ -7,14 +7,17 @@
   --emerald-accent: #00975c;
   --white: #fff;
   --gray-light: #e4e4e4;
+
   /* fonts */
   --font-body: "Spectral", serif;
   --font-heading: "Cinzel Decorative", cursive;
   --font-nav: "Cinzel Decorative", cursive;
+
   /* sizing */
   --card-radius: 20px;
   --photo-size: 96px;
   --btn-radius: 28px;
+
   /* transitions */
   --t-fast: 0.18s;
   --t-med: 0.7s;
@@ -22,6 +25,9 @@
   --ease-med: ease;
 }
 
+/* =========================
+   Base / Reset
+   ========================= */
 html,
 body {
   margin: 0;
@@ -40,25 +46,44 @@ body {
   box-sizing: border-box;
 }
 
-/* base card styling */
+/* Scroll-lock only when <body class="no-scroll"> */
+.no-scroll,
+.no-scroll html {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* =========================
+   Cards (single source of truth)
+   ========================= */
 .card {
   background: var(--white);
   color: #222;
   border-radius: var(--card-radius);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
-  border: 2px solid var(--emerald-border);
-  font-family: var(--font-heading);
+  border: 2px solid var(--emerald-border); /* consistent, thicker visible border */
   text-decoration: none;
   cursor: pointer;
   transition:
     background var(--t-fast) var(--ease-med),
     color var(--t-fast) var(--ease-med),
     transform var(--t-fast) var(--ease-med),
-    opacity var(--t-med) var(--ease-med);
+    opacity var(--t-med) var(--ease-med),
+    box-shadow var(--t-fast) var(--ease-med),
+    border-color var(--t-fast) var(--ease-med);
 }
 
+.card:hover,
+.card:focus-visible {
+  box-shadow: 0 12px 48px rgba(1, 68, 33, 0.18);
+  border-color: var(--emerald-border);
+  transform: translateY(-2px) scale(1.02);
+  outline: none;
+}
 
-/* Flip clock countdown styles */
+/* =========================
+   Flip clock countdown
+   ========================= */
 .flip-clock {
   display: flex;
   justify-content: center;
@@ -131,20 +156,11 @@ body {
   font-size: 0.85rem;
 }
 
+/* =========================
+   Intro page (index.html)
+   ========================= */
 
-
-/* ======================================================
-   A. INTRO‑PAGE RULES (only on index.html)
-   ====================================================== */
-
-/* Scroll‑lock only when <body class="no-scroll"> */
-.no-scroll,
-.no-scroll html {
-  overflow: hidden;
-  height: 100vh;
-}
-
-/* Video background & fallback */
+/* Background video & fallback */
 .background-video {
   position: fixed;
   inset: 0;
@@ -171,7 +187,6 @@ body {
   pointer-events: none;
 }
 
-
 /* Intro card container */
 .intro-card-container {
   position: fixed;
@@ -189,32 +204,11 @@ body {
   pointer-events: auto;
 }
 
-/* Card component inside intro */
-.card {
-  background: var(--white);
-  color: #222;
-  border-radius: var(--card-radius);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
-  border: 1.5px solid var(--gray-light);
+/* Intro card modifier (applies to the .card element) */
+.intro-card {
   padding: 3rem 2.5rem 2.5rem;
   max-width: 460px;
   width: 90%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    box-shadow 0.23s,
-    border 0.2s,
-    transform 0.16s,
-    opacity var(--t-med) var(--ease-med);
-}
-.card:hover,
-.card:focus {
-  box-shadow: 0 12px 48px rgba(1, 68, 33, 0.18);
-  border: 2px solid var(--emerald-border);
-  transform: translateY(-2px) scale(1.02);
 }
 
 /* Flip card behavior */
@@ -226,7 +220,7 @@ body {
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 0.6s;
+  transition: transform 0.6s var(--ease);
 }
 .flip-card.flipped .card-inner {
   transform: rotateY(180deg);
@@ -245,7 +239,7 @@ body {
   transform: rotateY(180deg);
 }
 
-/* Can't attend form and button */
+/* "Can't attend" button and form */
 .cant-attend-btn {
   margin-top: 1rem;
   padding: 0.6rem 1.2rem;
@@ -255,75 +249,18 @@ body {
   font-family: var(--font-heading);
   cursor: pointer;
   border-radius: 4px;
+  transition: background var(--t-fast) var(--ease);
 }
-.cant-attend-btn:hover {
+.cant-attend-btn:hover,
+.cant-attend-btn:focus-visible {
   background: var(--emerald-accent);
+  outline: none;
 }
+
 #cantAttendFormContainer form {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   align-items: center;
 }
-#cantAttendFormContainer label {
-  display: flex;
-  flex-direction: column;
-  font-family: var(--font-body);
-  color: var(--emerald-border);
-  width: 100%;
-}
-#cantAttendFormContainer input {
-  padding: 0.4rem;
-  border: 1px solid var(--gray-light);
-  border-radius: 4px;
-}
-
-  /* Photo & text in intro card */
-  .wedding-names {
-    font-family: var(--font-heading);
-    font-size: 2.7rem;
-    font-weight: 600;
-    margin: 0 0 1rem;
-    letter-spacing: 0.07em;
-    color: var(--emerald-border);
-    text-align: center;
-  }
-  .wedding-date {
-    font-size: 1.18rem;
-    color: var(--emerald-accent);
-    margin-bottom: 2.3rem;
-    letter-spacing: 0.04em;
-    text-align: center;
-  }
-
-  /* Responsive tweaks for intro */
-  @media (max-width: 600px) {
-    .card {
-      padding: 1.4rem 0.5rem;
-      max-width: 98%;
-    }
-    .wedding-names {
-      font-size: 2rem;
-    }
-    .wedding-date {
-      font-size: 1rem;
-    }
-    /* Ensure countdown fits within the intro card */
-    #countdown.flip-clock {
-      gap: 2px;
-    }
-    #countdown.flip-clock.flip-small .flip-digit {
-      width: 20px;
-      height: 30px;
-      font-size: 1.2rem;
-    }
-    #countdown.flip-clock.flip-small .separator {
-      font-size: 1.4rem;
-      line-height: 30px;
-    }
-    #countdown.flip-clock.flip-small .flip-label {
-      font-size: 0.7rem;
-    }
-  }
-
-
+#cantAttendFormContainer l
