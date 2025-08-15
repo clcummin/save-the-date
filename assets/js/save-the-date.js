@@ -1,63 +1,12 @@
-
-// assets/js/script.js
-
-function initHeader() {
-  const header = document.querySelector(".site-header");
-  if (!header) return;
-
-  const updateBodyPadding = () => {
-    document.body.style.paddingTop = header.offsetHeight + "px";
-  };
-  updateBodyPadding();
-  window.addEventListener("resize", updateBodyPadding);
-  window.addEventListener("scroll", () => {
-    header.classList.toggle("scrolled", window.scrollY > 50);
-  });
-
-  const mainNav = header.querySelector(".main-nav");
-  const navList = mainNav?.querySelector("ul");
-  if (mainNav && navList) {
-    const current = window.location.pathname.split("/").pop();
-    navList.querySelectorAll("a").forEach((link) => {
-      if (link.getAttribute("href") === current) {
-        link.closest("li")?.remove();
-      }
-    });
-
-    const updateNavScroll = () => {
-      const maxScroll = navList.scrollWidth - navList.clientWidth;
-      const cur = navList.scrollLeft;
-      if (cur > 0) {
-        mainNav.classList.add("show-left");
-      } else {
-        mainNav.classList.remove("show-left");
-      }
-      if (cur < maxScroll) {
-        mainNav.classList.add("show-right");
-      } else {
-        mainNav.classList.remove("show-right");
-      }
-    };
-    navList.addEventListener("scroll", updateNavScroll);
-    window.addEventListener("resize", updateNavScroll);
-    updateNavScroll();
-  }
-}
-window.initHeader = initHeader;
-
 document.addEventListener("DOMContentLoaded", () => {
-  initHeader();
-
-  // ── 2) Intro‑card fade‑in + flip to back (only on index.html) ──
+  // Intro card fade-in and flip
   const introCardContainer = document.getElementById("introCard");
   if (introCardContainer) {
-    // fade in after 3s
     setTimeout(() => introCardContainer.classList.add("visible"), 3000);
 
     const card = introCardContainer.querySelector(".intro-card");
     const front = card?.querySelector(".card-front");
     if (card && front) {
-      // lock height so faces overlap properly
       card.style.height = front.offsetHeight + "px";
       card.addEventListener("click", () => {
         if (!card.classList.contains("flipped")) {
@@ -67,7 +16,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ── 3) Countdown ticker (flip clock) ──
+  // Can't attend form handling
+  const trigger = document.getElementById("showCantAttendForm");
+  const backContent = document.getElementById("backContent");
+  const formContainer = document.getElementById("cantAttendFormContainer");
+  const form = formContainer ? formContainer.querySelector("form") : null;
+
+  if (trigger && backContent && formContainer) {
+    trigger.addEventListener("click", () => {
+      backContent.style.display = "none";
+      formContainer.style.display = "block";
+    });
+  }
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      try {
+        await fetch(form.action, { method: "POST", body: formData, mode: "no-cors" });
+        window.location.href = "thankyou.html";
+      } catch (err) {
+        formContainer.innerHTML =
+          '<p class="thank-you-message">Submission failed. Please try again later.</p>';
+      }
+    });
+  }
+
+  // Countdown ticker
   const countdownEl = document.getElementById("countdown");
   if (countdownEl) {
     const target = new Date("2026-09-12T00:00:00");
@@ -150,25 +126,5 @@ document.addEventListener("DOMContentLoaded", () => {
     setupClock();
     updateClock();
     timer = setInterval(updateClock, 1000);
-  }
-
-  // ── 5) Expandable venue map ──
-  const mapTrigger = document.querySelector(".map-section .map-trigger");
-  const mapOverlay = document.getElementById("mapOverlay");
-  if (mapTrigger && mapOverlay) {
-    const closeBtn = mapOverlay.querySelector(".close");
-    const dismiss = () => {
-      mapOverlay.classList.add("hidden");
-      document.body.classList.remove("no-scroll");
-    };
-    mapTrigger.addEventListener("click", (e) => {
-      e.preventDefault();
-      mapOverlay.classList.remove("hidden");
-      document.body.classList.add("no-scroll");
-    });
-    closeBtn?.addEventListener("click", dismiss);
-    mapOverlay.addEventListener("click", (e) => {
-      if (e.target === mapOverlay) dismiss();
-    });
   }
 });
