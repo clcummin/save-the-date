@@ -15,8 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (form && introCard && thankYou) {
     const submitButton = form.querySelector('button[type="submit"]');
+    let isSubmitting = false;
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (isSubmitting) return;
+      isSubmitting = true;
       const formData = new FormData(form);
       if (submitButton) {
         submitButton.disabled = true;
@@ -34,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
           submitButton.classList.remove('loading');
           submitButton.textContent = 'Send';
         }
+        isSubmitting = false;
       }
     });
   }
