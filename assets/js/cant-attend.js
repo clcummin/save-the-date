@@ -14,15 +14,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (form && introCard && thankYou) {
+    const submitButton = form.querySelector('button[type="submit"]');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.classList.add('loading');
+        submitButton.textContent = 'Sending...';
+      }
       try {
         await fetch(form.action, { method: 'POST', body: formData, mode: 'no-cors' });
         introCard.remove();
         thankYou.style.display = 'flex';
       } catch (err) {
         formContainer.innerHTML = '<p class="thank-you-message">Submission failed. Please try again later.</p>';
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.classList.remove('loading');
+          submitButton.textContent = 'Send';
+        }
       }
     });
   }
