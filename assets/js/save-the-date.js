@@ -1,5 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
   const introCard = document.getElementById('introCard');
+  const video = document.querySelector('.background-video video');
+  const preCountdown = document.getElementById('preCountdown');
+
+  if (video) {
+    video.addEventListener('ended', () => {
+      introCard?.classList.add('visible');
+    });
+  }
+
+  if (preCountdown) {
+    let n = 10;
+    let timer;
+    const render = () => {
+      preCountdown.textContent = n;
+      preCountdown.style.fontFamily = 'var(--font-heading)';
+      preCountdown.style.transition = 'font-size 0.7s var(--ease-med)';
+      preCountdown.style.fontSize = `${(11 - n) * (11 - n) * 0.5}rem`;
+      if (n === 1) {
+        clearInterval(timer);
+        preCountdown.classList.add('hidden');
+        video?.play();
+      } else {
+        n--;
+      }
+    };
+    render();
+    timer = setInterval(render, 1000);
+  } else {
+    video?.play();
+  }
+
   if (introCard) {
     const flipCard = introCard.querySelector('.flip-card');
     const front = flipCard?.querySelector('.flip-front');
@@ -17,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     adjustCardSize();
     window.addEventListener('resize', adjustCardSize);
 
-    setTimeout(() => introCard.classList.add('visible'), 3000);
     const handleFlip = () => {
       introCard.querySelector('.flip-card')?.classList.add('flipped');
       introCard.removeEventListener('click', handleFlip);
