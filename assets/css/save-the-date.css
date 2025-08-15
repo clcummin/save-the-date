@@ -172,7 +172,7 @@ body {
 .background-video {
   position: fixed;
   inset: 0;
-  background: url("assets/video-fallback.jpg") center/cover no-repeat;
+  background: url("../video-fallback.jpg") center/cover no-repeat;
   overflow: hidden;
   z-index: 0;
 }
