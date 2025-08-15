@@ -141,7 +141,7 @@ html, body {
 }
 .flip-back {
   transform: rotateY(180deg);
-  color: var(--emerald-border);
+  color: var(--bg-emerald-dark);
   font-family: var(--font-body);
 }
 
@@ -172,20 +172,23 @@ html, body {
 /* Form displayed inside the intro card when user cannot attend */
 .card-form-container {
   display: none;
-  color: var(--emerald-border);
+  color: var(--bg-emerald-dark);
   text-align: center;
+  font-family: var(--font-body);
 }
 .card-form-container input {
   padding: 0.35rem 0.6rem;
   border: 1px solid var(--gray-light);
   border-radius: var(--btn-radius);
   margin-right: 0.4rem;
+  color: var(--bg-emerald-dark);
+  font-family: var(--font-body);
 }
 button {
   padding: 0.4rem 0.8rem;
-  border: 1px solid var(--emerald-border);
+  border: none;
   border-radius: var(--btn-radius);
-  background: var(--emerald-accent);
+  background: var(--bg-emerald-dark);
   color: var(--white);
   cursor: pointer;
   font-family: var(--font-body);
@@ -211,7 +214,7 @@ button {
   text-decoration: none;
 }
 button:hover {
-  background: var(--emerald-hover);
+  background: var(--bg-emerald-dark);
 }
 
 /* Loading state for submit buttons */
