@@ -47,12 +47,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       let n = 10;
-      let timer;
-      const render = () => {
-        preCountdown.textContent = n;
-        preCountdown.style.fontFamily = 'var(--font-heading)';
+      const base = window.innerWidth < 600 ? 0.35 : 0.5;
+      preCountdown.style.fontFamily = 'var(--font-heading)';
+      preCountdown.textContent = n;
+      preCountdown.style.fontSize = `${(11 - n) * (11 - n) * base}rem`;
+      playBeat();
+
+      // Enable transition after initial size is applied so first number doesn't animate
+      requestAnimationFrame(() => {
         preCountdown.style.transition = 'font-size 0.7s var(--ease-med)';
-        const base = window.innerWidth < 600 ? 0.35 : 0.5;
+      });
+
+      const timer = setInterval(() => {
+        n--;
+        preCountdown.textContent = n;
         preCountdown.style.fontSize = `${(11 - n) * (11 - n) * base}rem`;
         playBeat();
         if (n <= 1) {
@@ -64,10 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             video.play();
           }, 500);
         }
-        n--;
-      };
-      render();
-      timer = setInterval(render, 1000);
+      }, 1000);
     };
     preCountdown.addEventListener('click', start);
   } else if (video) {
