@@ -41,15 +41,13 @@ body {
 }
 
 /* video background */
-.background-video,
-.video-bg {
+.background-video {
   position: fixed;
   inset: 0;
   overflow: hidden;
   z-index: 0;
 }
-.background-video video,
-.video-bg video {
+.background-video video {
   position: absolute;
   inset: 0;
   object-fit: cover;
@@ -82,427 +80,6 @@ body {
     transform var(--t-fast) var(--ease-med),
     opacity var(--t-med) var(--ease-med);
 }
-
-/* buttons share the same structure as cards but use the
-   site background color for their fill */
-.main-btn {
-  display: inline-block;
-  padding: 1.1rem 3.2rem;
-  font-size: 1.6rem;
-  background: var(--bg-emerald-dark);
-  color: var(--white);
-  border-radius: var(--btn-radius);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
-  border: 2px solid var(--emerald-border);
-  font-family: var(--font-heading);
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    background var(--t-fast) var(--ease-med),
-    color var(--t-fast) var(--ease-med),
-    transform var(--t-fast) var(--ease-med),
-    opacity var(--t-med) var(--ease-med);
-}
-
-.main-btn:hover {
-  background: var(--emerald-hover);
-  color: var(--white);
-}
-
-@media (max-width: 600px) {
-  .main-btn {
-    font-size: 1.3rem;
-    padding: 1rem 3rem;
-  }
-}
-
-.text-page-buttons {
-  text-align: center;
-  margin: 1.5rem 0;
-}
-
-/* fade utility */
-.fade-out {
-  opacity: 0 !important;
-  pointer-events: none;
-}
-
-body.allow-scroll {
-  overflow-y: auto;
-}
-
-
-/* 1. Site‑wide Navigation */
-.main-nav {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 16px 0 32px;
-}
-.main-nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
-  align-items: center;
-  width: 100%;
-}
-.main-nav li {
-  flex: 1 1 auto;
-  display: flex;
-  justify-content: center;
-  margin: 0.5rem 0;
-}
-.main-nav a {
-  color: var(--white);
-  font-family: var(--font-nav);
-  font-size: 1.1rem; /* Slightly larger for improved legibility */
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  border-radius: 16px;
-  text-decoration: none;
-  transition:
-    background var(--t-fast) var(--ease),
-    color var(--t-fast) var(--ease);
-}
-.main-nav a:hover,
-.main-nav a:focus {
-  background: var(--white);
-  color: var(--emerald-border);
-  font-family: var(--font-nav);
-  font-weight: 600;
-  font-style: normal;
-  /* bonus: make it stand out even more */
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* 2. Gallery Grid (page‑agnostic) */
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  max-width: 1200px;
-  margin: 6rem auto 2rem;
-}
-
-.gallery-grid img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-  border-radius: var(--card-radius);
-  cursor: pointer;
-  transition:
-    transform var(--t-fast) var(--ease),
-    box-shadow var(--t-fast) var(--ease);
-}
-
-.gallery-grid img:hover,
-.gallery-grid img:focus {
-  transform: scale(1.03);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-/* ── Sticky Header ── */
-.site-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background: rgba(0, 0, 0, 0.85);
-  z-index: 1000;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  padding: 0.25rem 0;
-}
-
-.site-title {
-  display: block;
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  color: var(--white);
-  text-align: center;
-  margin-bottom: 0.25rem;
-  text-decoration: none;
-}
-
-/* prevent content from sliding under the header */
-body {
-  /* adjust this if your header height changes */
-  padding-top: 5rem;
-}
-
-/* keep using your .main-nav rules, but scoped inside .site-header */
-.site-header .main-nav a {
-  color: var(--white);
-}
-.site-header .main-nav a:hover,
-.site-header .main-nav a:focus {
-  background: var(--white);
-  color: var(--emerald-border);
-}
-.site-header .main-nav {
-  margin: 0;
-}
-.site-header .main-nav li {
-  margin: 0;
-}
-
-/* ── Coming Soon Banner (global) ── */
-.coming-soon-banner {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, 10%);
-  z-index: 999;
-  background: var(--white);
-  color: var(--emerald-border);
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-align: center;
-  padding: 1rem 2rem;
-  border: 2px solid var(--emerald-border);
-  border-radius: var(--card-radius);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
-}
-/* Reuse the “content‑container” white card from Home/Events */
-.content-container {
-  background: var(--white);
-  color: #222;
-  max-width: 800px;
-  margin: 2rem auto 4rem;
-  padding: 2rem 1.5rem;
-  border-radius: var(--card-radius);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
-  font-family: var(--font-body);
-}
-
-/* Page title */
-.content-container h1 {
-  font-family: var(--font-heading);
-  font-size: 2.4rem;
-  color: var(--emerald-border);
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-/* Section headings */
-.content-container h2 {
-  font-family: var(--font-heading);
-  font-size: 1.8rem;
-  color: var(--emerald-border);
-  text-align: center;
-  margin: 2rem 0 1rem;
-}
-
-/* Paragraph text */
-.content-container p {
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-/* Links */
-.content-container a:not(.main-btn) {
-  color: var(--emerald-accent);
-  text-decoration: underline;
-}
-.content-container a:not(.main-btn):hover {
-  color: var(--emerald-border);
-}
-
-/* Standard section formatting used across pages */
-.info-section h2 {
-  font-family: var(--font-heading);
-  font-size: 1.8rem;
-  color: var(--emerald-border);
-  text-align: center;
-  margin: 2rem 0 1rem;
-}
-.info-section ol {
-  margin: 0 0 1rem 1.4rem;
-}
-.info-section li {
-  margin-bottom: 0.6rem;
-}
-.info-section .note {
-  font-style: italic;
-  font-size: 1rem;
-  margin-top: 0.5rem;
-}
-
-/* Generic responsive iframe wrapper */
-.iframe-container {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-radius: var(--card-radius);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-}
-.iframe-container iframe,
-.iframe-container img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-@media (max-width: 600px) {
-  .coming-soon-banner {
-    font-size: 1.2rem;
-    padding: 0.8rem 1.6rem;
-  }
-
-  .content-container h1 {
-    font-size: 2rem;
-  }
-
-  .content-container h2 {
-    font-size: 1.4rem;
-  }
-
-  /* Shared mobile spacing for content containers */
-  .content-container {
-    margin: 1rem;
-    padding: 1.5rem 1rem;
-  }
-
-  /* Shrink sticky navigation and keep items on a single line */
-  .site-header {
-    padding: 0.25rem 0;
-  }
-  .site-header .main-nav ul {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    justify-content: flex-start;
-    -webkit-overflow-scrolling: touch;
-  }
-  .site-header .main-nav li {
-    flex: 0 0 auto;
-    margin: 0;
-  }
-  .site-header .main-nav a {
-    font-size: 1.1rem; /* match default nav size */
-    padding: 0.25rem 0.5rem;
-  }
-  /* Visual cue that nav can scroll */
-  .site-header .main-nav {
-    position: relative;
-  }
-  .site-header .main-nav::before,
-  .site-header .main-nav::after {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1.6rem;
-    height: 1.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    font-size: 1rem;
-    color: var(--white);
-    background: var(--emerald-border);
-    border-radius: 50%;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
-    opacity: 1;
-    transition:
-      background var(--t-fast) var(--ease-med),
-      color var(--t-fast) var(--ease-med);
-  }
-  .site-header .main-nav::before {
-    content: "‹";
-    left: 0.25rem;
-  }
-  .site-header .main-nav::after {
-    content: "›";
-    right: 0.25rem;
-  }
-  .site-header .main-nav.show-left::before {
-    background: var(--white);
-    color: var(--emerald-border);
-  }
-  .site-header .main-nav.show-right::after {
-    background: var(--white);
-    color: var(--emerald-border);
-  }
-}
-
-/* 3. Utility Classes */
-.hidden {
-  display: none;
-}
-.fadeable {
-  transition: opacity var(--t-med) var(--ease);
-}
-
-/* Prevent background scroll when overlays are open */
-.no-scroll,
-.no-scroll html {
-  overflow: hidden;
-  height: 100vh;
-}
-
-/* Clickable cover for iframe maps */
-.map-trigger {
-  position: absolute;
-  inset: 0;
-  cursor: pointer;
-}
-
-/* Fullscreen PDF overlay */
-.pdf-overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.9);
-  padding: 1rem;
-  z-index: 2000;
-}
-.pdf-overlay.hidden {
-  display: none;
-}
-.pdf-overlay .pdf-content {
-  position: relative;
-  max-width: 90%;
-  width: 90%;
-}
-.pdf-overlay iframe,
-.pdf-overlay img {
-  border: 0;
-  border-radius: var(--card-radius);
-}
-
-.pdf-overlay iframe {
-  width: 100%;
-  height: 80vh;
-}
-
-.pdf-overlay img {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 80vh;
-}
-.pdf-overlay .close {
-  position: absolute;
-  top: -2rem;
-  right: 0;
-  background: none;
-  border: none;
-  color: var(--white);
-  font-size: 2rem;
-  cursor: pointer;
-}
-
-/* (Leave all page‑specific rules to their own CSS files) */
 
 
 /* Flip clock countdown styles */
@@ -578,20 +155,6 @@ body {
   font-size: 0.85rem;
 }
 
-.flip-clock.flip-large .flip-digit {
-  width: 60px;
-  height: 90px;
-  font-size: 3rem;
-}
-
-.flip-clock.flip-large .separator {
-  font-size: 3.2rem;
-  line-height: 90px;
-}
-
-.flip-clock.flip-large .flip-label {
-  font-size: 1rem;
-}
 
 
 /* ======================================================
@@ -631,12 +194,6 @@ body {
   pointer-events: none;
 }
 
-/* Fade‑out helper */
-.fade-out {
-  opacity: 0 !important;
-  pointer-events: none;
-  transition: opacity var(--t-med) var(--ease-med);
-}
 
 /* Intro card container */
 .intro-card-container {
@@ -744,65 +301,52 @@ body {
   border-radius: 4px;
 }
 
-/* Photo & text in intro card */
-.circle-photo {
-  width: var(--photo-size);
-  height: var(--photo-size);
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid var(--white);
-  box-shadow: 0 2px 10px rgba(1, 68, 33, 0.07);
-  margin-bottom: 1rem;
-}
-.wedding-names {
-  font-family: var(--font-heading);
-  font-size: 2.7rem;
-  font-weight: 600;
-  margin: 0 0 1rem;
-  letter-spacing: 0.07em;
-  color: var(--emerald-border);
-  text-align: center;
-}
-.wedding-date {
-  font-size: 1.18rem;
-  color: var(--emerald-accent);
-  margin-bottom: 2.3rem;
-  letter-spacing: 0.04em;
-  text-align: center;
-}
-
-/* Responsive tweaks for intro */
-@media (max-width: 600px) {
-  .card {
-    padding: 1.4rem 0.5rem;
-    max-width: 98%;
-  }
-  .circle-photo {
-    width: 68px;
-    height: 68px;
-  }
+  /* Photo & text in intro card */
   .wedding-names {
-    font-size: 2rem;
+    font-family: var(--font-heading);
+    font-size: 2.7rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    letter-spacing: 0.07em;
+    color: var(--emerald-border);
+    text-align: center;
   }
   .wedding-date {
-    font-size: 1rem;
+    font-size: 1.18rem;
+    color: var(--emerald-accent);
+    margin-bottom: 2.3rem;
+    letter-spacing: 0.04em;
+    text-align: center;
   }
-  /* Ensure countdown fits within the intro card */
-  #countdown.flip-clock {
-    gap: 2px;
+
+  /* Responsive tweaks for intro */
+  @media (max-width: 600px) {
+    .card {
+      padding: 1.4rem 0.5rem;
+      max-width: 98%;
+    }
+    .wedding-names {
+      font-size: 2rem;
+    }
+    .wedding-date {
+      font-size: 1rem;
+    }
+    /* Ensure countdown fits within the intro card */
+    #countdown.flip-clock {
+      gap: 2px;
+    }
+    #countdown.flip-clock.flip-small .flip-digit {
+      width: 20px;
+      height: 30px;
+      font-size: 1.2rem;
+    }
+    #countdown.flip-clock.flip-small .separator {
+      font-size: 1.4rem;
+      line-height: 30px;
+    }
+    #countdown.flip-clock.flip-small .flip-label {
+      font-size: 0.7rem;
+    }
   }
-  #countdown.flip-clock.flip-small .flip-digit {
-    width: 20px;
-    height: 30px;
-    font-size: 1.2rem;
-  }
-  #countdown.flip-clock.flip-small .separator {
-    font-size: 1.4rem;
-    line-height: 30px;
-  }
-  #countdown.flip-clock.flip-small .flip-label {
-    font-size: 0.7rem;
-  }
-}
 
 
