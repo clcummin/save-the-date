@@ -17,9 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', adjustCardSize);
 
     setTimeout(() => introCard.classList.add('visible'), 3000);
-    introCard.addEventListener('click', () => {
-      introCard.querySelector('.flip-card')?.classList.toggle('flipped');
-    });
+    const handleFlip = () => {
+      introCard.querySelector('.flip-card')?.classList.add('flipped');
+      introCard.removeEventListener('click', handleFlip);
+    };
+    introCard.addEventListener('click', handleFlip);
   }
 
   const countdownEl = document.getElementById('countdown');
