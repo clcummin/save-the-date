@@ -1,57 +1,6 @@
-
-// assets/js/script.js
-
-function initHeader() {
-  const header = document.querySelector(".site-header");
-  if (!header) return;
-
-  const updateBodyPadding = () => {
-    document.body.style.paddingTop = header.offsetHeight + "px";
-  };
-  updateBodyPadding();
-  window.addEventListener("resize", updateBodyPadding);
-  window.addEventListener("scroll", () => {
-    header.classList.toggle("scrolled", window.scrollY > 50);
-  });
-
-  const mainNav = header.querySelector(".main-nav");
-  const navList = mainNav?.querySelector("ul");
-  if (mainNav && navList) {
-    const current = window.location.pathname.split("/").pop();
-    navList.querySelectorAll("a").forEach((link) => {
-      if (link.getAttribute("href") === current) {
-        link.closest("li")?.remove();
-      }
-    });
-
-    const updateNavScroll = () => {
-      const maxScroll = navList.scrollWidth - navList.clientWidth;
-      const cur = navList.scrollLeft;
-      if (cur > 0) {
-        mainNav.classList.add("show-left");
-      } else {
-        mainNav.classList.remove("show-left");
-      }
-      if (cur < maxScroll) {
-        mainNav.classList.add("show-right");
-      } else {
-        mainNav.classList.remove("show-right");
-      }
-    };
-    navList.addEventListener("scroll", updateNavScroll);
-    window.addEventListener("resize", updateNavScroll);
-    updateNavScroll();
-  }
-}
-window.initHeader = initHeader;
-
 document.addEventListener("DOMContentLoaded", () => {
-  initHeader();
-
-  // ── 2) Intro‑card fade‑in + click (only on index.html) ──
   const introCard = document.getElementById("introCard");
   if (introCard) {
-    // fade in after 3s
     setTimeout(() => introCard.classList.add("visible"), 3000);
 
     const introLink = introCard.querySelector("a.intro-card");
@@ -69,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ── 3) Countdown ticker (flip clock) ──
   const countdownEl = document.getElementById("countdown");
   if (countdownEl) {
     const target = new Date("2026-09-12T00:00:00");
@@ -152,25 +100,5 @@ document.addEventListener("DOMContentLoaded", () => {
     setupClock();
     updateClock();
     timer = setInterval(updateClock, 1000);
-  }
-
-  // ── 5) Expandable venue map ──
-  const mapTrigger = document.querySelector(".map-section .map-trigger");
-  const mapOverlay = document.getElementById("mapOverlay");
-  if (mapTrigger && mapOverlay) {
-    const closeBtn = mapOverlay.querySelector(".close");
-    const dismiss = () => {
-      mapOverlay.classList.add("hidden");
-      document.body.classList.remove("no-scroll");
-    };
-    mapTrigger.addEventListener("click", (e) => {
-      e.preventDefault();
-      mapOverlay.classList.remove("hidden");
-      document.body.classList.add("no-scroll");
-    });
-    closeBtn?.addEventListener("click", dismiss);
-    mapOverlay.addEventListener("click", (e) => {
-      if (e.target === mapOverlay) dismiss();
-    });
   }
 });
