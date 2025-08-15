@@ -25,11 +25,8 @@
   --ease-med: ease;
 }
 
-/* =========================
-   Base / Reset
-   ========================= */
-html,
-body {
+/* ========== Base / Reset ========== */
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -39,18 +36,12 @@ body {
   font-family: var(--font-body);
   color: var(--white);
 }
-
-*,
-*::before,
-*::after { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
 
 /* Scroll-lock only when <body class="no-scroll"> */
-.no-scroll,
-.no-scroll html { overflow: hidden; height: 100vh; }
+.no-scroll, .no-scroll html { overflow: hidden; height: 100vh; }
 
-/* =========================
-   Card (single source of truth)
-   ========================= */
+/* ========== Card (single source of truth) ========== */
 .card {
   background: var(--white);
   color: #222;
@@ -66,21 +57,17 @@ body {
     opacity var(--t-med) var(--ease-med),
     box-shadow var(--t-fast) var(--ease-med),
     border-color var(--t-fast) var(--ease-med);
-  overflow: hidden;      /* clip 3D children inside the border */
-  margin: 0 auto;        /* center in non-flex/grid contexts too */
+  overflow: hidden;   /* clip 3D children inside the border */
+  margin: 0 auto;     /* center in non-flex/grid contexts too */
 }
-
 .card:hover,
 .card:focus-visible {
   box-shadow: 0 12px 48px rgba(1, 68, 33, 0.18);
-  border-color: var(--emerald-border);
   transform: translateY(-2px) scale(1.02);
   outline: none;
 }
 
-/* =========================
-   Flip clock countdown
-   ========================= */
+/* ========== Flip clock countdown ========== */
 .flip-clock {
   display: flex;
   justify-content: center;
@@ -89,7 +76,7 @@ body {
   margin: 0 auto;
 }
 
-/* Digits: white cards with emerald border */
+/* Digits: white boxes with emerald border */
 .flip-digit {
   position: relative;
   width: 40px;
@@ -106,7 +93,7 @@ body {
   overflow: hidden;
 }
 
-/* Labels — green pill with white text (inside the card) */
+/* Labels — green pill, white text (INSIDE the card) */
 .flip-label {
   background: var(--emerald-border);
   color: var(--white);
@@ -120,7 +107,7 @@ body {
   font-size: 0.95rem;
 }
 
-/* Colon separator — TEXT ONLY (no background, no border) */
+/* Colon (:) — TEXT ONLY (no background, no border) */
 .separator {
   background: transparent;
   color: var(--emerald-border);
@@ -129,42 +116,29 @@ body {
   padding: 0;
   font-family: var(--font-heading);
   font-size: 2.2rem;
-  line-height: 60px;   /* aligns with 60px digit height */
+  line-height: 60px;  /* align with .flip-digit height */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 /* Grouping */
-.flip-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.digit-row { display: flex; }
+.flip-group { display: flex; flex-direction: column; align-items: center; }
+.digit-row  { display: flex; }
 
 /* Size modifiers */
-.flip-clock.flip-small .flip-digit {
-  width: 32px;
-  height: 48px;
-  font-size: 1.6rem;
-}
-.flip-clock.flip-small .separator {
-  font-size: 1.8rem;
-  line-height: 48px;   /* match small digit height */
-}
+.flip-clock.flip-small .flip-digit { width: 32px; height: 48px; font-size: 1.6rem; }
+.flip-clock.flip-small .separator  { font-size: 1.8rem; line-height: 48px; }
 .flip-clock.flip-small .flip-label { font-size: 0.85rem; }
 
-/* Countdown placement: inside the card, below date */
+/* Countdown placement: inside the card, below the date */
 #countdown {
   position: static;
   margin-top: 0.6rem;
   max-width: 100%;
 }
 
-/* =========================
-   Intro page (index.html)
-   ========================= */
+/* ========== Intro page (index.html) ========== */
 
 /* Background video & fallback */
 .background-video {
@@ -193,11 +167,11 @@ body {
   pointer-events: none;
 }
 
-/* Intro card container — hard center the card */
+/* Intro card container — bulletproof centering */
 .intro-card-container {
   position: fixed;
   inset: 0;
-  display: grid;        /* bulletproof centering */
+  display: grid;
   place-items: center;
   z-index: 2;
   opacity: 0;
@@ -213,9 +187,7 @@ body {
   width: 90%;
 }
 
-/* =========================
-   Flip card behavior (grid-stacked faces)
-   ========================= */
+/* ========== Flip card behavior (grid-stacked faces) ========== */
 .flip-card { perspective: 1000px; }
 
 .flip-card .card-inner {
@@ -224,10 +196,9 @@ body {
   transform-style: preserve-3d;
   transition: transform 0.6s var(--ease);
 }
-
 .flip-card.flipped .card-inner { transform: rotateY(180deg); }
 
-/* Faces share the same grid cell (not absolute) */
+/* Faces share the same grid cell (NOT absolute) */
 .flip-card .card-face {
   grid-area: 1 / 1;
   backface-visibility: hidden;
@@ -235,14 +206,11 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 0 1.25rem; /* breathing room so clock never kisses the edge */
+  padding: 0 1.25rem;        /* keeps clock away from border */
 }
-
 .flip-card .card-back { transform: rotateY(180deg); }
 
-/* =========================
-   "Can't attend" button and form
-   ========================= */
+/* ========== Can't attend button & form ========== */
 .cant-attend-btn {
   margin-top: 1rem;
   padding: 0.6rem 1.2rem;
@@ -255,10 +223,7 @@ body {
   transition: background var(--t-fast) var(--ease);
 }
 .cant-attend-btn:hover,
-.cant-attend-btn:focus-visible {
-  background: var(--emerald-accent);
-  outline: none;
-}
+.cant-attend-btn:focus-visible { background: var(--emerald-accent); outline: none; }
 
 #cantAttendFormContainer form {
   display: flex;
@@ -293,9 +258,7 @@ body {
   outline: none;
 }
 
-/* =========================
-   Headings & date in intro card
-   ========================= */
+/* ========== Headings & date in intro card ========== */
 .wedding-names {
   font-family: var(--font-heading);
   font-size: 2.7rem;
@@ -313,18 +276,12 @@ body {
   text-align: center;
 }
 
-/* =========================
-   Responsive
-   ========================= */
+/* ========== Responsive ========== */
 @media (max-width: 600px) {
-  .intro-card {
-    padding: 1.4rem 0.5rem;
-    max-width: 98%;
-  }
+  .intro-card { padding: 1.4rem 0.5rem; max-width: 98%; }
   .wedding-names { font-size: 2rem; }
   .wedding-date  { font-size: 1rem; }
 
-  /* Ensure countdown fits within the intro card */
   #countdown.flip-clock { gap: 2px; }
   #countdown.flip-clock.flip-small .flip-digit {
     width: 20px; height: 30px; font-size: 1.2rem;
