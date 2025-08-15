@@ -110,7 +110,7 @@ html, body {
 .flip-front:hover {
   box-shadow: 0 12px 48px rgba(1,68,33,0.18);
   border: 2px solid var(--emerald-border);
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-2px);
 }
 .flip-back {
   transform: rotateY(180deg);
