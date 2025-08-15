@@ -52,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
         preCountdown.textContent = n;
         preCountdown.style.fontFamily = 'var(--font-heading)';
         preCountdown.style.transition = 'font-size 0.7s var(--ease-med)';
-        preCountdown.style.fontSize = `${(11 - n) * (11 - n) * 0.5}rem`;
+        const base = window.innerWidth < 600 ? 0.35 : 0.5;
+        preCountdown.style.fontSize = `${(11 - n) * (11 - n) * base}rem`;
         playBeat();
         if (n <= 1) {
           clearInterval(timer);
@@ -100,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     adjustCardSize();
     window.addEventListener('resize', adjustCardSize);
+    document.fonts?.ready.then(adjustCardSize);
 
     const handleFlip = () => {
       introCard.querySelector('.flip-card')?.classList.add('flipped');
