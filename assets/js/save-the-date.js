@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const introCard = document.getElementById('introCard');
+  const launchCountdown = document.getElementById('launchCountdown');
   if (introCard) {
     const flipCard = introCard.querySelector('.flip-card');
     const front = flipCard?.querySelector('.flip-front');
@@ -16,7 +17,29 @@ document.addEventListener('DOMContentLoaded', () => {
     adjustCardSize();
     window.addEventListener('resize', adjustCardSize);
 
-    setTimeout(() => introCard.classList.add('visible'), 3000);
+    const showIntroCard = () => introCard.classList.add('visible');
+
+    if (launchCountdown) {
+      let count = 10;
+      const runCountdown = () => {
+        if (count === 0) {
+          launchCountdown.remove();
+          showIntroCard();
+          return;
+        }
+        launchCountdown.innerHTML = '';
+        const numEl = document.createElement('div');
+        numEl.className = 'countdown-number';
+        numEl.textContent = count;
+        launchCountdown.appendChild(numEl);
+        count--;
+        setTimeout(runCountdown, 1000);
+      };
+      runCountdown();
+    } else {
+      setTimeout(showIntroCard, 3000);
+    }
+
     introCard.addEventListener('click', () => {
       introCard.querySelector('.flip-card')?.classList.toggle('flipped');
     });
@@ -33,8 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const days = Math.floor(diff / (1000*60*60*24));
-      const hours = Math.floor((diff/ (1000*60*60)) % 24);
-      const minutes = Math.floor((diff/ (1000*60)) % 60);
+      const hours = Math.floor((diff / (1000*60*60)) % 24);
+      const minutes = Math.floor((diff / (1000*60)) % 60);
       const seconds = Math.floor((diff/1000) % 60);
       countdownEl.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
     }, 1000);
