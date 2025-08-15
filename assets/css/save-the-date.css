@@ -40,30 +40,6 @@ body {
   box-sizing: border-box;
 }
 
-/* video background */
-.background-video {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-}
-.background-video video {
-  position: absolute;
-  inset: 0;
-  object-fit: cover;
-  transition: opacity var(--t-med) var(--ease-med);
-  background: var(--bg-emerald-dark);
-}
-
-/* overlay */
-.video-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--emerald-overlay);
-  z-index: 1;
-  pointer-events: none;
-}
-
 /* base card styling */
 .card {
   background: var(--white);
@@ -183,6 +159,7 @@ body {
   height: 100%;
   object-fit: cover;
   transition: opacity var(--t-med) var(--ease-med);
+  background: var(--bg-emerald-dark);
 }
 
 /* Dim overlay */
