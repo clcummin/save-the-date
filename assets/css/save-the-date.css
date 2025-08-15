@@ -114,7 +114,7 @@ body {
   box-shadow: none;
   border-radius: 4px;
   padding: 0 6px;
-  margin-top: 4px;
+  margin-top: 6px;
   font-family: var(--font-heading);
   letter-spacing: 0.05em;
   font-size: 0.95rem;
@@ -122,10 +122,10 @@ body {
 
 /* Colon separator — TEXT ONLY (no background, no border) */
 .separator {
-  background: transparent !important;
+  background: transparent;
   color: var(--emerald-border);
-  border: 0 !important;
-  box-shadow: none !important;
+  border: 0;
+  box-shadow: none;
   padding: 0;
   font-family: var(--font-heading);
   font-size: 2.2rem;
@@ -157,7 +157,7 @@ body {
 
 /* Countdown placement: inside the card, below date */
 #countdown {
-  position: static !important;
+  position: static;
   margin-top: 0.6rem;
   max-width: 100%;
 }
@@ -235,9 +235,7 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-
-  /* a bit of internal padding so the clock never kisses the edge */
-  padding: 0 1.25rem;
+  padding: 0 1.25rem; /* breathing room so clock never kisses the edge */
 }
 
 .flip-card .card-back { transform: rotateY(180deg); }
@@ -336,4 +334,3 @@ body {
   }
   #countdown.flip-clock.flip-small .flip-label { font-size: 0.7rem; }
 }
-
