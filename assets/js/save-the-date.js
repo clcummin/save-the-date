@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gain.connect(ctx.destination);
     const now = ctx.currentTime;
     gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(1, now + 0.01);
+    gain.gain.linearRampToValueAtTime(1.5, now + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
     osc.start(now);
     osc.stop(now + 0.3);
@@ -33,6 +33,19 @@ document.addEventListener('DOMContentLoaded', () => {
       audioCtx.resume();
       preCountdown.classList.remove('start-prompt');
       preCountdown.removeEventListener('click', start);
+
+      // Prime video playback within a user gesture so it can later play with sound
+      video.muted = true;
+      const prime = video.play();
+      if (prime !== undefined) {
+        prime
+          .then(() => {
+            video.pause();
+            video.currentTime = 0;
+          })
+          .catch(() => {});
+      }
+
       let n = 10;
       let timer;
       const render = () => {
@@ -46,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
           setTimeout(() => {
             preCountdown.classList.add('hidden');
             video.muted = false;
+            video.volume = 1.0;
             video.play();
           }, 500);
         }
@@ -57,7 +71,17 @@ document.addEventListener('DOMContentLoaded', () => {
     preCountdown.addEventListener('click', start);
   } else if (video) {
     video.muted = false;
-    video.play();
+    video.volume = 1.0;
+    const autoplay = video.play();
+    if (autoplay !== undefined) {
+      autoplay.catch(() => {
+        const resume = () => {
+          video.play();
+          document.removeEventListener('click', resume);
+        };
+        document.addEventListener('click', resume, { once: true });
+      });
+    }
   }
 
   if (introCard) {
