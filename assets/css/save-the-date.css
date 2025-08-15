@@ -25,9 +25,7 @@
   --ease-med: ease;
 }
 
-/* =========================
-   Base / Reset
-   ========================= */
+/* Base / Reset */
 html,
 body {
   margin: 0;
@@ -39,29 +37,21 @@ body {
   font-family: var(--font-body);
   color: var(--white);
 }
-
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
 /* Scroll-lock only when <body class="no-scroll"> */
 .no-scroll,
-.no-scroll html {
-  overflow: hidden;
-  height: 100vh;
-}
+.no-scroll html { overflow: hidden; height: 100vh; }
 
-/* =========================
-   Card (single source of truth)
-   ========================= */
+/* ===== Cards (single source of truth) ===== */
 .card {
   background: var(--white);
   color: #222;
   border-radius: var(--card-radius);
+  border: 2px solid var(--emerald-border); /* consistent, visible */
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
-  border: 2px solid var(--emerald-border); /* consistent, visible border */
   text-decoration: none;
   cursor: pointer;
   transition:
@@ -72,7 +62,6 @@ body {
     box-shadow var(--t-fast) var(--ease-med),
     border-color var(--t-fast) var(--ease-med);
 }
-
 .card:hover,
 .card:focus-visible {
   box-shadow: 0 12px 48px rgba(1, 68, 33, 0.18);
@@ -81,16 +70,13 @@ body {
   outline: none;
 }
 
-/* =========================
-   Flip clock countdown
-   ========================= */
+/* ===== Flip clock countdown ===== */
 .flip-clock {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   gap: 8px;
 }
-
 .flip-digit {
   position: relative;
   width: 40px;
@@ -106,7 +92,6 @@ body {
   justify-content: center;
   overflow: hidden;
 }
-
 .separator,
 .flip-label {
   background: var(--emerald-border);
@@ -114,7 +99,6 @@ body {
   border-radius: 4px;
   padding: 0 4px;
 }
-
 .separator {
   font-family: var(--font-heading);
   font-size: 2.2rem;
@@ -123,17 +107,8 @@ body {
   align-items: center;
   justify-content: center;
 }
-
-.flip-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.digit-row {
-  display: flex;
-}
-
+.flip-group { display: flex; flex-direction: column; align-items: center; }
+.digit-row { display: flex; }
 .flip-label {
   margin-top: 4px;
   font-family: var(--font-heading);
@@ -141,24 +116,11 @@ body {
 }
 
 /* Size modifiers */
-.flip-clock.flip-small .flip-digit {
-  width: 32px;
-  height: 48px;
-  font-size: 1.6rem;
-}
+.flip-clock.flip-small .flip-digit { width: 32px; height: 48px; font-size: 1.6rem; }
+.flip-clock.flip-small .separator { font-size: 1.8rem; line-height: 48px; }
+.flip-clock.flip-small .flip-label { font-size: 0.85rem; }
 
-.flip-clock.flip-small .separator {
-  font-size: 1.8rem;
-  line-height: 48px;
-}
-
-.flip-clock.flip-small .flip-label {
-  font-size: 0.85rem;
-}
-
-/* =========================
-   Intro page (index.html)
-   ========================= */
+/* ===== Intro page (index.html) ===== */
 
 /* Background video & fallback */
 .background-video {
@@ -199,26 +161,122 @@ body {
   transition: opacity var(--t-med) var(--ease-med);
   pointer-events: none;
 }
-.intro-card-container.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
+.intro-card-container.visible { opacity: 1; pointer-events: auto; }
 
 /* Intro card modifier */
 .intro-card {
   padding: 3rem 2.5rem 2.5rem;
   max-width: 460px;
   width: 90%;
-  /* Optional floor to reduce jump when flipping to taller content */
+  /* Optional: a gentle floor to reduce jump if back face is taller */
   /* min-height: 340px; */
 }
 
-/* =========================
-   Flip card behavior (grid-stacked faces)
-   ========================= */
-.flip-card {
-  perspective: 1000px;
-}
+/* ===== Flip card behavior (grid-stacked faces; no absolute) ===== */
+.flip-card { perspective: 1000px; }
 
 .flip-card .card-inner {
-  position:
+  position: relative;
+  display: grid;               /* stack faces so height follows content */
+  transform-style: preserve-3d;
+  transition: transform 0.6s var(--ease);
+  /* IMPORTANT: do NOT set fixed height here */
+}
+
+.flip-card.flipped .card-inner { transform: rotateY(180deg); }
+
+/* Faces occupy the same grid cell, not absolute */
+.flip-card .card-face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;     /* center content nicely */
+  text-align: center;
+  /* Remove any 'position:absolute; inset:0;' from old CSS */
+}
+.flip-card .card-back { transform: rotateY(180deg); }
+
+/* ===== "Can't attend" button and form ===== */
+.cant-attend-btn {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  background: var(--emerald-border);
+  color: var(--white);
+  font-family: var(--font-heading);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background var(--t-fast) var(--ease);
+}
+.cant-attend-btn:hover,
+.cant-attend-btn:focus-visible { background: var(--emerald-accent); outline: none; }
+
+#cantAttendFormContainer form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+#cantAttendFormContainer label {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-body);
+  color: var(--emerald-border);
+  width: 100%;
+}
+#cantAttendFormContainer input,
+#cantAttendFormContainer button[type="submit"] {
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--gray-light);
+  font-family: var(--font-body);
+}
+#cantAttendFormContainer button[type="submit"] {
+  background: var(--emerald-border);
+  color: var(--white);
+  border-color: var(--emerald-border);
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+}
+#cantAttendFormContainer button[type="submit"]:hover,
+#cantAttendFormContainer button[type="submit"]:focus-visible {
+  background: var(--emerald-hover);
+  outline: none;
+}
+
+/* ===== Headings & date in intro card ===== */
+.wedding-names {
+  font-family: var(--font-heading);
+  font-size: 2.7rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  letter-spacing: 0.07em;
+  color: var(--emerald-border);
+  text-align: center;
+}
+.wedding-date {
+  font-size: 1.18rem;
+  color: var(--emerald-accent);
+  margin-bottom: 2.3rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .intro-card { padding: 1.4rem 0.5rem; max-width: 98%; }
+  .wedding-names { font-size: 2rem; }
+  .wedding-date { font-size: 1rem; }
+
+  /* Ensure countdown fits within the intro card */
+  #countdown.flip-clock { gap: 2px; }
+  #countdown.flip-clock.flip-small .flip-digit {
+    width: 20px; height: 30px; font-size: 1.2rem;
+  }
+  #countdown.flip-clock.flip-small .separator {
+    font-size: 1.4rem; line-height: 30px;
+  }
+  #countdown.flip-clock.flip-small .flip-label { font-size: 0.7rem; }
+}
