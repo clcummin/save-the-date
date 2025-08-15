@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const el = document.getElementById('countdownDemo');
   if (!el) return;
   let n = 10;
-  let timer;
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const playBeat = () => {
     const ctx = audioCtx;
@@ -20,18 +19,25 @@ document.addEventListener('DOMContentLoaded', () => {
     osc.start(now);
     osc.stop(now + 0.3);
   };
-  const render = () => {
-    el.textContent = n;
-    el.style.fontFamily = 'var(--font-heading)';
+  const sizeFor = (val) => `${(11 - val) * (11 - val) * 0.5}rem`;
+
+  el.textContent = n;
+  el.style.fontFamily = 'var(--font-heading)';
+  el.style.fontSize = sizeFor(n);
+  playBeat();
+
+  // Enable transition after the initial size is applied so 10 doesn't animate
+  requestAnimationFrame(() => {
     el.style.transition = 'font-size 0.7s var(--ease-med)';
-    el.style.fontSize = `${(11 - n) * (11 - n) * 0.5}rem`;
+  });
+
+  const timer = setInterval(() => {
+    n--;
+    el.textContent = n;
+    el.style.fontSize = sizeFor(n);
     playBeat();
     if (n === 1) {
       clearInterval(timer);
-    } else {
-      n--;
     }
-  };
-  render();
-  timer = setInterval(render, 1000);
+  }, 1000);
 });
