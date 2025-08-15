@@ -207,6 +207,15 @@ button {
     width: 90%;
     height: auto;
   }
+  .wedding-names {
+    font-size: 2rem;
+  }
+  .wedding-date {
+    font-size: 1rem;
+  }
+  .countdown-overlay {
+    font-size: 3rem;
+  }
 }
 
 
