@@ -44,16 +44,48 @@
 
     <!-- Intro card (fades in) -->
     <div class="intro-card-container" id="introCard">
-      <div class="card intro-card" tabindex="0">
-        <h1 class="wedding-names">Lorraine<br />&amp;<br />Christopher</h1>
-        <div class="wedding-date">
-          September 12, 2026&nbsp;•&nbsp;Portola, CA
+      <div class="card intro-card flip-card" tabindex="0">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <h1 class="wedding-names">Lorraine<br />&amp;<br />Christopher</h1>
+            <div class="wedding-date">
+              September 12, 2026&nbsp;•&nbsp;Portola, CA
+            </div>
+            <!-- ⬇ New countdown ticker -->
+            <div id="countdown" class="flip-clock flip-small"></div>
+          </div>
+          <div class="card-face card-back">
+            <div id="backContent">
+              <p>
+                Our full website is coming soon. Please plan ahead and let
+                Chris and Lorraine know if you need help.
+              </p>
+              <button id="showCantAttendForm" class="cant-attend-btn">
+                Can't attend?
+              </button>
+            </div>
+            <div id="cantAttendFormContainer" style="display: none">
+              <form
+                action="https://script.google.com/macros/s/AKfycbw1oW3-NLd95psh53-YJFoUoa80b1jeyw9oEXX0TWffxMEyauwYvn6aVOn0UjdZgZF2IQ/exec"
+                method="POST"
+              >
+                <label>
+                  Name
+                  <input type="text" name="name" required />
+                </label>
+                <label>
+                  Email
+                  <input type="email" name="email" required />
+                </label>
+                <button type="submit">Submit</button>
+              </form>
+            </div>
+          </div>
         </div>
-        <!-- ⬇ New countdown ticker -->
-        <div id="countdown" class="flip-clock flip-small"></div>
       </div>
     </div>
 
     <script src="assets/js/save-the-date.js"></script>
+    <script src="assets/js/cant-attend.js"></script>
   </body>
 </html>
