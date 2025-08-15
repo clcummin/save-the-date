@@ -71,6 +71,10 @@ html, body {
   transition: opacity var(--t-med) var(--ease-med);
 }
 
+.countdown-overlay.start-prompt {
+  cursor: pointer;
+}
+
 .countdown-overlay.hidden {
   opacity: 0;
   pointer-events: none;

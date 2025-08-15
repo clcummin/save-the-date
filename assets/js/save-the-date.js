@@ -26,28 +26,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (preCountdown) {
-    let n = 10;
-    let timer;
-    const render = () => {
-      preCountdown.textContent = n;
-      preCountdown.style.fontFamily = 'var(--font-heading)';
-      preCountdown.style.transition = 'font-size 0.7s var(--ease-med)';
-      preCountdown.style.fontSize = `${(11 - n) * (11 - n) * 0.5}rem`;
-      playBeat();
-      if (n <= 1) {
-        clearInterval(timer);
-        setTimeout(() => {
-          preCountdown.classList.add('hidden');
-          video?.play();
-        }, 500);
-      }
-      n--;
+  if (preCountdown && video) {
+    preCountdown.textContent = 'Tap to Start';
+    preCountdown.classList.add('start-prompt');
+    const start = () => {
+      audioCtx.resume();
+      preCountdown.classList.remove('start-prompt');
+      preCountdown.removeEventListener('click', start);
+      let n = 10;
+      let timer;
+      const render = () => {
+        preCountdown.textContent = n;
+        preCountdown.style.fontFamily = 'var(--font-heading)';
+        preCountdown.style.transition = 'font-size 0.7s var(--ease-med)';
+        preCountdown.style.fontSize = `${(11 - n) * (11 - n) * 0.5}rem`;
+        playBeat();
+        if (n <= 1) {
+          clearInterval(timer);
+          setTimeout(() => {
+            preCountdown.classList.add('hidden');
+            video.muted = false;
+            video.play();
+          }, 500);
+        }
+        n--;
+      };
+      render();
+      timer = setInterval(render, 1000);
     };
-    render();
-    timer = setInterval(render, 1000);
-  } else {
-    video?.play();
+    preCountdown.addEventListener('click', start);
+  } else if (video) {
+    video.muted = false;
+    video.play();
   }
 
   if (introCard) {
