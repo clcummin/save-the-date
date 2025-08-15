@@ -1,13 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Intro card fade-in and flip
   const introCardContainer = document.getElementById("introCard");
+  let card;
+  let front;
   if (introCardContainer) {
     setTimeout(() => introCardContainer.classList.add("visible"), 3000);
 
-    const card = introCardContainer.querySelector(".intro-card");
-    const front = card?.querySelector(".card-front");
+    card = introCardContainer.querySelector(".intro-card");
+    front = card?.querySelector(".card-front");
     if (card && front) {
-      card.style.height = front.offsetHeight + "px";
       card.addEventListener("click", () => {
         if (!card.classList.contains("flipped")) {
           card.classList.add("flipped");
@@ -49,6 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const target = new Date("2026-09-12T00:00:00");
     const digits = [];
     let timer;
+
+    function adjustCardHeight() {
+      if (card && front) {
+        card.style.height = front.offsetHeight + "px";
+      }
+    }
 
     function createDigit() {
       const d = document.createElement("div");
@@ -121,10 +128,14 @@ document.addEventListener("DOMContentLoaded", () => {
       str.split("").forEach((num, idx) => {
         flipTo(digits[idx], num);
       });
+
+      adjustCardHeight();
     }
 
     setupClock();
     updateClock();
     timer = setInterval(updateClock, 1000);
+    window.addEventListener("load", adjustCardHeight);
+    window.addEventListener("resize", adjustCardHeight);
   }
 });
