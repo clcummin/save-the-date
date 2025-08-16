@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     adjustCardSize();
     window.addEventListener('resize', adjustCardSize);
+    window.addEventListener('load', adjustCardSize);
     document.fonts?.ready.then(adjustCardSize);
 
     const handleFlip = () => {
