@@ -1,64 +1,88 @@
 document.addEventListener('DOMContentLoaded', () => {
   document.documentElement.classList.add('js');
 
-  const el = document.getElementById('countdownDemo');
-  if (!el) return;
-
-  const stage = document.querySelector('.countdown-stage');
-  const shell = document.querySelector('.countdown-shell');
-  const video = shell?.querySelector('video');
-
-  const countdownImageData = [
-    { src: 'assets/images/AUG4710_bw.jpg', x: 10, y: 10, tiltStart: '-6deg', tiltMid: '-2deg' },
-    { src: 'assets/images/AUG4726_bw.jpg', x: 30, y: 8, tiltStart: '5deg', tiltMid: '1deg' },
-    { src: 'assets/images/AUG4738_bw.jpg', x: 50, y: 6, tiltStart: '-4deg', tiltMid: '-1deg' },
-    { src: 'assets/images/AUG4759_bw.jpg', x: 70, y: 8, tiltStart: '3deg', tiltMid: '1deg' },
-    { src: 'assets/images/AUG4761_bw.jpg', x: 90, y: 10, tiltStart: '-5deg', tiltMid: '-2deg' },
-    { src: 'assets/images/AUG4849_bw.jpg', x: 92, y: 35, tiltStart: '6deg', tiltMid: '2deg' },
-    { src: 'assets/images/AUG4869_bw.jpg', x: 88, y: 88, tiltStart: '-3deg', tiltMid: '-1deg' },
-    { src: 'assets/images/AUG5106_bw.jpg', x: 50, y: 92, tiltStart: '4deg', tiltMid: '1deg' },
-    { src: 'assets/images/AUG5127_bw.jpg', x: 10, y: 90, tiltStart: '-6deg', tiltMid: '-2deg' },
-    { src: 'assets/images/AUG5139_bw.jpg', x: 8, y: 50, tiltStart: '5deg', tiltMid: '1deg' }
-  ];
-
-  const imageStack = stage ? document.createElement('div') : null;
-  let imageElements = [];
-  if (imageStack && countdownImageData.length) {
-    imageStack.className = 'countdown-image-stack';
-    imageStack.setAttribute('aria-hidden', 'true');
-
-    const sequence = countdownImageData.slice(0, 10);
-    imageElements = sequence.map((data) => {
-      const wrapper = document.createElement('figure');
-      wrapper.className = 'countdown-image';
-      if (typeof data.x === 'number') wrapper.style.setProperty('--pos-x', `${data.x}`);
-      if (typeof data.y === 'number') wrapper.style.setProperty('--pos-y', `${data.y}`);
-      if (data.tiltStart) wrapper.style.setProperty('--tilt-start', data.tiltStart);
-      if (data.tiltMid) wrapper.style.setProperty('--tilt-mid', data.tiltMid);
-
-      const img = document.createElement('img');
-      img.src = data.src;
-      img.alt = '';
-      img.decoding = 'async';
-      img.loading = 'eager';
-      img.setAttribute('draggable', 'false');
-      wrapper.appendChild(img);
-      imageStack.appendChild(wrapper);
-      return wrapper;
-    });
-
-    if (stage && shell && shell.parentNode === stage) {
-      stage.insertBefore(imageStack, shell);
-    } else if (stage) {
-      stage.appendChild(imageStack);
-    }
-
-    requestAnimationFrame(() => {
-      imageStack.classList.add('is-active');
-    });
+  const layout = document.getElementById('countdownLayout');
+  const square = document.getElementById('countdownSquare');
+  const numberEl = document.getElementById('countdownDemo');
+  const startOverlay = document.getElementById('preCountdown');
+  if (!layout || !square || !numberEl || !startOverlay) {
+    return;
   }
 
-  let n = 10;
+  const videoWrapper = square.querySelector('.countdown-video');
+  const video = videoWrapper?.querySelector('video') || null;
+  let hasStarted = false;
+
+  const countdownImageSources = [
+    'assets/images/AUG4710_bw.jpg',
+    'assets/images/AUG4726_bw.jpg',
+    'assets/images/AUG4738_bw.jpg',
+    'assets/images/AUG4759_bw.jpg',
+    'assets/images/AUG4761_bw.jpg',
+    'assets/images/AUG4849_bw.jpg',
+    'assets/images/AUG4869_bw.jpg',
+    'assets/images/AUG5106_bw.jpg',
+    'assets/images/AUG5127_bw.jpg',
+    'assets/images/AUG5139_bw.jpg',
+    'assets/images/AUG5177_bw.jpg',
+    'assets/images/AUG5181_bw.jpg',
+    'assets/images/AUG5201_bw.jpg',
+    'assets/images/AUG5253_bw.jpg',
+    'assets/images/AUG5290_bw.jpg',
+    'assets/images/AUG5306_bw.jpg'
+  ];
+
+  const squareLayout = [
+    { row: 1, col: 1 },
+    { row: 1, col: 2 },
+    { row: 1, col: 3 },
+    { row: 1, col: 4 },
+    { row: 1, col: 5 },
+    { row: 2, col: 5 },
+    { row: 3, col: 5 },
+    { row: 4, col: 5 },
+    { row: 5, col: 5 },
+    { row: 5, col: 4 },
+    { row: 5, col: 3 },
+    { row: 5, col: 2 },
+    { row: 5, col: 1 },
+    { row: 4, col: 1 },
+    { row: 3, col: 1 },
+    { row: 2, col: 1 }
+  ];
+
+  const randomBetween = (min, max) => Math.random() * (max - min) + min;
+
+  const imageElements = [];
+  const fragment = document.createDocumentFragment();
+  const framesToUse = countdownImageSources.slice(0, squareLayout.length);
+  framesToUse.forEach((src, index) => {
+    const frame = document.createElement('figure');
+    frame.className = 'countdown-image';
+    frame.style.gridRow = String(squareLayout[index]?.row ?? 'auto');
+    frame.style.gridColumn = String(squareLayout[index]?.col ?? 'auto');
+    const tilt = randomBetween(-6, 6);
+    frame.style.setProperty('--tilt-start', `${tilt.toFixed(2)}deg`);
+    frame.style.setProperty('--tilt-mid', `${(tilt * 0.4).toFixed(2)}deg`);
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '';
+    img.decoding = 'async';
+    img.loading = 'eager';
+    img.setAttribute('draggable', 'false');
+    frame.appendChild(img);
+
+    fragment.appendChild(frame);
+    imageElements.push(frame);
+  });
+
+  layout.insertBefore(fragment, square);
+
+  requestAnimationFrame(() => {
+    layout.classList.add('is-active');
+  });
+
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const playBeat = () => {
     const ctx = audioCtx;
@@ -71,57 +95,62 @@ document.addEventListener('DOMContentLoaded', () => {
     gain.connect(ctx.destination);
     const now = ctx.currentTime;
     gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(1, now + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    gain.gain.linearRampToValueAtTime(1.1, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
     osc.start(now);
-    osc.stop(now + 0.3);
+    osc.stop(now + 0.32);
   };
 
-  const containerRect = shell?.getBoundingClientRect();
-  const fallbackMeasure = Math.min(window.innerWidth, window.innerHeight) * 0.5;
-  const minSize = containerRect ? Math.min(containerRect.width, containerRect.height) * 0.32 : fallbackMeasure * 0.6;
-  const maxSize = containerRect ? Math.min(containerRect.width, containerRect.height) * 0.72 : fallbackMeasure;
+  const measureSquare = () => {
+    const rect = square.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      return Math.min(rect.width, rect.height);
+    }
+    return Math.min(window.innerWidth, window.innerHeight) * 0.55;
+  };
+
   const sizeFor = (val) => {
+    const base = measureSquare();
+    const minSize = base * 0.34;
+    const maxSize = base * 0.74;
     const progress = (10 - val) / 9;
-    const nextSize = minSize + (maxSize - minSize) * Math.max(0, Math.min(1, progress));
-    return `${Math.max(48, Math.min(nextSize, maxSize))}px`;
+    const next = minSize + (maxSize - minSize) * Math.max(0, Math.min(1, progress));
+    return `${Math.max(56, Math.min(next, maxSize))}px`;
   };
-
-  el.textContent = n;
-  el.style.fontFamily = 'var(--font-heading)';
-  el.style.fontSize = sizeFor(n);
 
   const totalImages = imageElements.length;
   let currentImage = -1;
-  const baseDuration = 0.72;
-  const minDuration = 0.32;
+  const baseDuration = 0.78;
+  const minDuration = 0.28;
   const durationStep = totalImages > 1 ? (baseDuration - minDuration) / (totalImages - 1) : 0;
 
-  const showNextImage = () => {
-    if (!imageElements.length) return;
-    const nextIndex = Math.min(currentImage + 1, imageElements.length - 1);
-    if (nextIndex === currentImage) return;
-    const nextEl = imageElements[nextIndex];
-    const duration = Math.max(minDuration, baseDuration - durationStep * nextIndex);
-    nextEl.style.setProperty('--hit-duration', `${duration}s`);
-    nextEl.classList.add('active');
-    currentImage = nextIndex;
+  const revealNextImages = (count = 1) => {
+    for (let i = 0; i < count; i += 1) {
+      if (currentImage >= totalImages - 1) return;
+      const nextIndex = currentImage + 1;
+      const frame = imageElements[nextIndex];
+      if (!frame) return;
+      const duration = Math.max(minDuration, baseDuration - durationStep * nextIndex);
+      frame.style.setProperty('--hit-duration', `${duration.toFixed(2)}s`);
+      requestAnimationFrame(() => {
+        frame.classList.add('active');
+      });
+      currentImage = nextIndex;
+    }
   };
 
-  showNextImage();
-  playBeat();
-
+  let countdownTimer = () => {};
   let countdownResolved = false;
-  let resolveCountdown;
   const countdownComplete = new Promise((resolve) => {
-    resolveCountdown = () => {
+    const finish = () => {
       if (countdownResolved) return;
       countdownResolved = true;
       resolve();
     };
+    countdownTimer = finish;
   });
 
-  const videoReady = new Promise((resolve) => {
+  const waitForVideo = new Promise((resolve) => {
     if (!video) {
       resolve();
       return;
@@ -129,55 +158,106 @@ document.addEventListener('DOMContentLoaded', () => {
     if (video.readyState >= 2) {
       resolve();
     } else {
-      const onCanPlay = () => {
-        video.removeEventListener('canplay', onCanPlay);
-        video.removeEventListener('loadeddata', onCanPlay);
+      const onReady = () => {
+        video.removeEventListener('canplay', onReady);
+        video.removeEventListener('loadeddata', onReady);
         resolve();
       };
-      video.addEventListener('canplay', onCanPlay);
-      video.addEventListener('loadeddata', onCanPlay);
+      video.addEventListener('canplay', onReady);
+      video.addEventListener('loadeddata', onReady);
     }
   });
 
-  // Enable transition after the initial size is applied so 10 doesn't animate
-  requestAnimationFrame(() => {
-    el.style.transition = 'opacity 0.6s ease, font-size 0.7s var(--ease-med)';
-    el.style.fontSize = sizeFor(n);
-  });
+  let intervalId = null;
 
-  const timer = setInterval(() => {
-    n--;
-    if (n < 1) {
-      clearInterval(timer);
-      resolveCountdown();
-      return;
+  const finishCountdown = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
     }
-    el.textContent = n;
-    el.style.fontSize = sizeFor(n);
-    playBeat();
-    showNextImage();
-    if (n === 1) {
-      clearInterval(timer);
-      setTimeout(resolveCountdown, 650);
-    }
-  }, 1000);
+    countdownTimer();
+  };
 
-  Promise.all([countdownComplete, videoReady]).then(() => {
-    el.style.opacity = '0';
-    if (shell) {
-      shell.classList.add('show-video');
-    }
-    if (imageStack) {
-      imageStack.classList.add('fade-out');
-      imageStack.addEventListener('transitionend', (event) => {
-        if (event.target === imageStack) {
-          imageStack.remove();
-        }
-      }, { once: true });
-    }
+  const startCountdown = () => {
+    if (hasStarted) return;
+    hasStarted = true;
+    startOverlay.classList.remove('start-prompt');
+    startOverlay.classList.add('is-counting');
+    startOverlay.setAttribute('aria-hidden', 'true');
+    startOverlay.setAttribute('tabindex', '-1');
+    startOverlay.blur();
+
+    requestAnimationFrame(() => {
+      startOverlay.classList.add('hidden');
+    });
+
+    audioCtx.resume().catch(() => {});
+
     if (video) {
-      if (video.paused && typeof video.play === 'function') {
-        video.play().catch(() => {});
+      video.muted = true;
+      const prime = video.play();
+      if (prime !== undefined) {
+        prime
+          .then(() => {
+            video.pause();
+            video.currentTime = 0;
+          })
+          .catch(() => {});
+      }
+    }
+
+    let n = 10;
+    numberEl.textContent = n;
+    numberEl.style.fontSize = sizeFor(n);
+    numberEl.style.opacity = '1';
+
+    revealNextImages(1);
+    playBeat();
+
+    requestAnimationFrame(() => {
+      numberEl.style.transition = 'opacity 0.6s ease, font-size 0.7s var(--ease-med)';
+      numberEl.style.fontSize = sizeFor(n);
+    });
+
+    intervalId = setInterval(() => {
+      n -= 1;
+      if (n < 0) n = 0;
+      numberEl.textContent = n;
+      numberEl.style.fontSize = sizeFor(n);
+      playBeat();
+
+      let reveals = 1;
+      if (n <= 4) reveals += 1;
+      if (n <= 2) reveals += 1;
+      revealNextImages(reveals);
+
+      if (n <= 1) {
+        revealNextImages(totalImages);
+        clearInterval(intervalId);
+        setTimeout(finishCountdown, 650);
+      }
+    }, 1000);
+  };
+
+  startOverlay.addEventListener('click', startCountdown);
+  startOverlay.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      startCountdown();
+    }
+  });
+  startOverlay.setAttribute('tabindex', '0');
+  startOverlay.setAttribute('role', 'button');
+  startOverlay.setAttribute('aria-label', 'Start countdown');
+
+  Promise.all([countdownComplete, waitForVideo]).then(() => {
+    square.classList.add('show-video');
+    if (video) {
+      video.muted = false;
+      video.currentTime = 0;
+      const playback = video.play();
+      if (playback) {
+        playback.catch(() => {});
       }
     }
     document.body.classList.remove('no-scroll');
