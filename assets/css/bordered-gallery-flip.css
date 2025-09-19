@@ -208,6 +208,8 @@ body {
   justify-content: center;
   text-align: center;
   gap: clamp(14px, 3.2vw, 26px);
+  width: 100%;
+  max-width: min(520px, 100%);
 }
 
 .countdown-wrapper.has-video {
