@@ -21,10 +21,18 @@
 
     <main class="content-card">
       <div class="card-shell">
-        <div class="countdown-wrapper" aria-live="polite">
-          <p class="eyebrow">Celebration Countdown</p>
-          <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown at 10">10</div>
-          <p class="countdown-note">Counting down the final moments until the big day.</p>
+        <div class="countdown-wrapper has-details" role="group" aria-labelledby="saveDateTitle" aria-describedby="saveDateNote">
+          <p class="eyebrow">Save the Date</p>
+          <h1 class="save-date-title" id="saveDateTitle">
+            <span class="save-date-name">Lorraine</span>
+            <span class="save-date-amp">&amp;</span>
+            <span class="save-date-name">Christopher</span>
+          </h1>
+          <p class="save-date-date">
+            <span class="save-date-date-main">September 12, 2026</span>
+            <span class="save-date-date-location">Portola, California</span>
+          </p>
+          <p class="countdown-note save-date-note" id="saveDateNote">Formal invitation to follow. We can't wait to celebrate with you!</p>
         </div>
       </div>
     </main>
@@ -50,212 +58,6 @@
       });
     });
 
-    const countdownWrapper = document.querySelector('.countdown-wrapper');
-    const cardShell = countdownWrapper ? countdownWrapper.closest('.card-shell') : null;
-    const countdownNumber = document.getElementById('countdownNumber');
-    const countdownStart = 10;
-    const countdownNote = document.querySelector('.countdown-note');
-    let currentValue = countdownStart;
-
-    const showSaveTheDateDetails = () => {
-      if (!countdownWrapper) {
-        return;
-      }
-
-      countdownWrapper.classList.remove('has-video');
-      countdownWrapper.classList.add('has-details');
-      countdownWrapper.innerHTML = '';
-
-      const eyebrow = document.createElement('p');
-      eyebrow.className = 'eyebrow';
-      eyebrow.textContent = 'Save the Date';
-
-      const title = document.createElement('h1');
-      title.className = 'save-date-title';
-      title.innerHTML = '<span class="save-date-name">Lorraine</span>' +
-        '<span class="save-date-amp">&amp;</span>' +
-        '<span class="save-date-name">Christopher</span>';
-
-      const dateLine = document.createElement('p');
-      dateLine.className = 'save-date-date';
-      dateLine.innerHTML = '<span class="save-date-date-main">September 12, 2026</span>' +
-        '<span class="save-date-date-location">Portola, California</span>';
-
-      const countdownContainer = document.createElement('div');
-      countdownContainer.className = 'save-date-countdown';
-      countdownContainer.setAttribute('aria-live', 'polite');
-      countdownContainer.setAttribute('role', 'timer');
-
-      const countdownGrid = document.createElement('div');
-      countdownGrid.className = 'countdown-grid';
-      countdownContainer.appendChild(countdownGrid);
-
-      const countdownValues = {};
-      const countdownSegments = [
-        ['days', 'Days'],
-        ['hours', 'Hours'],
-        ['minutes', 'Minutes'],
-        ['seconds', 'Seconds'],
-      ];
-
-      countdownSegments.forEach(([unit, label]) => {
-        const segment = document.createElement('div');
-        segment.className = 'countdown-segment';
-
-        const value = document.createElement('div');
-        value.className = 'countdown-value';
-        value.textContent = '00';
-        value.setAttribute('data-unit', unit);
-
-        const unitLabel = document.createElement('div');
-        unitLabel.className = 'countdown-label';
-        unitLabel.textContent = label;
-
-        segment.appendChild(value);
-        segment.appendChild(unitLabel);
-        countdownGrid.appendChild(segment);
-        countdownValues[unit] = value;
-      });
-
-      const note = document.createElement('p');
-      note.className = 'countdown-note save-date-note';
-      note.textContent = "Formal invitation to follow. We can't wait to celebrate with you!";
-
-      countdownWrapper.appendChild(eyebrow);
-      countdownWrapper.appendChild(title);
-      countdownWrapper.appendChild(dateLine);
-      countdownWrapper.appendChild(countdownContainer);
-      countdownWrapper.appendChild(note);
-
-      if (cardShell) {
-        cardShell.classList.remove('is-video');
-        cardShell.classList.add('is-details');
-      }
-
-      const eventDate = new Date('2026-09-12T16:00:00-07:00');
-
-      const formatNumber = (value) => {
-        const stringValue = String(Math.max(0, value));
-        return stringValue.padStart(2, '0');
-      };
-
-      const updateCountdown = () => {
-        const now = new Date();
-        const totalMilliseconds = eventDate.getTime() - now.getTime();
-
-        if (totalMilliseconds <= 0) {
-          countdownValues.days.textContent = '00';
-          countdownValues.hours.textContent = '00';
-          countdownValues.minutes.textContent = '00';
-          countdownValues.seconds.textContent = '00';
-          note.textContent = 'Today is the day—see you soon!';
-          countdownContainer.setAttribute('aria-label', 'Countdown complete');
-          return false;
-        }
-
-        const totalSeconds = Math.floor(totalMilliseconds / 1000);
-        const secondsInDay = 60 * 60 * 24;
-        const secondsInHour = 60 * 60;
-        const secondsInMinute = 60;
-
-        const days = Math.floor(totalSeconds / secondsInDay);
-        const hours = Math.floor((totalSeconds % secondsInDay) / secondsInHour);
-        const minutes = Math.floor((totalSeconds % secondsInHour) / secondsInMinute);
-        const seconds = totalSeconds % secondsInMinute;
-
-        countdownValues.days.textContent = formatNumber(days);
-        countdownValues.hours.textContent = formatNumber(hours);
-        countdownValues.minutes.textContent = formatNumber(minutes);
-        countdownValues.seconds.textContent = formatNumber(seconds);
-
-        countdownContainer.setAttribute(
-          'aria-label',
-          `${days} days, ${hours} hours, ${minutes} minutes, and ${seconds} seconds until the celebration`
-        );
-
-        return true;
-      };
-
-      const hasTimeRemaining = updateCountdown();
-
-      if (hasTimeRemaining) {
-        const eventCountdownInterval = window.setInterval(() => {
-          const stillCounting = updateCountdown();
-          if (!stillCounting) {
-            window.clearInterval(eventCountdownInterval);
-          }
-        }, 1000);
-      }
-    };
-
-    const showCelebrationVideo = () => {
-      if (!countdownWrapper) {
-        return;
-      }
-
-      countdownWrapper.classList.add('has-video');
-      countdownWrapper.classList.remove('has-details');
-      countdownWrapper.innerHTML = '';
-
-      const videoFrame = document.createElement('div');
-      videoFrame.className = 'countdown-video-frame';
-
-      const videoHashtag = document.createElement('p');
-      videoHashtag.className = 'video-hashtag';
-      videoHashtag.textContent = '#BECOMINGCUMMINGS';
-
-      const celebrationVideo = document.createElement('video');
-      celebrationVideo.className = 'countdown-video';
-      celebrationVideo.src = 'assets/video.mp4';
-      celebrationVideo.autoplay = true;
-      celebrationVideo.loop = false;
-      celebrationVideo.muted = true;
-      celebrationVideo.setAttribute('playsinline', '');
-
-      celebrationVideo.addEventListener('ended', () => {
-        showSaveTheDateDetails();
-      });
-      celebrationVideo.addEventListener('error', () => {
-        showSaveTheDateDetails();
-      }, { once: true });
-
-      videoFrame.appendChild(celebrationVideo);
-      countdownWrapper.appendChild(videoHashtag);
-      countdownWrapper.appendChild(videoFrame);
-
-      if (cardShell) {
-        cardShell.classList.remove('is-details');
-        cardShell.classList.add('is-video');
-      }
-    };
-
-    if (countdownNumber) {
-      countdownNumber.textContent = String(currentValue);
-
-      const countdownInterval = window.setInterval(() => {
-        currentValue -= 1;
-        countdownNumber.classList.add('is-transitioning');
-
-        if (currentValue <= 0) {
-          countdownNumber.textContent = '0';
-          countdownNumber.setAttribute('aria-label', 'Countdown finished');
-          window.clearInterval(countdownInterval);
-          if (countdownNote) {
-            countdownNote.textContent = 'It\'s time to celebrate!';
-          }
-          window.setTimeout(() => {
-            showCelebrationVideo();
-          }, 400);
-        } else {
-          countdownNumber.textContent = String(currentValue);
-          countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
-        }
-
-        window.setTimeout(() => {
-          countdownNumber.classList.remove('is-transitioning');
-        }, 200);
-      }, 1000);
-    }
   </script>
 </body>
 </html>
