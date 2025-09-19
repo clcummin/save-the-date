@@ -200,6 +200,18 @@ body {
   gap: clamp(18px, 4vw, 32px);
 }
 
+.countdown-wrapper.has-video {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border: none;
+  gap: 0;
+}
+
+.countdown-wrapper.has-video::before {
+  content: none;
+}
+
 .countdown-number {
   font-family: var(--countdown-font);
   font-size: clamp(3.2rem, 10vw, 6rem);
@@ -212,6 +224,14 @@ body {
 .countdown-number.is-transitioning {
   opacity: 0.6;
   transform: scale(0.9);
+}
+
+.countdown-video {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  display: block;
 }
 
 .countdown-note {
