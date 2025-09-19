@@ -22,24 +22,28 @@ document.addEventListener('DOMContentLoaded', () => {
     'assets/images/AUG5329_bw.jpg'
   ];
   const countdownFrames = [];
-  const squareLayout = [
-    { row: 1, col: 1 },
-    { row: 1, col: 2 },
-    { row: 1, col: 3 },
-    { row: 1, col: 4 },
-    { row: 1, col: 5 },
-    { row: 2, col: 5 },
-    { row: 3, col: 5 },
-    { row: 4, col: 5 },
-    { row: 5, col: 5 },
-    { row: 5, col: 4 },
-    { row: 5, col: 3 },
-    { row: 5, col: 2 },
-    { row: 5, col: 1 },
-    { row: 4, col: 1 },
-    { row: 3, col: 1 },
-    { row: 2, col: 1 }
-  ];
+  const buildBorderLayout = (size) => {
+    const positions = [];
+    if (size < 2) return positions;
+
+    for (let col = 1; col <= size; col += 1) {
+      positions.push({ row: 1, col });
+    }
+    for (let row = 2; row <= size; row += 1) {
+      positions.push({ row, col: size });
+    }
+    for (let col = size - 1; col >= 1; col -= 1) {
+      positions.push({ row: size, col });
+    }
+    for (let row = size - 1; row >= 2; row -= 1) {
+      positions.push({ row, col: 1 });
+    }
+
+    return positions;
+  };
+
+  const gridSize = 5;
+  const squareLayout = buildBorderLayout(gridSize);
   const randomBetween = (min, max) => Math.random() * (max - min) + min;
 
   if (countdownImagesContainer) {
