@@ -11,45 +11,64 @@
 </head>
 <body>
   <div class="page-border">
-    <div class="border-cell top-left"><img src="assets/images/AUG4710_bw.jpg" alt="Couple laughing together"></div>
-    <div class="border-cell top-center"><img src="assets/images/AUG4726_bw.jpg" alt="Holding hands"></div>
-    <div class="border-cell top-right"><img src="assets/images/AUG4738_bw.jpg" alt="Looking at each other"></div>
+    <div class="border-cell top-left" data-reveal-index="1"><img src="assets/images/AUG4710_bw.jpg" alt="Couple laughing together"></div>
+    <div class="border-cell top-left-center" data-reveal-index="2"><img src="assets/images/AUG4726_bw.jpg" alt="Holding hands"></div>
+    <div class="border-cell top-right-center" data-reveal-index="3"><img src="assets/images/AUG4738_bw.jpg" alt="Looking at each other"></div>
+    <div class="border-cell top-right" data-reveal-index="4"><img src="assets/images/AUG4759_bw.jpg" alt="Sharing a quiet moment together"></div>
 
-    <div class="border-cell middle-left"><img src="assets/images/AUG4849_bw.jpg" alt="Walking through the forest"></div>
+    <div class="border-cell middle-left" data-reveal-index="5"><img src="assets/images/AUG4849_bw.jpg" alt="Walking through the forest"></div>
+    <div class="border-cell middle-left-lower" data-reveal-index="6"><img src="assets/images/AUG4869_bw.jpg" alt="Dancing together"></div>
     <main class="content-card">
       <div class="card-shell" id="cardShell">
         <div class="countdown-wrapper" aria-live="polite">
           <p class="eyebrow">Celebration Countdown</p>
-          <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown at 10">10</div>
+          <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown starting">10</div>
           <p class="countdown-note">Counting down the final moments until the big day.</p>
         </div>
       </div>
     </main>
-    <div class="border-cell middle-right"><img src="assets/images/AUG4869_bw.jpg" alt="Dancing together"></div>
+    <div class="border-cell middle-right" data-reveal-index="7"><img src="assets/images/AUG5177_bw.jpg" alt="Laughing in the field"></div>
+    <div class="border-cell middle-right-lower" data-reveal-index="8"><img src="assets/images/AUG5181_bw.jpg" alt="A spin in the meadow"></div>
 
-    <div class="border-cell bottom-left"><img src="assets/images/AUG5106_bw.jpg" alt="Smiling under the trees"></div>
-    <div class="border-cell bottom-center"><img src="assets/images/AUG5127_bw.jpg" alt="Holding close"></div>
-    <div class="border-cell bottom-right"><img src="assets/images/AUG5139_bw.jpg" alt="Walking by the lake"></div>
+    <div class="border-cell bottom-left" data-reveal-index="9"><img src="assets/images/AUG5106_bw.jpg" alt="Smiling under the trees"></div>
+    <div class="border-cell bottom-left-center" data-reveal-index="10"><img src="assets/images/AUG5127_bw.jpg" alt="Holding close"></div>
+    <div class="border-cell bottom-right-center" data-reveal-index="11"><img src="assets/images/AUG5139_bw.jpg" alt="Walking by the lake"></div>
+    <div class="border-cell bottom-right" data-reveal-index="12"><img src="assets/images/AUG5201_bw.jpg" alt="Strolling along the shoreline"></div>
   </div>
   <script>
-    const borderCells = Array.from(document.querySelectorAll('.border-cell'));
-
-    borderCells.forEach((cell, index) => {
-      cell.style.setProperty('--border-cell-delay', `${index * 0.35}s`);
+    const borderCells = Array.from(document.querySelectorAll('.border-cell')).sort((first, second) => {
+      const firstIndex = Number(first.dataset.revealIndex) || 0;
+      const secondIndex = Number(second.dataset.revealIndex) || 0;
+      return firstIndex - secondIndex;
     });
 
-    requestAnimationFrame(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
       borderCells.forEach((cell) => {
-        cell.classList.add('is-ready');
+        cell.classList.add('is-visible');
       });
-    });
+    }
 
     const cardShell = document.getElementById('cardShell');
     const initialCountdownWrapper = cardShell?.querySelector('.countdown-wrapper');
     const countdownNumber = document.getElementById('countdownNumber');
     const countdownNote = initialCountdownWrapper?.querySelector('.countdown-note');
-    const countdownStart = 10;
+    const countdownStart = borderCells.length > 0 ? borderCells.length : 10;
     let currentValue = countdownStart;
+    let revealedCells = 0;
+
+    const revealNextBorderCell = () => {
+      if (prefersReducedMotion) {
+        return;
+      }
+
+      const nextCell = borderCells[revealedCells];
+      if (nextCell) {
+        nextCell.classList.add('is-visible');
+        revealedCells += 1;
+      }
+    };
 
     const showSaveTheDateDetails = () => {
       if (!cardShell) return;
@@ -124,6 +143,8 @@
 
     if (countdownNumber && initialCountdownWrapper) {
       countdownNumber.textContent = String(currentValue);
+      countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
+      revealNextBorderCell();
       const countdownInterval = window.setInterval(() => {
         currentValue -= 1;
         countdownNumber.classList.add('is-transitioning');
@@ -132,6 +153,7 @@
           countdownNumber.textContent = '0';
           countdownNumber.setAttribute('aria-label', 'Countdown finished');
           window.clearInterval(countdownInterval);
+          revealNextBorderCell();
           if (countdownNote) {
             countdownNote.textContent = "It's time to celebrate!";
           }
@@ -141,12 +163,13 @@
         } else {
           countdownNumber.textContent = String(currentValue);
           countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
+          revealNextBorderCell();
         }
 
         window.setTimeout(() => {
           countdownNumber.classList.remove('is-transitioning');
-        }, 200);
-      }, 1000);
+        }, 360);
+      }, 1100);
     } else {
       showCelebrationVideo();
     }
