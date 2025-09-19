@@ -218,6 +218,15 @@ body {
   content: none;
 }
 
+.countdown-wrapper.has-details {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1.5px solid rgba(12, 44, 29, 0.12);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  padding: clamp(32px, 5vw, 52px);
+  gap: clamp(14px, 4vw, 28px);
+  align-items: center;
+}
+
 .countdown-video-frame {
   width: 100%;
   max-width: 540px;
@@ -256,6 +265,77 @@ body {
   line-height: 1.6;
   font-size: clamp(1rem, 2.2vw, 1.3rem);
   color: var(--text-muted);
+}
+
+.save-date-title {
+  font-family: var(--countdown-font);
+  font-size: clamp(2.2rem, 7vw, 3.8rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dark);
+  margin: 0;
+  text-align: center;
+}
+
+.save-date-title span {
+  display: inline-block;
+  margin: 0 clamp(8px, 1.6vw, 14px);
+}
+
+.save-date-date {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.8vw, 1.4rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(12, 44, 29, 0.82);
+  text-align: center;
+}
+
+.save-date-countdown {
+  width: 100%;
+}
+
+.countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: clamp(12px, 3vw, 20px);
+}
+
+.countdown-segment {
+  background: rgba(12, 44, 29, 0.08);
+  border-radius: clamp(14px, 3vw, 20px);
+  padding: clamp(14px, 3.4vw, 22px) clamp(12px, 3vw, 18px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 14px 26px rgba(0, 0, 0, 0.14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.countdown-value {
+  font-family: var(--countdown-font);
+  font-size: clamp(2.2rem, 8vw, 3.4rem);
+  letter-spacing: 0.12em;
+  color: var(--text-dark);
+}
+
+.countdown-label {
+  margin-top: clamp(6px, 1.2vw, 10px);
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: clamp(0.62rem, 1.6vw, 0.78rem);
+  color: var(--text-muted);
+}
+
+.save-date-note {
+  max-width: 420px;
+  text-align: center;
+}
+
+.card-shell.is-details {
+  width: min(620px, 100%);
+  padding: clamp(28px, 5vw, 56px);
 }
 
 @media (prefers-reduced-motion: reduce) {
