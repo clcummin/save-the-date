@@ -72,7 +72,9 @@
 
       const title = document.createElement('h1');
       title.className = 'save-date-title';
-      title.innerHTML = 'Lorraine <span>&amp;</span> Christopher';
+      title.innerHTML = '<span class="save-date-name">Lorraine</span>' +
+        '<span class="save-date-amp">&amp;</span>' +
+        '<span class="save-date-name">Christopher</span>';
 
       const dateLine = document.createElement('p');
       dateLine.className = 'save-date-date';
@@ -198,6 +200,10 @@
       const videoFrame = document.createElement('div');
       videoFrame.className = 'countdown-video-frame';
 
+      const videoHashtag = document.createElement('p');
+      videoHashtag.className = 'video-hashtag';
+      videoHashtag.textContent = '#BECOMINGCUMMINGS';
+
       const celebrationVideo = document.createElement('video');
       celebrationVideo.className = 'countdown-video';
       celebrationVideo.src = 'assets/video.mp4';
@@ -214,6 +220,7 @@
       }, { once: true });
 
       videoFrame.appendChild(celebrationVideo);
+      countdownWrapper.appendChild(videoHashtag);
       countdownWrapper.appendChild(videoFrame);
 
       if (cardShell) {

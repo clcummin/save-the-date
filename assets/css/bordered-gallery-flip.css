@@ -247,6 +247,8 @@ body {
   letter-spacing: 0.1em;
   color: var(--text-dark);
   text-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  font-variant-numeric: tabular-nums;
+  margin-left: -0.12em;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
@@ -281,8 +283,18 @@ body {
 }
 
 .save-date-title span {
-  display: inline-block;
-  margin: 0 clamp(6px, 1.2vw, 12px);
+  display: block;
+  margin: 0;
+}
+
+.save-date-title .save-date-name {
+  letter-spacing: 0.18em;
+}
+
+.save-date-title .save-date-amp {
+  font-size: clamp(2.1rem, 7vw, 3.5rem);
+  letter-spacing: 0.38em;
+  margin-block: clamp(4px, 1vw, 10px);
 }
 
 .save-date-date {
@@ -308,12 +320,16 @@ body {
 
 .save-date-countdown {
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .countdown-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(88px, 1fr));
+  grid-template-columns: repeat(4, minmax(82px, 1fr));
   gap: clamp(10px, 2.5vw, 18px);
+  width: min(440px, 100%);
+  margin: 0 auto;
 }
 
 .countdown-segment {
@@ -346,11 +362,20 @@ body {
 .save-date-note {
   max-width: 420px;
   text-align: center;
+  font-size: clamp(0.82rem, 1.8vw, 0.98rem);
 }
 
 .card-shell.is-details {
   width: min(560px, 100%);
   padding: clamp(28px, 5vw, 56px);
+}
+
+.video-hashtag {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.36em;
+  font-size: clamp(0.62rem, 1.4vw, 0.78rem);
+  color: rgba(12, 44, 29, 0.68);
 }
 
 @media (prefers-reduced-motion: reduce) {
