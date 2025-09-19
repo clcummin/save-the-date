@@ -118,7 +118,6 @@ html, body {
   justify-content: center;
   height: 100%;
   max-height: 100%;
-  pointer-events: auto;
 }
 
 .intro-card-shell {
@@ -548,11 +547,18 @@ html, body {
 .intro-card-container {
   position: relative;
   z-index: 1;
-  opacity: 1;
+  pointer-events: none;
+  opacity: 0;
+  transform: perspective(1400px) rotateX(18deg) rotateY(-20deg) rotateZ(-4deg) scale(0.86);
+  transform-origin: center;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
 }
 
 .intro-card-container.visible {
+  pointer-events: auto;
   opacity: 1;
+  animation: card-reveal-spin 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .intro-card-container .flip-card {
@@ -561,6 +567,17 @@ html, body {
 
 .intro-card-container.visible .flip-card {
   animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-card-container {
+    transform: none;
+  }
+
+  .intro-card-container.visible {
+    animation: none !important;
+    opacity: 1;
+  }
 }
 
 .flip-card {
@@ -711,6 +728,21 @@ button.loading::after {
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
+@keyframes card-reveal-spin {
+  0% {
+    opacity: 0;
+    transform: perspective(1400px) rotateX(18deg) rotateY(-20deg) rotateZ(-6deg) scale(0.78);
+  }
+  55% {
+    opacity: 1;
+    transform: perspective(1400px) rotateX(-6deg) rotateY(8deg) rotateZ(3deg) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+  }
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
