@@ -22,9 +22,7 @@
     <main class="content-card">
       <div class="card-shell">
         <div class="countdown-wrapper" aria-live="polite">
-          <p class="eyebrow">Celebration Countdown</p>
           <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown at 10">10</div>
-          <p class="countdown-note">Counting down the final moments until the big day.</p>
         </div>
       </div>
     </main>
@@ -52,7 +50,6 @@
 
     const countdownNumber = document.getElementById('countdownNumber');
     const countdownStart = 10;
-    const countdownNote = document.querySelector('.countdown-note');
     let currentValue = countdownStart;
 
     if (countdownNumber) {
@@ -66,9 +63,6 @@
           countdownNumber.textContent = '1';
           countdownNumber.setAttribute('aria-label', 'Countdown finished');
           window.clearInterval(countdownInterval);
-          if (countdownNote) {
-            countdownNote.textContent = 'It\'s time to celebrate!';
-          }
         } else {
           countdownNumber.textContent = String(currentValue);
           countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);

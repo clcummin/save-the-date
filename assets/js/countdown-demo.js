@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
     audioCtx.resume().catch(() => {});
 
     let n = countdownStartValue;
-    numberEl.style.transition = 'opacity 0.45s ease, transform 0.7s var(--ease-med), font-size 0.7s var(--ease-med)';
+    numberEl.style.removeProperty('transition');
     updateNumber(n);
     applyScheduledReveal();
     playBeat();
