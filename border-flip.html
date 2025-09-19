@@ -103,6 +103,40 @@
       }
     }
 
+    const prefersReducedMotionQuery =
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia('(prefers-reduced-motion: reduce)')
+        : null;
+    let shouldReduceMotion = prefersReducedMotionQuery?.matches ?? false;
+
+    const updateMotionPreference = (event) => {
+      shouldReduceMotion = event.matches;
+    };
+
+    if (prefersReducedMotionQuery) {
+      if (typeof prefersReducedMotionQuery.addEventListener === 'function') {
+        prefersReducedMotionQuery.addEventListener('change', updateMotionPreference);
+      } else if (typeof prefersReducedMotionQuery.addListener === 'function') {
+        prefersReducedMotionQuery.addListener(updateMotionPreference);
+      }
+    }
+
+    const defaultSpinDurationMs = 2800;
+    const readSpinDuration = () => {
+      try {
+        const rootStyle = window.getComputedStyle(document.documentElement);
+        const rawValue = rootStyle?.getPropertyValue('--card-spin-duration');
+        const parsedSeconds = rawValue ? parseFloat(rawValue) : Number.NaN;
+        return Number.isFinite(parsedSeconds) ? parsedSeconds * 1000 : defaultSpinDurationMs;
+      } catch (error) {
+        return defaultSpinDurationMs;
+      }
+    };
+
+    let slowSpinDurationMs = readSpinDuration();
+    let slowSpinTimeoutId = null;
+    let hasRevealedDetails = false;
+
     const revealNextCells = (count = 1) => {
       for (let i = 0; i < count; i += 1) {
         if (revealIndex >= totalBorderCells) {
@@ -158,8 +192,14 @@
     }
 
     const showSaveTheDateDetails = () => {
-      if (!countdownWrapper) {
+      if (!countdownWrapper || hasRevealedDetails) {
         return;
+      }
+
+      hasRevealedDetails = true;
+      if (slowSpinTimeoutId !== null) {
+        window.clearTimeout(slowSpinTimeoutId);
+        slowSpinTimeoutId = null;
       }
 
       countdownWrapper.classList.remove('has-video');
@@ -193,7 +233,40 @@
       if (cardShell) {
         cardShell.classList.remove('is-video');
         cardShell.classList.add('is-details');
+        cardShell.classList.remove('is-revealing');
       }
+    };
+
+    const startSlowSpinReveal = () => {
+      if (hasRevealedDetails) {
+        return;
+      }
+
+      if (!cardShell || shouldReduceMotion) {
+        showSaveTheDateDetails();
+        return;
+      }
+
+      slowSpinDurationMs = readSpinDuration();
+      cardShell.classList.add('is-revealing');
+
+      if (slowSpinTimeoutId !== null) {
+        window.clearTimeout(slowSpinTimeoutId);
+      }
+
+      slowSpinTimeoutId = window.setTimeout(() => {
+        slowSpinTimeoutId = null;
+        showSaveTheDateDetails();
+      }, Math.max(0, Math.floor(slowSpinDurationMs * 0.5)));
+
+      const handleAnimationEnd = () => {
+        cardShell?.classList.remove('is-revealing');
+        if (!hasRevealedDetails) {
+          showSaveTheDateDetails();
+        }
+      };
+
+      cardShell.addEventListener('animationend', handleAnimationEnd, { once: true });
     };
 
     const showCelebrationVideo = () => {
@@ -227,12 +300,18 @@
         celebrationVideo.setAttribute('muted', '');
       }
 
-      celebrationVideo.addEventListener('ended', () => {
-        showSaveTheDateDetails();
-      });
-      celebrationVideo.addEventListener('error', () => {
-        showSaveTheDateDetails();
-      }, { once: true });
+      const handleVideoComplete = () => {
+        startSlowSpinReveal();
+      };
+
+      celebrationVideo.addEventListener('ended', handleVideoComplete, { once: true });
+      celebrationVideo.addEventListener(
+        'error',
+        () => {
+          handleVideoComplete();
+        },
+        { once: true }
+      );
 
       videoFrame.appendChild(celebrationVideo);
       countdownWrapper.appendChild(videoHashtag);
