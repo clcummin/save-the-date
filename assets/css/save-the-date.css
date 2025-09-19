@@ -44,6 +44,24 @@ html, body {
   overflow: hidden;
   z-index: 0;
 }
+.background-video .countdown-image-stack {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+.countdown-image-stack::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.18) 55%, rgba(0,0,0,0.42) 100%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.countdown-image-stack.is-active::after {
+  opacity: 1;
+}
 .background-video video {
   position: absolute;
   inset: 0;
@@ -51,6 +69,70 @@ html, body {
   height: 100%;
   object-fit: cover;
   transition: opacity var(--t-med) var(--ease-med);
+}
+.countdown-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(220px, 58vw, 540px);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  filter: drop-shadow(0 24px 50px rgba(0,0,0,0.38));
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+.countdown-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  background: rgba(0,0,0,0.18);
+  filter: blur(25px);
+  opacity: 0;
+  transform: translate3d(0,0,-1px);
+  transition: opacity 0.4s ease;
+}
+.countdown-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 28px;
+  object-fit: cover;
+  transform: translate(calc(var(--tx, 0px)), calc(var(--ty, 0px))) scale(1.22) rotate(var(--tilt-start, 0deg));
+  opacity: 0;
+}
+.countdown-image.active::before {
+  opacity: 1;
+}
+.countdown-image.active img {
+  animation: countdownHit var(--hit-duration, 0.6s) cubic-bezier(0.36, 0, 0.07, 1.03) forwards;
+}
+.countdown-image-stack.fade-out .countdown-image {
+  opacity: 0;
+  transition: opacity 0.8s ease, transform 0.9s ease;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+.countdown-image-stack.fade-out .countdown-image::before {
+  opacity: 0;
+}
+
+@keyframes countdownHit {
+  0% {
+    opacity: 0;
+    transform: translate(calc(var(--tx, 0px)), calc(var(--ty, 0px))) scale(1.18) rotate(var(--tilt-start, 0deg));
+  }
+  28% {
+    opacity: 1;
+    transform: translate(calc(var(--tx, 0px) * 0.35), calc(var(--ty, 0px) * 0.35)) scale(0.94) rotate(var(--tilt-start, 0deg));
+  }
+  52% {
+    opacity: 1;
+    transform: translate(calc(var(--tx, 0px) * 0.18), calc(var(--ty, 0px) * 0.18)) scale(1.02) rotate(var(--tilt-mid, 0deg));
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
 }
 
 .video-overlay {

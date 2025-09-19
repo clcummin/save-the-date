@@ -2,6 +2,47 @@ document.addEventListener('DOMContentLoaded', () => {
   const introCard = document.getElementById('introCard');
   const video = document.querySelector('.background-video video');
   const preCountdown = document.getElementById('preCountdown');
+  const countdownImagesContainer = document.getElementById('countdownImages');
+  const countdownImageSources = [
+    'assets/images/_AUG4670_bw.jpg',
+    'assets/images/_AUG4710_bw.jpg',
+    'assets/images/_AUG4726_bw.jpg',
+    'assets/images/_AUG4738_bw.jpg',
+    'assets/images/_AUG4759_bw.jpg',
+    'assets/images/_AUG5106_bw.jpg',
+    'assets/images/_AUG5127_bw.jpg',
+    'assets/images/_AUG5139_bw.jpg',
+    'assets/images/_AUG5177_bw.jpg',
+    'assets/images/_AUG5181_bw.jpg',
+    'assets/images/_AUG5201_bw.jpg',
+    'assets/images/_AUG5253_bw.jpg',
+    'assets/images/_AUG5279_bw.jpg',
+    'assets/images/_AUG5290_bw.jpg',
+    'assets/images/_AUG5306_bw.jpg',
+    'assets/images/_AUG5329_bw.jpg'
+  ];
+  const countdownFrames = [];
+  const randomBetween = (min, max) => Math.random() * (max - min) + min;
+
+  if (countdownImagesContainer) {
+    countdownImageSources.forEach((src) => {
+      const frame = document.createElement('div');
+      frame.className = 'countdown-image';
+      frame.style.setProperty('--tx', `${randomBetween(-38, 38).toFixed(2)}px`);
+      frame.style.setProperty('--ty', `${randomBetween(-48, 48).toFixed(2)}px`);
+      const tilt = randomBetween(-7, 7);
+      frame.style.setProperty('--tilt-start', `${tilt.toFixed(2)}deg`);
+      frame.style.setProperty('--tilt-mid', `${(tilt * 0.35).toFixed(2)}deg`);
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = 'Lorraine and Christopher';
+      img.loading = 'eager';
+      img.decoding = 'async';
+      frame.appendChild(img);
+      countdownImagesContainer.appendChild(frame);
+      countdownFrames.push(frame);
+    });
+  }
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const playBeat = () => {
     const ctx = audioCtx;
@@ -34,6 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
       preCountdown.classList.remove('start-prompt');
       preCountdown.removeEventListener('click', start);
 
+      if (countdownImagesContainer) {
+        countdownImagesContainer.classList.remove('fade-out');
+        countdownImagesContainer.classList.add('is-active');
+      }
+
       // Prime video playback within a user gesture so it can later play with sound
       video.muted = true;
       const prime = video.play();
@@ -53,6 +99,25 @@ document.addEventListener('DOMContentLoaded', () => {
       preCountdown.style.fontSize = `${(11 - n) * (11 - n) * base}rem`;
       playBeat();
 
+      let hitIndex = 0;
+      const revealNextImage = (delay = 0) => {
+        if (!countdownImagesContainer) return;
+        if (hitIndex >= countdownFrames.length) return;
+        const frame = countdownFrames[hitIndex];
+        const progress = countdownFrames.length > 1 ? hitIndex / (countdownFrames.length - 1) : 1;
+        const duration = Math.max(0.24, 0.88 - progress * 0.46);
+        frame.style.setProperty('--hit-duration', `${duration.toFixed(2)}s`);
+        const activate = () => frame.classList.add('active');
+        if (delay) {
+          setTimeout(() => requestAnimationFrame(activate), delay);
+        } else {
+          requestAnimationFrame(activate);
+        }
+        hitIndex += 1;
+      };
+
+      revealNextImage();
+
       // Enable transition after initial size is applied so first number doesn't animate
       requestAnimationFrame(() => {
         preCountdown.style.transition = 'font-size 0.7s var(--ease-med)';
@@ -63,10 +128,25 @@ document.addEventListener('DOMContentLoaded', () => {
         preCountdown.textContent = n;
         preCountdown.style.fontSize = `${(11 - n) * (11 - n) * base}rem`;
         playBeat();
+        revealNextImage();
+        if (n <= 4) {
+          revealNextImage(240 - (n * 30));
+        }
+        if (n <= 2) {
+          revealNextImage(160);
+        }
         if (n <= 1) {
           clearInterval(timer);
           setTimeout(() => {
             preCountdown.classList.add('hidden');
+            if (countdownImagesContainer) {
+              countdownImagesContainer.classList.remove('is-active');
+              countdownImagesContainer.classList.add('fade-out');
+              setTimeout(() => {
+                countdownImagesContainer.classList.remove('fade-out');
+                countdownFrames.forEach((frame) => frame.classList.remove('active'));
+              }, 1200);
+            }
             video.muted = false;
             video.volume = 1.0;
             video.play();
