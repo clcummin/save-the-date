@@ -113,9 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const base = measureSquare();
     const minSize = base * 0.34;
     const maxSize = base * 0.74;
-    const progress = (10 - val) / 9;
-    const next = minSize + (maxSize - minSize) * Math.max(0, Math.min(1, progress));
-    return `${Math.max(56, Math.min(next, maxSize))}px`;
+    const progress = Math.max(0, Math.min(1, (11 - val) / 11));
+    const eased = progress * progress;
+    const next = minSize + (maxSize - minSize) * eased;
+    return `${Math.max(minSize, Math.min(next, maxSize))}px`;
   };
 
   const totalImages = imageElements.length;
@@ -137,6 +138,23 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       currentImage = nextIndex;
     }
+  };
+
+  const revealForNumber = (value) => {
+    const remainingImages = totalImages - (currentImage + 1);
+    if (remainingImages <= 0) return;
+    const remainingSteps = Math.max(1, value + 1);
+    const toReveal = Math.max(1, Math.ceil(remainingImages / remainingSteps));
+    revealNextImages(toReveal);
+  };
+
+  const updateNumber = (value) => {
+    const clamped = Math.max(0, value);
+    numberEl.classList.remove('is-visible');
+    void numberEl.offsetWidth;
+    numberEl.textContent = clamped;
+    numberEl.style.fontSize = sizeFor(clamped);
+    numberEl.classList.add('is-visible');
   };
 
   let countdownTimer = () => {};
@@ -189,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     requestAnimationFrame(() => {
       startOverlay.classList.add('hidden');
+      startOverlay.textContent = '';
     });
 
     audioCtx.resume().catch(() => {});
@@ -207,34 +226,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let n = 10;
-    numberEl.textContent = n;
-    numberEl.style.fontSize = sizeFor(n);
-    numberEl.style.opacity = '1';
-
-    revealNextImages(1);
+    numberEl.style.transition = 'opacity 0.45s ease, transform 0.7s var(--ease-med), font-size 0.7s var(--ease-med)';
+    updateNumber(n);
+    revealForNumber(n);
     playBeat();
-
-    requestAnimationFrame(() => {
-      numberEl.style.transition = 'opacity 0.6s ease, font-size 0.7s var(--ease-med)';
-      numberEl.style.fontSize = sizeFor(n);
-    });
 
     intervalId = setInterval(() => {
       n -= 1;
       if (n < 0) n = 0;
-      numberEl.textContent = n;
-      numberEl.style.fontSize = sizeFor(n);
+      updateNumber(n);
       playBeat();
 
-      let reveals = 1;
-      if (n <= 4) reveals += 1;
-      if (n <= 2) reveals += 1;
-      revealNextImages(reveals);
+      revealForNumber(n);
 
       if (n <= 1) {
-        revealNextImages(totalImages);
         clearInterval(intervalId);
-        setTimeout(finishCountdown, 650);
+        setTimeout(() => {
+          revealForNumber(0);
+          finishCountdown();
+        }, 650);
       }
     }, 1000);
   };
