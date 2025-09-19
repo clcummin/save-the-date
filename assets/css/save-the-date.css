@@ -81,6 +81,9 @@ html, body {
   transform-origin: center;
   will-change: transform, opacity;
 }
+.countdown-image.active {
+  opacity: 1;
+}
 .countdown-image::before {
   content: '';
   position: absolute;
