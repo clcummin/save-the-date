@@ -21,26 +21,10 @@
 
     <main class="content-card">
       <div class="card-shell">
-        <div class="flip-card" id="flipCard" aria-live="polite">
-          <div class="flip-inner">
-            <div class="flip-face flip-front" tabindex="-1">
-              <p class="eyebrow">Save The Date</p>
-              <h1 class="wedding-names">Emma &amp; Liam</h1>
-              <p class="date">June 21, 2025 &middot; Asheville, NC</p>
-              <p class="description">Tap to reveal the weekend itinerary and travel notes. We can&rsquo;t wait to celebrate with you.</p>
-              <button class="flip-action" type="button" aria-controls="flipCard" aria-label="Show celebration details" aria-expanded="false">View Details</button>
-            </div>
-            <div class="flip-face flip-back" aria-hidden="true" tabindex="-1">
-              <h2>Ceremony Weekend</h2>
-              <ul>
-                <li><strong>Friday:</strong> Welcome gathering at The Greenhouse, 6 PM.</li>
-                <li><strong>Saturday:</strong> Ceremony at Black Balsam Knoll, 4 PM.</li>
-                <li><strong>Sunday:</strong> Farewell brunch downtown, 10 AM.</li>
-              </ul>
-              <p class="travel-note">Flights into AVL airport are easiest. A shuttle schedule will be shared in spring.</p>
-              <button class="flip-action" type="button" aria-controls="flipCard" aria-label="Return to invitation front" aria-expanded="false">Back</button>
-            </div>
-          </div>
+        <div class="countdown-wrapper" aria-live="polite">
+          <p class="eyebrow">Celebration Countdown</p>
+          <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown at 10">10</div>
+          <p class="countdown-note">Counting down the final moments until the big day.</p>
         </div>
       </div>
     </main>
@@ -57,7 +41,7 @@
   <script>
     const borderCells = Array.from(document.querySelectorAll('.border-cell'));
     borderCells.forEach((cell, index) => {
-      cell.style.setProperty('--border-cell-delay', `${index * 0.18}s`);
+      cell.style.setProperty('--border-cell-delay', `${index * 0.35}s`);
     });
 
     requestAnimationFrame(() => {
@@ -66,56 +50,35 @@
       });
     });
 
-    const flipCard = document.getElementById('flipCard');
-    const actionButtons = flipCard ? Array.from(flipCard.querySelectorAll('.flip-action')) : [];
-    const [frontButton, backButton] = actionButtons;
-    const frontFace = flipCard?.querySelector('.flip-front');
-    const backFace = flipCard?.querySelector('.flip-back');
+    const countdownNumber = document.getElementById('countdownNumber');
+    const countdownStart = 10;
+    const countdownNote = document.querySelector('.countdown-note');
+    let currentValue = countdownStart;
 
-    frontFace?.setAttribute('aria-hidden', 'false');
-    backFace?.setAttribute('aria-hidden', 'true');
-    frontButton?.setAttribute('aria-expanded', 'false');
-    backButton?.setAttribute('aria-expanded', 'false');
+    if (countdownNumber) {
+      countdownNumber.textContent = String(currentValue);
 
-    const setButtonState = (isExpanded) => {
-      frontButton?.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
-      backButton?.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
-    };
+      const countdownInterval = window.setInterval(() => {
+        currentValue -= 1;
+        countdownNumber.classList.add('is-transitioning');
 
-    const toggleFlip = (event) => {
-      if (!flipCard) return;
-      event?.stopPropagation();
-      const shouldFlip = !flipCard.classList.contains('flipped');
-      flipCard.classList.toggle('flipped', shouldFlip);
-      const isFlipped = flipCard.classList.contains('flipped');
-      frontFace?.setAttribute('aria-hidden', isFlipped ? 'true' : 'false');
-      backFace?.setAttribute('aria-hidden', isFlipped ? 'false' : 'true');
-      setButtonState(isFlipped);
-      const focusTarget = isFlipped ? backFace : frontButton || frontFace;
-      focusTarget?.focus({ preventScroll: true });
-    };
+        if (currentValue <= 1) {
+          countdownNumber.textContent = '1';
+          countdownNumber.setAttribute('aria-label', 'Countdown finished');
+          window.clearInterval(countdownInterval);
+          if (countdownNote) {
+            countdownNote.textContent = 'It\'s time to celebrate!';
+          }
+        } else {
+          countdownNumber.textContent = String(currentValue);
+          countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
+        }
 
-    actionButtons.forEach((button) => {
-      button.addEventListener('click', toggleFlip);
-    });
-
-    flipCard?.addEventListener('click', (event) => {
-      if (event.target instanceof HTMLButtonElement) {
-        return;
-      }
-      const target = event.target instanceof HTMLElement ? event.target : null;
-      const isFrontFace = target?.closest('.flip-front');
-      if (!flipCard.classList.contains('flipped') && isFrontFace) {
-        toggleFlip(event);
-      }
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && flipCard?.classList.contains('flipped')) {
-        event.preventDefault();
-        toggleFlip(event);
-      }
-    });
+        window.setTimeout(() => {
+          countdownNumber.classList.remove('is-transitioning');
+        }, 200);
+      }, 1000);
+    }
   </script>
 </body>
 </html>

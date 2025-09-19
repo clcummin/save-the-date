@@ -7,6 +7,7 @@
   --accent: #ffe3a2;
   --card-radius: clamp(24px, 4vw, 40px);
   --transition: 0.35s ease;
+  --countdown-font: 'Cinzel Decorative', serif;
 }
 
 * {
@@ -56,7 +57,7 @@ body {
 
 .border-cell.is-ready {
   opacity: 0;
-  animation: border-cell-in 0.85s ease forwards;
+  animation: border-cell-in 1.6s ease-out forwards;
   animation-delay: var(--border-cell-delay, 0s);
 }
 
@@ -175,49 +176,6 @@ body {
   pointer-events: none;
 }
 
-.flip-card {
-  width: 100%;
-  height: 100%;
-  perspective: 1200px;
-}
-
-.flip-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.6s ease;
-  transform-style: preserve-3d;
-}
-
-.flip-card.flipped .flip-inner {
-  transform: rotateY(180deg);
-}
-
-.flip-face {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.94);
-  border-radius: clamp(18px, 3vw, 30px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
-  border: 1.5px solid rgba(12, 44, 29, 0.12);
-  padding: clamp(24px, 4vw, 44px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  backface-visibility: hidden;
-}
-
-.flip-front {
-  background: rgba(255, 255, 255, 0.94);
-}
-
-.flip-back {
-  background: rgba(255, 255, 255, 0.92);
-  transform: rotateY(180deg);
-}
-
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.35em;
@@ -226,66 +184,41 @@ body {
   margin-bottom: clamp(10px, 1.4vw, 16px);
 }
 
-.wedding-names {
-  font-family: 'Cinzel Decorative', serif;
-  font-size: clamp(2.4rem, 5vw, 3.6rem);
-  letter-spacing: 0.06em;
-  margin: 0 0 clamp(12px, 2vw, 20px);
+.countdown-wrapper {
+  position: relative;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: clamp(18px, 3vw, 30px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  border: 1.5px solid rgba(12, 44, 29, 0.12);
+  padding: clamp(28px, 5vw, 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: clamp(18px, 4vw, 32px);
+}
+
+.countdown-number {
+  font-family: var(--countdown-font);
+  font-size: clamp(3.2rem, 10vw, 6rem);
+  letter-spacing: 0.12em;
   color: var(--text-dark);
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
-.date {
-  font-size: clamp(1rem, 2vw, 1.3rem);
-  color: var(--text-muted);
-  margin-bottom: clamp(18px, 2vw, 28px);
+.countdown-number.is-transitioning {
+  opacity: 0.6;
+  transform: scale(0.9);
 }
 
-.description,
-.travel-note {
-  margin: 0 0 clamp(18px, 3vw, 28px);
+.countdown-note {
+  margin: 0;
   line-height: 1.6;
-  font-size: clamp(0.95rem, 2vw, 1.1rem);
-}
-
-.flip-back h2 {
-  font-family: 'Cinzel Decorative', serif;
-  font-size: clamp(1.4rem, 3vw, 2rem);
-  margin-bottom: clamp(14px, 2vw, 22px);
-  color: var(--text-dark);
-}
-
-.flip-back ul {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 clamp(18px, 3vw, 26px);
-  width: 100%;
-  color: var(--text-dark);
-  text-align: left;
-  line-height: 1.5;
-}
-
-.flip-back li + li {
-  margin-top: clamp(10px, 2vw, 16px);
-}
-
-.flip-action {
-  border: none;
-  background: var(--text-dark);
-  color: var(--cream);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: clamp(12px, 2.5vw, 16px) clamp(22px, 5vw, 30px);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition), transform var(--transition);
-}
-
-.flip-action:hover,
-.flip-action:focus-visible {
-  background: var(--accent);
-  color: var(--text-dark);
-  transform: translateY(-2px);
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  color: var(--text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
