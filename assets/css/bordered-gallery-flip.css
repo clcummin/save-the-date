@@ -7,6 +7,7 @@
   --accent: #ffe3a2;
   --card-radius: clamp(24px, 4vw, 40px);
   --transition: 0.35s ease;
+  --card-spin-duration: 2.8s;
   --countdown-font: 'Cinzel Decorative', serif;
 }
 
@@ -151,6 +152,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 2;
+  perspective: 1400px;
 }
 
 .card-shell {
@@ -166,10 +168,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  transform-style: preserve-3d;
 }
 
 .border-cell {
   z-index: 1;
+}
+
+.card-shell.is-revealing {
+  animation: slow-spin-reveal var(--card-spin-duration, 2.8s) ease-in-out forwards;
+  will-change: transform;
+  pointer-events: none;
 }
 
 .card-shell.is-video {
@@ -210,6 +219,8 @@ body {
   gap: clamp(14px, 3.2vw, 26px);
   width: 100%;
   max-width: min(520px, 100%);
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 .countdown-wrapper.has-video {
@@ -235,6 +246,7 @@ body {
   justify-content: flex-start;
   padding-top: clamp(24px, 4.2vw, 44px);
   max-width: min(520px, 100%);
+  animation: details-reveal 1s ease forwards;
 }
 
 .countdown-video-frame {
@@ -396,6 +408,46 @@ body {
   letter-spacing: 0.36em;
   font-size: clamp(0.62rem, 1.4vw, 0.78rem);
   color: rgba(12, 44, 29, 0.68);
+}
+
+@keyframes slow-spin-reveal {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+
+  45% {
+    transform: rotateY(92deg) scale(0.94);
+  }
+
+  55% {
+    transform: rotateY(92deg) scale(0.94);
+  }
+
+  100% {
+    transform: rotateY(0deg) scale(1);
+  }
+}
+
+@keyframes details-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-shell.is-revealing {
+    animation: none;
+  }
+
+  .countdown-wrapper.has-details {
+    animation: none;
+  }
 }
 
 .countdown-overlay {
