@@ -182,6 +182,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let intervalId = null;
 
+  const waitForAnimations = (target) => {
+    if (!target || typeof target.getAnimations !== 'function') {
+      return Promise.resolve();
+    }
+
+    const activeAnimations = target
+      .getAnimations({ subtree: true })
+      .filter((animation) => animation.playState !== 'finished');
+
+    if (!activeAnimations.length) {
+      return Promise.resolve();
+    }
+
+    return Promise.all(
+      activeAnimations.map((animation) => animation.finished.catch(() => {}))
+    );
+  };
+
   const loadVideoElement = () =>
     new Promise((resolve) => {
       if (!videoWrapper) {
@@ -209,6 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
       videoEl.setAttribute('playsinline', '');
       videoEl.setAttribute('aria-hidden', 'true');
       videoEl.tabIndex = -1;
+      videoEl.style.width = '100%';
+      videoEl.style.height = '100%';
+      videoEl.style.display = 'block';
+      videoEl.style.objectFit = 'cover';
 
       const posterUrl = videoWrapper.dataset.videoPoster;
       if (posterUrl) {
@@ -315,9 +337,15 @@ document.addEventListener('DOMContentLoaded', () => {
   startOverlay.setAttribute('aria-label', 'Start countdown');
 
   countdownComplete
-    .then(() => loadVideoElement())
+    .then(() => {
+      const loadPromise = loadVideoElement();
+      return waitForAnimations(layout).then(() => loadPromise);
+    })
     .then((loadedVideo) => {
       square.classList.add('show-video');
+      return waitForAnimations(square).then(() => loadedVideo);
+    })
+    .then((loadedVideo) => {
       if (loadedVideo) {
         loadedVideo.muted = false;
         loadedVideo.currentTime = 0;
