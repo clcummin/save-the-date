@@ -600,12 +600,69 @@ body {
   }
 }
 
-@media (max-width: 520px) {
-  .page-border {
-    grid-template-columns: minmax(56px, 28vw) minmax(56px, 28vw) 1fr minmax(56px, 28vw);
-    grid-template-rows: minmax(56px, 26vh) minmax(56px, 26vh) 1fr minmax(56px, 26vh);
+@media (max-width: 640px) {
+  body {
+    display: block;
+    overflow-y: auto;
   }
 
+  .page-border {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: minmax(140px, 32vh);
+    grid-template-areas: none;
+    height: auto;
+    min-height: 100vh;
+    padding: clamp(16px, 8vw, 32px);
+    gap: clamp(12px, 6vw, 24px);
+    align-content: start;
+  }
+
+  .page-border > * {
+    grid-area: auto !important;
+  }
+
+  .content-card {
+    grid-column: 1 / -1;
+    padding: clamp(16px, 6vw, 30px);
+    margin: 0;
+  }
+
+  .card-shell {
+    width: 100%;
+    min-height: clamp(280px, 70vh, 480px);
+    padding: clamp(20px, 7vw, 34px);
+  }
+
+  .card-shell.is-video {
+    width: 100%;
+  }
+
+  .countdown-wrapper {
+    padding: clamp(22px, 7vw, 36px);
+    gap: clamp(16px, 6vw, 28px);
+  }
+
+  .countdown-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(10px, 4vw, 18px);
+  }
+
+  .countdown-overlay {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .countdown-overlay-button {
+    width: min(260px, 80%);
+  }
+
+  .border-cell {
+    border-radius: clamp(16px, 8vw, 24px);
+  }
+}
+
+@media (max-width: 520px) {
   .card-shell::before {
     inset: clamp(10px, 3vw, 18px);
   }
@@ -620,8 +677,8 @@ body {
   }
 
   .countdown-grid {
-    grid-template-columns: repeat(4, minmax(64px, 1fr));
-    gap: clamp(8px, 3.6vw, 14px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(10px, 4vw, 18px);
   }
 
   .save-date-title {
