@@ -84,10 +84,34 @@ document.addEventListener('DOMContentLoaded', () => {
     osc.stop(now + 0.3);
   };
 
-  if (video) {
-    video.addEventListener('ended', () => {
-      introCard?.classList.add('visible');
+  const revealIntroCard = () => {
+    if (!introCard) return;
+    requestAnimationFrame(() => {
+      introCard.classList.add('visible');
     });
+  };
+
+  if (video && introCard) {
+    introCard.classList.remove('visible');
+    const showAfterVideo = () => {
+      revealIntroCard();
+    };
+    const fallbackDelay = Number.isFinite(video.duration) && video.duration > 0
+      ? Math.ceil(video.duration * 1000) + 2000
+      : 60000;
+    const fallbackTimer = window.setTimeout(showAfterVideo, fallbackDelay);
+    const handleAndClear = () => {
+      window.clearTimeout(fallbackTimer);
+      showAfterVideo();
+    };
+    ['ended', 'error', 'abort'].forEach((eventName) => {
+      video.addEventListener(eventName, handleAndClear, { once: true });
+    });
+    if (video.ended) {
+      handleAndClear();
+    }
+  } else if (introCard && !introCard.classList.contains('visible')) {
+    revealIntroCard();
   }
 
   if (preCountdown && video) {
