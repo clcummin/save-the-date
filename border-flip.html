@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Framed Memories Flip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/bordered-gallery-flip.css">
+</head>
+<body>
+  <div class="page-border">
+    <div class="border-cell top-left"><img src="assets/images/AUG4710_bw.jpg" alt="Couple laughing together"></div>
+    <div class="border-cell top-left-center"><img src="assets/images/AUG4726_bw.jpg" alt="Holding hands"></div>
+    <div class="border-cell top-right-center"><img src="assets/images/AUG4738_bw.jpg" alt="Looking at each other"></div>
+    <div class="border-cell top-right"><img src="assets/images/AUG4759_bw.jpg" alt="Walking through a meadow"></div>
+
+    <div class="border-cell mid-left-upper"><img src="assets/images/AUG4849_bw.jpg" alt="Strolling through the forest"></div>
+    <div class="border-cell mid-right-upper"><img src="assets/images/AUG4869_bw.jpg" alt="Dancing together"></div>
+
+    <main class="content-card">
+      <div class="card-shell">
+        <div class="flip-card" id="flipCard" aria-live="polite">
+          <div class="flip-inner">
+            <div class="flip-face flip-front" tabindex="-1">
+              <p class="eyebrow">Save The Date</p>
+              <h1 class="wedding-names">Emma &amp; Liam</h1>
+              <p class="date">June 21, 2025 &middot; Asheville, NC</p>
+              <p class="description">Tap to reveal the weekend itinerary and travel notes. We can&rsquo;t wait to celebrate with you.</p>
+              <button class="flip-action" type="button" aria-controls="flipCard" aria-label="Show celebration details" aria-expanded="false">View Details</button>
+            </div>
+            <div class="flip-face flip-back" aria-hidden="true" tabindex="-1">
+              <h2>Ceremony Weekend</h2>
+              <ul>
+                <li><strong>Friday:</strong> Welcome gathering at The Greenhouse, 6 PM.</li>
+                <li><strong>Saturday:</strong> Ceremony at Black Balsam Knoll, 4 PM.</li>
+                <li><strong>Sunday:</strong> Farewell brunch downtown, 10 AM.</li>
+              </ul>
+              <p class="travel-note">Flights into AVL airport are easiest. A shuttle schedule will be shared in spring.</p>
+              <button class="flip-action" type="button" aria-controls="flipCard" aria-label="Return to invitation front" aria-expanded="false">Back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="border-cell mid-left-lower"><img src="assets/images/AUG5177_bw.jpg" alt="Sharing a quiet moment"></div>
+    <div class="border-cell mid-right-lower"><img src="assets/images/AUG5201_bw.jpg" alt="Couple embracing"></div>
+
+    <div class="border-cell bottom-left"><img src="assets/images/AUG5253_bw.jpg" alt="Walking hand in hand"></div>
+    <div class="border-cell bottom-left-center"><img src="assets/images/AUG5279_bw.jpg" alt="Smiling together"></div>
+    <div class="border-cell bottom-right-center"><img src="assets/images/AUG5290_bw.jpg" alt="Dancing under string lights"></div>
+    <div class="border-cell bottom-right"><img src="assets/images/AUG5306_bw.jpg" alt="Laughing near the lake"></div>
+  </div>
+
+  <script>
+    const flipCard = document.getElementById('flipCard');
+    const actionButtons = flipCard ? Array.from(flipCard.querySelectorAll('.flip-action')) : [];
+    const [frontButton, backButton] = actionButtons;
+    const frontFace = flipCard?.querySelector('.flip-front');
+    const backFace = flipCard?.querySelector('.flip-back');
+
+    frontFace?.setAttribute('aria-hidden', 'false');
+    backFace?.setAttribute('aria-hidden', 'true');
+    frontButton?.setAttribute('aria-expanded', 'false');
+    backButton?.setAttribute('aria-expanded', 'false');
+
+    const setButtonState = (isExpanded) => {
+      frontButton?.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+      backButton?.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+    };
+
+    const toggleFlip = (event) => {
+      if (!flipCard) return;
+      event?.stopPropagation();
+      const shouldFlip = !flipCard.classList.contains('flipped');
+      flipCard.classList.toggle('flipped', shouldFlip);
+      const isFlipped = flipCard.classList.contains('flipped');
+      frontFace?.setAttribute('aria-hidden', isFlipped ? 'true' : 'false');
+      backFace?.setAttribute('aria-hidden', isFlipped ? 'false' : 'true');
+      setButtonState(isFlipped);
+      const focusTarget = isFlipped ? backFace : frontButton || frontFace;
+      focusTarget?.focus({ preventScroll: true });
+    };
+
+    actionButtons.forEach((button) => {
+      button.addEventListener('click', toggleFlip);
+    });
+
+    flipCard?.addEventListener('click', (event) => {
+      if (event.target instanceof HTMLButtonElement) {
+        return;
+      }
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      const isFrontFace = target?.closest('.flip-front');
+      if (!flipCard.classList.contains('flipped') && isFrontFace) {
+        toggleFlip(event);
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && flipCard?.classList.contains('flipped')) {
+        event.preventDefault();
+        toggleFlip(event);
+      }
+    });
+  </script>
+</body>
+</html>
