@@ -778,3 +778,156 @@ button.loading::after {
   text-align: center;
   line-height: 1.4;
 }
+
+@media (max-width: 900px) {
+  html,
+  body {
+    height: auto;
+    min-height: 100%;
+  }
+
+  body {
+    display: block;
+    overflow-y: auto;
+  }
+
+  body.no-scroll {
+    overflow: auto;
+  }
+
+  .gallery-stage {
+    height: auto;
+    min-height: 100vh;
+    padding: clamp(24px, 8vw, 60px) clamp(18px, 6vw, 48px);
+  }
+
+  .gallery-frame {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    width: min(640px, 100%);
+    margin: 0 auto;
+    height: auto;
+    padding: clamp(18px, 6vw, 40px);
+    gap: clamp(20px, 6vw, 36px);
+  }
+
+  .photo-grid {
+    display: none;
+  }
+
+  .intro-card-container {
+    grid-column: auto;
+    grid-row: auto;
+    height: auto;
+  }
+
+  .intro-card-shell {
+    min-height: clamp(320px, 70vh, 520px);
+    padding: clamp(26px, 8vw, 48px);
+  }
+
+  .flip-card {
+    max-width: none;
+  }
+
+  .wedding-names {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+    letter-spacing: 0.08em;
+  }
+
+  .wedding-date {
+    font-size: clamp(1rem, 4.6vw, 1.28rem);
+    letter-spacing: 0.12em;
+  }
+
+  .countdown-overlay {
+    position: fixed;
+  }
+
+  .thank-you-container {
+    position: relative;
+    padding: clamp(40px, 12vw, 80px) clamp(18px, 6vw, 48px);
+  }
+
+  .thank-you-card {
+    width: min(520px, 100%);
+  }
+}
+
+@media (max-width: 560px) {
+  .intro-card-shell {
+    padding: clamp(20px, 10vw, 40px);
+  }
+
+  .flip-front,
+  .flip-back {
+    padding: clamp(18px, 7vw, 36px);
+  }
+
+  .wedding-names {
+    font-size: clamp(1.8rem, 11vw, 2.4rem);
+  }
+
+  .wedding-date {
+    font-size: clamp(0.92rem, 4.8vw, 1.16rem);
+    text-align: center;
+  }
+
+  .flip-back p {
+    font-size: clamp(0.95rem, 4.6vw, 1.1rem);
+  }
+
+  .cant-attend-btn,
+  .intro-card-container button {
+    width: 100%;
+  }
+
+  .countdown-stage {
+    padding: clamp(32px, 12vw, 64px) clamp(18px, 6vw, 44px);
+  }
+
+  .countdown-shell {
+    width: min(100%, 520px);
+    border-radius: clamp(24px, 8vw, 42px);
+    padding: clamp(22px, 8vw, 42px);
+  }
+
+  .countdown-layout {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .countdown-overlay {
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .intro-card-shell {
+    border-radius: clamp(22px, 8vw, 32px);
+  }
+
+  .flip-card {
+    min-height: clamp(260px, 80vh, 420px);
+  }
+
+  .flip-front,
+  .flip-back {
+    gap: clamp(14px, 6vw, 24px);
+  }
+
+  .wedding-names {
+    letter-spacing: 0.06em;
+  }
+
+  .intro-card-container button {
+    font-size: clamp(0.94rem, 4.6vw, 1.04rem);
+  }
+
+  .thank-you-card {
+    padding: clamp(22px, 8vw, 32px);
+  }
+}
