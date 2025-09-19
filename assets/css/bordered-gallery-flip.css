@@ -256,7 +256,8 @@ body {
   color: var(--emerald-mid);
   text-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
   font-variant-numeric: tabular-nums;
-  margin-left: -0.12em;
+  margin-left: 0;
+  text-align: center;
   transition: transform 0.4s ease;
 }
 
