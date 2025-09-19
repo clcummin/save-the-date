@@ -38,9 +38,6 @@ html, body {
 }
 
 .countdown-stage {
-  --shell-width: min(78vw, 640px);
-  --shell-height: calc(var(--shell-width) * 0.5625);
-  --stack-scale: 1.4;
   position: relative;
   display: flex;
   align-items: center;
@@ -49,25 +46,87 @@ html, body {
   padding: clamp(32px, 8vw, 140px);
 }
 
-.countdown-shell {
+.countdown-layout {
   position: relative;
-  width: var(--shell-width);
-  max-width: 640px;
-  aspect-ratio: 16 / 9;
+  width: min(90vmin, 560px);
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: clamp(14px, 2.6vw, 28px);
+  align-items: center;
+  justify-items: center;
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  z-index: 1;
+}
+
+.countdown-layout.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.countdown-square {
+  grid-row: 2 / span 3;
+  grid-column: 2 / span 3;
+  position: relative;
+  width: min(58vmin, 360px);
+  aspect-ratio: 1;
   border-radius: clamp(18px, 3vw, 28px);
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.55);
+  background: radial-gradient(circle at 50% 35%, rgba(0,0,0,0.55), rgba(0,0,0,0.8));
   border: 1px solid rgba(255,255,255,0.28);
   box-shadow: 0 32px 60px rgba(0,0,0,0.36);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   z-index: 2;
+}
+
+.countdown-square::after {
+  content: '';
+  position: absolute;
+  inset: clamp(8px, 1.9vw, 20px);
+  border-radius: clamp(14px, 2.4vw, 24px);
+  border: 1px solid rgba(255,255,255,0.24);
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.countdown-number,
+#countdownDemo {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 22px 32px rgba(0,0,0,0.35);
+  position: relative;
+  z-index: 3;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.countdown-square.show-video .countdown-number,
+.countdown-square.show-video #countdownDemo {
+  opacity: 0;
+  transform: scale(0.85);
 }
 
 .countdown-video {
   position: absolute;
-  inset: 0;
-  background: #000;
+  inset: clamp(14px, 2.6vw, 30px);
+  border-radius: clamp(16px, 2.6vw, 24px);
+  overflow: hidden;
   opacity: 0;
-  transition: opacity var(--t-med) var(--ease-med);
+  background: #000;
+  box-shadow: inset 0 0 32px rgba(0,0,0,0.4);
+  transition: opacity 0.6s ease;
+  z-index: 1;
+}
+
+.countdown-square.show-video .countdown-video {
+  opacity: 1;
 }
 
 .countdown-video video {
@@ -77,44 +136,8 @@ html, body {
   object-fit: cover;
 }
 
-.countdown-display {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(16px, 4vw, 48px);
-  transition: opacity 0.6s ease;
-  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.32), rgba(0,0,0,0.58));
-}
-
-.countdown-shell.show-video .countdown-display {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.countdown-shell.show-video .countdown-video {
-  opacity: 1;
-}
-
-#countdownDemo {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  color: var(--white);
-  line-height: 1;
-  text-align: center;
-  text-shadow: 0 22px 32px rgba(0,0,0,0.35);
-}
-
 .countdown-stage .countdown-image-stack {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(calc(var(--shell-width) * var(--stack-scale)), 92vmin);
-  height: min(calc(var(--shell-width) * var(--stack-scale)), 92vmin);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 1;
+  display: contents;
 }
 
 .countdown-image-stack::after {
@@ -174,6 +197,25 @@ html, body {
 
 .countdown-image.active img {
   animation: countdownFrameReveal var(--hit-duration, 0.6s) cubic-bezier(0.36, 0, 0.2, 1) forwards;
+}
+
+.countdown-stage .countdown-image {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: scale(0.82) rotate(var(--tilt-start, 0deg));
+  justify-self: center;
+  align-self: center;
+  pointer-events: none;
+  width: clamp(112px, 18vmin, 168px);
+}
+
+.countdown-stage .countdown-image.active {
+  transform: scale(1) rotate(0deg);
+}
+
+.countdown-stage .countdown-image img {
+  transform: scale(1.08) rotate(var(--tilt-start, 0deg));
 }
 
 .countdown-image-stack.fade-out {

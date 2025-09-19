@@ -14,16 +14,17 @@
   <link rel="stylesheet" href="assets/css/save-the-date.css" />
 </head>
 <body class="no-scroll">
+  <div id="preCountdown" class="countdown-overlay start-prompt">Tap to Start</div>
   <div class="countdown-stage">
-    <div class="countdown-shell">
-      <div class="countdown-video">
-        <video autoplay muted loop playsinline poster="assets/video-fallback.jpg">
-          <source src="assets/video.mp4" type="video/mp4" />
-          <img src="assets/video-fallback.jpg" alt="Video fallback" style="width:100%;height:100%;object-fit:cover" />
-        </video>
-      </div>
-      <div class="countdown-display">
-        <div id="countdownDemo"></div>
+    <div class="countdown-layout" id="countdownLayout">
+      <div class="countdown-square" id="countdownSquare">
+        <div id="countdownDemo" class="countdown-number"></div>
+        <div class="countdown-video" aria-hidden="true">
+          <video muted loop playsinline preload="auto" poster="assets/video-fallback.jpg">
+            <source src="assets/video.mp4" type="video/mp4" />
+            <img src="assets/video-fallback.jpg" alt="Video fallback" style="width:100%;height:100%;object-fit:cover" />
+          </video>
+        </div>
       </div>
     </div>
   </div>
