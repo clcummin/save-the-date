@@ -159,9 +159,31 @@ html, body {
   padding: clamp(32px, 8vw, 140px);
 }
 
+.countdown-shell {
+  position: relative;
+  width: min(92vw, 820px);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: clamp(32px, 5vw, 52px);
+  padding: clamp(32px, 6vw, 72px);
+  box-shadow: 0 42px 90px rgba(0, 0, 0, 0.34);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-shell::after {
+  content: '';
+  position: absolute;
+  inset: clamp(10px, 2vw, 20px);
+  border-radius: clamp(26px, 4.2vw, 44px);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+}
+
 .countdown-layout {
   position: relative;
-  width: min(90vmin, 560px);
+  width: min(96vmin, 620px);
   aspect-ratio: 1;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -184,7 +206,7 @@ html, body {
   grid-row: 2 / span 3;
   grid-column: 2 / span 3;
   position: relative;
-  width: min(58vmin, 360px);
+  width: min(64vmin, 420px);
   aspect-ratio: 1;
   border-radius: clamp(18px, 3vw, 28px);
   background: radial-gradient(circle at 50% 35%, rgba(0,0,0,0.55), rgba(0,0,0,0.8));
@@ -239,9 +261,9 @@ html, body {
   transform: scale(0.84);
 }
 
-.countdown-video { 
+.countdown-video {
   position: absolute;
-  inset: clamp(14px, 2.6vw, 30px);
+  inset: clamp(12px, 2.2vw, 28px);
   border-radius: clamp(16px, 2.6vw, 24px);
   overflow: hidden;
   opacity: 0;
@@ -345,7 +367,7 @@ html, body {
   justify-self: center;
   align-self: center;
   pointer-events: none;
-  width: clamp(112px, 18vmin, 168px);
+  width: clamp(132px, 20vmin, 212px);
 }
 
 .countdown-stage .countdown-image.active {
