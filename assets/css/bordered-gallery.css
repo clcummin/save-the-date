@@ -157,6 +157,9 @@ body {
 
 .card-shell {
   position: relative;
+  grid-area: main;
+  align-self: center;
+  justify-self: center;
   width: min(560px, 100%);
   min-height: clamp(320px, 58vw, 520px);
   display: flex;
