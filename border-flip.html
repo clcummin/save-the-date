@@ -51,6 +51,7 @@
     });
 
     const countdownWrapper = document.querySelector('.countdown-wrapper');
+    const cardShell = countdownWrapper ? countdownWrapper.closest('.card-shell') : null;
     const countdownNumber = document.getElementById('countdownNumber');
     const countdownStart = 10;
     const countdownNote = document.querySelector('.countdown-note');
@@ -77,6 +78,10 @@
 
       videoFrame.appendChild(celebrationVideo);
       countdownWrapper.appendChild(videoFrame);
+
+      if (cardShell) {
+        cardShell.classList.add('is-video');
+      }
     };
 
     if (countdownNumber) {
