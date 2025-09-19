@@ -4,22 +4,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const preCountdown = document.getElementById('preCountdown');
   const countdownImagesContainer = document.getElementById('countdownImages');
   const countdownImageSources = [
-    'assets/images/_AUG4670_bw.jpg',
-    'assets/images/_AUG4710_bw.jpg',
-    'assets/images/_AUG4726_bw.jpg',
-    'assets/images/_AUG4738_bw.jpg',
-    'assets/images/_AUG4759_bw.jpg',
-    'assets/images/_AUG5106_bw.jpg',
-    'assets/images/_AUG5127_bw.jpg',
-    'assets/images/_AUG5139_bw.jpg',
-    'assets/images/_AUG5177_bw.jpg',
-    'assets/images/_AUG5181_bw.jpg',
-    'assets/images/_AUG5201_bw.jpg',
-    'assets/images/_AUG5253_bw.jpg',
-    'assets/images/_AUG5279_bw.jpg',
-    'assets/images/_AUG5290_bw.jpg',
-    'assets/images/_AUG5306_bw.jpg',
-    'assets/images/_AUG5329_bw.jpg'
+    'assets/images/AUG4670_bw.jpg',
+    'assets/images/AUG4710_bw.jpg',
+    'assets/images/AUG4726_bw.jpg',
+    'assets/images/AUG4738_bw.jpg',
+    'assets/images/AUG4759_bw.jpg',
+    'assets/images/AUG5106_bw.jpg',
+    'assets/images/AUG5127_bw.jpg',
+    'assets/images/AUG5139_bw.jpg',
+    'assets/images/AUG5177_bw.jpg',
+    'assets/images/AUG5181_bw.jpg',
+    'assets/images/AUG5201_bw.jpg',
+    'assets/images/AUG5253_bw.jpg',
+    'assets/images/AUG5279_bw.jpg',
+    'assets/images/AUG5290_bw.jpg',
+    'assets/images/AUG5306_bw.jpg',
+    'assets/images/AUG5329_bw.jpg'
   ];
   const countdownFrames = [];
   const randomBetween = (min, max) => Math.random() * (max - min) + min;
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const countdownEl = document.getElementById('countdown');
   if (countdownEl) {
-    const target = new Date('2026-09-12T00:00:00');
+    const target = new Date('2026-09-12T00:00:00-07:00');
     const interval = setInterval(() => {
       const diff = target - Date.now();
       if (diff <= 0) {
