@@ -53,12 +53,11 @@ body {
   overflow: hidden;
   isolation: isolate;
   border-radius: clamp(16px, 3vw, 28px);
+  opacity: 0;
 }
 
-.border-cell.is-ready {
-  opacity: 0;
-  animation: border-cell-in 1.6s ease-out forwards;
-  animation-delay: var(--border-cell-delay, 0s);
+.border-cell.is-visible {
+  animation: border-cell-in var(--border-cell-duration, 1.8s) ease-out forwards;
 }
 
 @keyframes border-cell-in {
@@ -396,10 +395,102 @@ body {
   color: rgba(12, 44, 29, 0.68);
 }
 
+.countdown-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(3, 40, 28, 0.9);
+  color: var(--cream);
+  z-index: 5;
+  font-family: var(--countdown-font);
+  font-size: clamp(2.6rem, 9vw, 6rem);
+  letter-spacing: 0.2em;
+  transition: opacity 0.6s ease;
+  overflow: hidden;
+}
+
+.countdown-overlay.start-prompt {
+  cursor: pointer;
+}
+
+.countdown-overlay:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 6px;
+}
+
+.countdown-overlay-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: clamp(48px, 14vh, 160px) clamp(24px, 12vw, 80px);
+  gap: clamp(24px, 8vh, 48px);
+  pointer-events: none;
+}
+
+.countdown-overlay-line {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
+.countdown-overlay-line--top {
+  align-self: flex-start;
+}
+
+.countdown-overlay-line--bottom {
+  align-self: flex-end;
+}
+
+.countdown-overlay::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(140px, 32vw, 360px);
+  height: clamp(140px, 32vw, 360px);
+  border-radius: clamp(18px, 3vw, 32px);
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.48);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.86);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.countdown-overlay.is-counting {
+  background: transparent;
+  pointer-events: none;
+}
+
+.countdown-overlay.is-counting::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.countdown-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 520px) {
+  .countdown-overlay-line {
+    font-size: clamp(2.2rem, 12vw, 4.4rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .border-cell.is-ready {
-    animation: none;
-    opacity: 1;
+  .border-cell {
+    animation: none !important;
+    opacity: 1 !important;
   }
 }
 
