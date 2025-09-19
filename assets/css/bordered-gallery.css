@@ -39,11 +39,11 @@ body {
     'middle-left-tall main main right-tall'
     'middle-left-tall main main right-tall'
     'bottom-left bottom-wide bottom-wide bottom-right';
-  gap: clamp(8px, 2vw, 18px);
+  gap: 0;
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  padding: clamp(18px, 4vw, 48px);
+  padding: 0;
 }
 
 .border-cell {
