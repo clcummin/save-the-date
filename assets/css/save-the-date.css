@@ -70,6 +70,12 @@ html, body {
   object-fit: cover;
   transition: opacity var(--t-med) var(--ease-med);
 }
+html.js .background-video video {
+  opacity: 0;
+}
+html.js .background-video video.is-visible {
+  opacity: 1;
+}
 .countdown-image {
   position: absolute;
   top: 50%;
@@ -80,6 +86,7 @@ html, body {
   filter: drop-shadow(0 24px 50px rgba(0,0,0,0.38));
   transform-origin: center;
   will-change: transform, opacity;
+  transition: opacity 0.4s ease;
 }
 .countdown-image.active {
   opacity: 1;
@@ -110,12 +117,20 @@ html, body {
 .countdown-image.active img {
   animation: countdownHit var(--hit-duration, 0.6s) cubic-bezier(0.36, 0, 0.07, 1.03) forwards;
 }
+.countdown-image-stack.fade-out {
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  pointer-events: none;
+}
 .countdown-image-stack.fade-out .countdown-image {
   opacity: 0;
   transition: opacity 0.8s ease, transform 0.9s ease;
   transform: translate(-50%, -50%) scale(1.05);
 }
 .countdown-image-stack.fade-out .countdown-image::before {
+  opacity: 0;
+}
+.countdown-image-stack.fade-out::after {
   opacity: 0;
 }
 
