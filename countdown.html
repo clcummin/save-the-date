@@ -14,15 +14,18 @@
   <link rel="stylesheet" href="assets/css/save-the-date.css" />
 </head>
 <body class="no-scroll">
-  <div class="background-video">
-    <video autoplay muted loop playsinline poster="assets/video-fallback.jpg">
-      <source src="assets/video.mp4" type="video/mp4" />
-      <img src="assets/video-fallback.jpg" alt="Video fallback" style="width:100%;height:100%;object-fit:cover" />
-    </video>
-  </div>
-  <div class="video-overlay"></div>
-  <div class="intro-card-container visible">
-    <div id="countdownDemo"></div>
+  <div class="countdown-stage">
+    <div class="countdown-shell">
+      <div class="countdown-video">
+        <video autoplay muted loop playsinline poster="assets/video-fallback.jpg">
+          <source src="assets/video.mp4" type="video/mp4" />
+          <img src="assets/video-fallback.jpg" alt="Video fallback" style="width:100%;height:100%;object-fit:cover" />
+        </video>
+      </div>
+      <div class="countdown-display">
+        <div id="countdownDemo"></div>
+      </div>
+    </div>
   </div>
   <script src="assets/js/countdown-demo.js"></script>
 </body>
