@@ -22,15 +22,38 @@ document.addEventListener('DOMContentLoaded', () => {
     'assets/images/AUG5329_bw.jpg'
   ];
   const countdownFrames = [];
+  const squareLayout = [
+    { row: 1, col: 1 },
+    { row: 1, col: 2 },
+    { row: 1, col: 3 },
+    { row: 1, col: 4 },
+    { row: 1, col: 5 },
+    { row: 2, col: 5 },
+    { row: 3, col: 5 },
+    { row: 4, col: 5 },
+    { row: 5, col: 5 },
+    { row: 5, col: 4 },
+    { row: 5, col: 3 },
+    { row: 5, col: 2 },
+    { row: 5, col: 1 },
+    { row: 4, col: 1 },
+    { row: 3, col: 1 },
+    { row: 2, col: 1 }
+  ];
   const randomBetween = (min, max) => Math.random() * (max - min) + min;
 
   if (countdownImagesContainer) {
-    countdownImageSources.forEach((src) => {
+    countdownImagesContainer.classList.add('countdown-grid');
+    const framesToUse = countdownImageSources.slice(0, squareLayout.length);
+    framesToUse.forEach((src, index) => {
       const frame = document.createElement('div');
       frame.className = 'countdown-image';
-      frame.style.setProperty('--tx', `${randomBetween(-38, 38).toFixed(2)}px`);
-      frame.style.setProperty('--ty', `${randomBetween(-48, 48).toFixed(2)}px`);
-      const tilt = randomBetween(-7, 7);
+      const layout = squareLayout[index];
+      if (layout) {
+        frame.style.gridRow = layout.row;
+        frame.style.gridColumn = layout.col;
+      }
+      const tilt = randomBetween(-5, 5);
       frame.style.setProperty('--tilt-start', `${tilt.toFixed(2)}deg`);
       frame.style.setProperty('--tilt-mid', `${(tilt * 0.35).toFixed(2)}deg`);
       const img = document.createElement('img');
@@ -73,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const start = () => {
       audioCtx.resume();
       preCountdown.classList.remove('start-prompt');
+      preCountdown.classList.add('is-counting');
       preCountdown.removeEventListener('click', start);
 
       if (countdownImagesContainer) {
@@ -140,15 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
           setTimeout(() => {
             preCountdown.classList.add('hidden');
             if (countdownImagesContainer) {
-              countdownImagesContainer.classList.remove('is-active');
-              countdownImagesContainer.classList.add('fade-out');
-              setTimeout(() => {
-                countdownImagesContainer.classList.remove('fade-out');
-                countdownFrames.forEach((frame) => frame.classList.remove('active'));
-              }, 1200);
+              countdownImagesContainer.classList.add('show-video');
             }
             video.muted = false;
             video.volume = 1.0;
+            video.classList.add('is-visible');
             video.play();
           }, 500);
         }
