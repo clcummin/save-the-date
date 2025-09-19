@@ -21,7 +21,6 @@
 
     <main class="content-card">
       <div class="card-shell">
-        <div class="countdown-wrapper" aria-live="polite">
           <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown at 10">10</div>
         </div>
       </div>
@@ -48,9 +47,44 @@
       });
     });
 
+    const countdownWrapper = document.querySelector('.countdown-wrapper');
     const countdownNumber = document.getElementById('countdownNumber');
     const countdownStart = 10;
     let currentValue = countdownStart;
+    let hasDisplayedVideos = false;
+
+    const showVideos = () => {
+      if (hasDisplayedVideos || !cardShell) {
+        return;
+      }
+
+      const sources = videoSources.length ? videoSources : fallbackVideos;
+
+      if (!sources.length) {
+        return;
+      }
+
+      const videoContainer = document.createElement('div');
+      videoContainer.className = 'video-gallery';
+
+      sources.forEach((src, index) => {
+        const videoWrapper = document.createElement('div');
+        videoWrapper.className = 'video-frame';
+
+        const video = document.createElement('video');
+        video.src = src;
+        video.controls = true;
+        video.preload = 'metadata';
+        video.playsInline = true;
+        video.setAttribute('aria-label', `Celebration video ${index + 1}`);
+
+        videoWrapper.appendChild(video);
+        videoContainer.appendChild(videoWrapper);
+      });
+
+      cardShell.replaceChildren(videoContainer);
+      hasDisplayedVideos = true;
+    };
 
     if (countdownNumber) {
       countdownNumber.textContent = String(currentValue);
@@ -59,8 +93,8 @@
         currentValue -= 1;
         countdownNumber.classList.add('is-transitioning');
 
-        if (currentValue <= 1) {
-          countdownNumber.textContent = '1';
+        if (currentValue <= 0) {
+          countdownNumber.textContent = '0';
           countdownNumber.setAttribute('aria-label', 'Countdown finished');
           window.clearInterval(countdownInterval);
         } else {
