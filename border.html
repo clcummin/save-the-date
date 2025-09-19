@@ -17,15 +17,12 @@
 
     <div class="border-cell middle-left"><img src="assets/images/AUG4849_bw.jpg" alt="Walking through the forest"></div>
     <main class="content-card">
-      <div class="content-inner">
-        <p class="eyebrow">Save The Date</p>
-        <h1>Emma &amp; Liam</h1>
-        <p class="date">June 21, 2025 &middot; Asheville, NC</p>
-        <p class="description">
-          Join us for a weekend of celebration surrounded by the beauty of the Blue Ridge Mountains.
-          We can&rsquo;t wait to share this moment with you.
-        </p>
-        <a class="cta" href="index.html">View Invitation</a>
+      <div class="card-shell" id="cardShell">
+        <div class="countdown-wrapper" aria-live="polite">
+          <p class="eyebrow">Celebration Countdown</p>
+          <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown at 10">10</div>
+          <p class="countdown-note">Counting down the final moments until the big day.</p>
+        </div>
       </div>
     </main>
     <div class="border-cell middle-right"><img src="assets/images/AUG4869_bw.jpg" alt="Dancing together"></div>
@@ -46,6 +43,195 @@
         cell.classList.add('is-ready');
       });
     });
+
+    const cardShell = document.getElementById('cardShell');
+    const countdownWrapper = cardShell?.querySelector('.countdown-wrapper');
+    const countdownNumber = document.getElementById('countdownNumber');
+    const countdownNote = countdownWrapper?.querySelector('.countdown-note');
+    const countdownStart = 10;
+    let currentValue = countdownStart;
+
+    const createFlipCardMarkup = () => {
+      return `
+        <div class="flip-card" aria-live="polite">
+          <div class="flip-inner">
+            <div class="flip-front">
+              <h1 class="wedding-names">Lorraine<br>&amp;<br>Christopher</h1>
+              <div class="wedding-date">September 12, 2026&nbsp;&bull;&nbsp;Portola, CA</div>
+              <div id="countdown" class="flip-countdown"></div>
+            </div>
+            <div class="flip-back">
+              <div id="backContent">
+                <p>Wedding details and site coming soon, please plan in advance. We will release room blocks in a few months. Out of towners should plan on a weekend trip. If you definitely cannot make it please inform Chris or Lorraine.</p><br>
+                <button id="showCantAttendForm" class="cant-attend-btn">Can't Attend</button>
+              </div>
+              <div id="cantAttendFormContainer" class="card-form-container" style="display:none;">
+                <form action="https://script.google.com/macros/s/AKfycbw1oW3-NLd95psh53-YJFoUoa80b1jeyw9oEXX0TWffxMEyauwYvn6aVOn0UJdZgZF2IQ/exec" method="post">
+                  <label>
+                    Name: <input type="text" name="name" required>
+                  </label><br>
+                  <label>
+                    Email: <input type="email" name="email" required>
+                  </label><br><br>
+                  <button type="submit">Send</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
+    const attachFlipCardInteractions = () => {
+      const flipCard = cardShell?.querySelector('.flip-card');
+      const countdownEl = cardShell?.querySelector('#countdown');
+      const cantAttendBtn = cardShell?.querySelector('#showCantAttendForm');
+      const backContent = cardShell?.querySelector('#backContent');
+      const formContainer = cardShell?.querySelector('#cantAttendFormContainer');
+      const form = formContainer?.querySelector('form');
+
+      if (flipCard) {
+        flipCard.addEventListener('click', (event) => {
+          const isInteractiveElement = (event.target instanceof HTMLElement) &&
+            (event.target.closest('form') || event.target.closest('.cant-attend-btn'));
+          if (isInteractiveElement) {
+            return;
+          }
+          flipCard.classList.toggle('flipped');
+        });
+      }
+
+      if (cantAttendBtn && backContent && formContainer) {
+        cantAttendBtn.addEventListener('click', () => {
+          backContent.setAttribute('hidden', '');
+          formContainer.style.display = 'block';
+        });
+      }
+
+      if (form && formContainer) {
+        const submitButton = form.querySelector('button[type="submit"]');
+        let isSubmitting = false;
+
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          if (isSubmitting) {
+            return;
+          }
+          isSubmitting = true;
+
+          if (submitButton instanceof HTMLButtonElement) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending...';
+          }
+
+          try {
+            const formData = new FormData(form);
+            await fetch(form.action, { method: 'POST', body: formData, mode: 'no-cors' });
+            formContainer.innerHTML = '<p class="thank-you-message">Thank you for letting us know. We will keep you updated!</p>';
+          } catch (error) {
+            let errorMessage = formContainer.querySelector('.form-error-message');
+            if (!errorMessage) {
+              errorMessage = document.createElement('p');
+              errorMessage.className = 'thank-you-message form-error-message';
+              formContainer.appendChild(errorMessage);
+            }
+            errorMessage.textContent = 'Submission failed. Please try again later.';
+
+            if (submitButton instanceof HTMLButtonElement) {
+              submitButton.disabled = false;
+              submitButton.textContent = 'Send';
+            }
+            isSubmitting = false;
+          }
+        });
+      }
+
+      if (countdownEl) {
+        const target = new Date('2026-09-12T00:00:00-07:00');
+        const updateCountdown = () => {
+          const diff = target.getTime() - Date.now();
+          if (diff <= 0) {
+            countdownEl.textContent = "It's today!";
+            return;
+          }
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const minutes = Math.floor((diff / (1000 * 60)) % 60);
+          const seconds = Math.floor((diff / 1000) % 60);
+          countdownEl.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        };
+        updateCountdown();
+        window.setInterval(updateCountdown, 1000);
+      }
+    };
+
+    const showFlipCard = () => {
+      if (!cardShell) return;
+      cardShell.innerHTML = createFlipCardMarkup();
+      attachFlipCardInteractions();
+    };
+
+    const showCelebrationVideo = () => {
+      if (!cardShell) return;
+      cardShell.innerHTML = '';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'countdown-wrapper has-video';
+
+      const videoFrame = document.createElement('div');
+      videoFrame.className = 'countdown-video-frame';
+
+      const celebrationVideo = document.createElement('video');
+      celebrationVideo.className = 'countdown-video';
+      celebrationVideo.src = 'assets/video.mp4';
+      celebrationVideo.autoplay = true;
+      celebrationVideo.muted = true;
+      celebrationVideo.playsInline = true;
+      celebrationVideo.controls = true;
+
+      celebrationVideo.addEventListener('ended', () => {
+        showFlipCard();
+      }, { once: true });
+
+      videoFrame.appendChild(celebrationVideo);
+      wrapper.appendChild(videoFrame);
+
+      const videoNote = document.createElement('p');
+      videoNote.className = 'countdown-note';
+      videoNote.textContent = 'A quick glimpse before the celebration details appear.';
+      wrapper.appendChild(videoNote);
+
+      cardShell.appendChild(wrapper);
+    };
+
+    if (countdownNumber && countdownWrapper) {
+      countdownNumber.textContent = String(currentValue);
+      const countdownInterval = window.setInterval(() => {
+        currentValue -= 1;
+        countdownNumber.classList.add('is-transitioning');
+
+        if (currentValue <= 0) {
+          countdownNumber.textContent = '0';
+          countdownNumber.setAttribute('aria-label', 'Countdown finished');
+          window.clearInterval(countdownInterval);
+          if (countdownNote) {
+            countdownNote.textContent = "It's time to celebrate!";
+          }
+          window.setTimeout(() => {
+            showCelebrationVideo();
+          }, 400);
+        } else {
+          countdownNumber.textContent = String(currentValue);
+          countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
+        }
+
+        window.setTimeout(() => {
+          countdownNumber.classList.remove('is-transitioning');
+        }, 200);
+      }, 1000);
+    } else {
+      showFlipCard();
+    }
   </script>
 </body>
 </html>
