@@ -226,6 +226,8 @@ body {
   padding: clamp(30px, 4.8vw, 48px);
   gap: clamp(12px, 3.8vw, 24px);
   align-items: center;
+  justify-content: flex-start;
+  padding-top: clamp(24px, 4.2vw, 44px);
   max-width: min(520px, 100%);
 }
 
