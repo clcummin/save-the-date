@@ -50,10 +50,30 @@
       });
     });
 
+    const countdownWrapper = document.querySelector('.countdown-wrapper');
     const countdownNumber = document.getElementById('countdownNumber');
     const countdownStart = 10;
     const countdownNote = document.querySelector('.countdown-note');
     let currentValue = countdownStart;
+
+    const showCelebrationVideo = () => {
+      if (!countdownWrapper) {
+        return;
+      }
+
+      countdownWrapper.classList.add('has-video');
+      countdownWrapper.innerHTML = '';
+
+      const celebrationVideo = document.createElement('video');
+      celebrationVideo.className = 'countdown-video';
+      celebrationVideo.src = 'assets/video.mp4';
+      celebrationVideo.autoplay = true;
+      celebrationVideo.loop = true;
+      celebrationVideo.muted = true;
+      celebrationVideo.setAttribute('playsinline', '');
+
+      countdownWrapper.appendChild(celebrationVideo);
+    };
 
     if (countdownNumber) {
       countdownNumber.textContent = String(currentValue);
@@ -62,13 +82,16 @@
         currentValue -= 1;
         countdownNumber.classList.add('is-transitioning');
 
-        if (currentValue <= 1) {
-          countdownNumber.textContent = '1';
+        if (currentValue <= 0) {
+          countdownNumber.textContent = '0';
           countdownNumber.setAttribute('aria-label', 'Countdown finished');
           window.clearInterval(countdownInterval);
           if (countdownNote) {
             countdownNote.textContent = 'It\'s time to celebrate!';
           }
+          window.setTimeout(() => {
+            showCelebrationVideo();
+          }, 400);
         } else {
           countdownNumber.textContent = String(currentValue);
           countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
