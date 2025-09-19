@@ -4,23 +4,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const el = document.getElementById('countdownDemo');
   if (!el) return;
 
-  const background = document.querySelector('.background-video');
-  const video = background?.querySelector('video');
+  const stage = document.querySelector('.countdown-stage');
+  const shell = document.querySelector('.countdown-shell');
+  const video = shell?.querySelector('video');
 
   const countdownImageData = [
-    { src: 'assets/images/AUG4710_bw.jpg', tx: -34, ty: -22, tiltStart: '-6deg', tiltMid: '-2deg' },
-    { src: 'assets/images/AUG4726_bw.jpg', tx: 24, ty: -18, tiltStart: '7deg', tiltMid: '2deg' },
-    { src: 'assets/images/AUG4738_bw.jpg', tx: -18, ty: 28, tiltStart: '-4deg', tiltMid: '-1deg' },
-    { src: 'assets/images/AUG4759_bw.jpg', tx: 26, ty: 20, tiltStart: '5deg', tiltMid: '1deg' },
-    { src: 'assets/images/AUG4761_bw.jpg', tx: -22, ty: -30, tiltStart: '-5deg', tiltMid: '-2deg' },
-    { src: 'assets/images/AUG4849_bw.jpg', tx: 34, ty: 18, tiltStart: '6deg', tiltMid: '2deg' },
-    { src: 'assets/images/AUG4869_bw.jpg', tx: -16, ty: 26, tiltStart: '-3deg', tiltMid: '-1deg' },
-    { src: 'assets/images/AUG5106_bw.jpg', tx: 20, ty: -26, tiltStart: '4deg', tiltMid: '1deg' },
-    { src: 'assets/images/AUG5127_bw.jpg', tx: -28, ty: 16, tiltStart: '-6deg', tiltMid: '-2deg' },
-    { src: 'assets/images/AUG5139_bw.jpg', tx: 16, ty: 24, tiltStart: '5deg', tiltMid: '1deg' }
+    { src: 'assets/images/AUG4710_bw.jpg', x: 10, y: 10, tiltStart: '-6deg', tiltMid: '-2deg' },
+    { src: 'assets/images/AUG4726_bw.jpg', x: 30, y: 8, tiltStart: '5deg', tiltMid: '1deg' },
+    { src: 'assets/images/AUG4738_bw.jpg', x: 50, y: 6, tiltStart: '-4deg', tiltMid: '-1deg' },
+    { src: 'assets/images/AUG4759_bw.jpg', x: 70, y: 8, tiltStart: '3deg', tiltMid: '1deg' },
+    { src: 'assets/images/AUG4761_bw.jpg', x: 90, y: 10, tiltStart: '-5deg', tiltMid: '-2deg' },
+    { src: 'assets/images/AUG4849_bw.jpg', x: 92, y: 35, tiltStart: '6deg', tiltMid: '2deg' },
+    { src: 'assets/images/AUG4869_bw.jpg', x: 88, y: 88, tiltStart: '-3deg', tiltMid: '-1deg' },
+    { src: 'assets/images/AUG5106_bw.jpg', x: 50, y: 92, tiltStart: '4deg', tiltMid: '1deg' },
+    { src: 'assets/images/AUG5127_bw.jpg', x: 10, y: 90, tiltStart: '-6deg', tiltMid: '-2deg' },
+    { src: 'assets/images/AUG5139_bw.jpg', x: 8, y: 50, tiltStart: '5deg', tiltMid: '1deg' }
   ];
 
-  const imageStack = background ? document.createElement('div') : null;
+  const imageStack = stage ? document.createElement('div') : null;
   let imageElements = [];
   if (imageStack && countdownImageData.length) {
     imageStack.className = 'countdown-image-stack';
@@ -30,8 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     imageElements = sequence.map((data) => {
       const wrapper = document.createElement('figure');
       wrapper.className = 'countdown-image';
-      if (typeof data.tx === 'number') wrapper.style.setProperty('--tx', `${data.tx}px`);
-      if (typeof data.ty === 'number') wrapper.style.setProperty('--ty', `${data.ty}px`);
+      if (typeof data.x === 'number') wrapper.style.setProperty('--pos-x', `${data.x}`);
+      if (typeof data.y === 'number') wrapper.style.setProperty('--pos-y', `${data.y}`);
       if (data.tiltStart) wrapper.style.setProperty('--tilt-start', data.tiltStart);
       if (data.tiltMid) wrapper.style.setProperty('--tilt-mid', data.tiltMid);
 
@@ -46,10 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return wrapper;
     });
 
-    if (video && video.parentNode) {
-      video.parentNode.insertBefore(imageStack, video);
-    } else if (background) {
-      background.appendChild(imageStack);
+    if (stage && shell && shell.parentNode === stage) {
+      stage.insertBefore(imageStack, shell);
+    } else if (stage) {
+      stage.appendChild(imageStack);
     }
 
     requestAnimationFrame(() => {
@@ -76,7 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
     osc.stop(now + 0.3);
   };
 
-  const sizeFor = (val) => `${(11 - val) * (11 - val) * 0.5}rem`;
+  const containerRect = shell?.getBoundingClientRect();
+  const fallbackMeasure = Math.min(window.innerWidth, window.innerHeight) * 0.5;
+  const minSize = containerRect ? Math.min(containerRect.width, containerRect.height) * 0.32 : fallbackMeasure * 0.6;
+  const maxSize = containerRect ? Math.min(containerRect.width, containerRect.height) * 0.72 : fallbackMeasure;
+  const sizeFor = (val) => {
+    const progress = (10 - val) / 9;
+    const nextSize = minSize + (maxSize - minSize) * Math.max(0, Math.min(1, progress));
+    return `${Math.max(48, Math.min(nextSize, maxSize))}px`;
+  };
 
   el.textContent = n;
   el.style.fontFamily = 'var(--font-heading)';
@@ -84,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const totalImages = imageElements.length;
   let currentImage = -1;
-  let activeImage = null;
   const baseDuration = 0.72;
   const minDuration = 0.32;
   const durationStep = totalImages > 1 ? (baseDuration - minDuration) / (totalImages - 1) : 0;
@@ -92,15 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const showNextImage = () => {
     if (!imageElements.length) return;
     const nextIndex = Math.min(currentImage + 1, imageElements.length - 1);
-    if (nextIndex === currentImage && activeImage) return;
+    if (nextIndex === currentImage) return;
     const nextEl = imageElements[nextIndex];
     const duration = Math.max(minDuration, baseDuration - durationStep * nextIndex);
     nextEl.style.setProperty('--hit-duration', `${duration}s`);
-    if (activeImage && activeImage !== nextEl) {
-      activeImage.classList.remove('active');
-    }
     nextEl.classList.add('active');
-    activeImage = nextEl;
     currentImage = nextIndex;
   };
 
@@ -160,9 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   Promise.all([countdownComplete, videoReady]).then(() => {
     el.style.opacity = '0';
-    const intro = el.closest('.intro-card-container');
-    if (intro) {
-      intro.classList.remove('visible');
+    if (shell) {
+      shell.classList.add('show-video');
     }
     if (imageStack) {
       imageStack.classList.add('fade-out');
@@ -173,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }, { once: true });
     }
     if (video) {
-      video.classList.add('is-visible');
       if (video.paused && typeof video.play === 'function') {
         video.play().catch(() => {});
       }
