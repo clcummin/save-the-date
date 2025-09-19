@@ -184,7 +184,7 @@ body {
   margin-bottom: clamp(10px, 1.4vw, 16px);
 }
 
-.card-content {
+.countdown-wrapper {
   position: relative;
   inset: 0;
   background: rgba(255, 255, 255, 0.94);
@@ -200,39 +200,7 @@ body {
   gap: clamp(18px, 4vw, 32px);
 }
 
-.wedding-names {
-  font-family: 'Cinzel Decorative', serif;
-  font-size: clamp(2.4rem, 5vw, 3.4rem);
-  margin: 0;
-  line-height: 1.1;
-  letter-spacing: 0.08em;
-  color: var(--text-dark);
-  text-transform: uppercase;
-}
-
-.wedding-date {
-  margin: 0;
-  font-size: clamp(1rem, 2.4vw, 1.25rem);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.card-countdown {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(8px, 2vw, 16px);
-}
-
-.card-countdown-label {
-  font-size: clamp(0.85rem, 1.8vw, 1rem);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.card-countdown-value {
+.countdown-number {
   font-family: var(--countdown-font);
   font-size: clamp(3.2rem, 10vw, 6rem);
   letter-spacing: 0.12em;
@@ -241,20 +209,16 @@ body {
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
-.card-message {
-  display: grid;
-  gap: clamp(12px, 2vw, 20px);
-  font-size: clamp(1rem, 2.2vw, 1.2rem);
-  line-height: 1.6;
-  color: var(--text-muted);
+.countdown-number.is-transitioning {
+  opacity: 0.6;
+  transform: scale(0.9);
 }
 
-.card-message p {
+.countdown-note {
   margin: 0;
-}
-
-.card-note {
-  font-style: italic;
+  line-height: 1.6;
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  color: var(--text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
