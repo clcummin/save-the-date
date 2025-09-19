@@ -64,6 +64,9 @@
       countdownWrapper.classList.add('has-video');
       countdownWrapper.innerHTML = '';
 
+      const videoFrame = document.createElement('div');
+      videoFrame.className = 'countdown-video-frame';
+
       const celebrationVideo = document.createElement('video');
       celebrationVideo.className = 'countdown-video';
       celebrationVideo.src = 'assets/video.mp4';
@@ -72,7 +75,8 @@
       celebrationVideo.muted = true;
       celebrationVideo.setAttribute('playsinline', '');
 
-      countdownWrapper.appendChild(celebrationVideo);
+      videoFrame.appendChild(celebrationVideo);
+      countdownWrapper.appendChild(videoFrame);
     };
 
     if (countdownNumber) {
