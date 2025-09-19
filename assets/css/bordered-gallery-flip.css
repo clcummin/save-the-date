@@ -151,6 +151,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
 }
 
 .card-shell {
@@ -166,6 +167,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.border-cell {
+  z-index: 1;
 }
 
 .card-shell.is-video {
