@@ -83,6 +83,7 @@
     const startOverlay = document.getElementById('startOverlay');
     let countdownInterval = null;
     let revealIndex = 0;
+    let hasUserInteracted = false;
 
     const totalCountdownSteps = countdownStart + 1;
     const totalBorderCells = borderCells.length;
@@ -210,8 +211,15 @@
       celebrationVideo.src = 'assets/video.mp4';
       celebrationVideo.autoplay = true;
       celebrationVideo.loop = false;
-      celebrationVideo.muted = true;
+      celebrationVideo.muted = !hasUserInteracted;
       celebrationVideo.setAttribute('playsinline', '');
+
+      if (!celebrationVideo.muted) {
+        celebrationVideo.removeAttribute('muted');
+        celebrationVideo.volume = 1;
+      } else {
+        celebrationVideo.setAttribute('muted', '');
+      }
 
       celebrationVideo.addEventListener('ended', () => {
         showSaveTheDateDetails();
@@ -223,6 +231,16 @@
       videoFrame.appendChild(celebrationVideo);
       countdownWrapper.appendChild(videoHashtag);
       countdownWrapper.appendChild(videoFrame);
+
+      const playPromise = celebrationVideo.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {
+          if (!celebrationVideo.muted) {
+            celebrationVideo.muted = true;
+            celebrationVideo.play().catch(() => {});
+          }
+        });
+      }
 
       if (cardShell) {
         cardShell.classList.remove('is-details');
@@ -267,20 +285,27 @@
       }, 1000);
     };
 
+    const markUserInteraction = () => {
+      hasUserInteracted = true;
+      audioCtx?.resume().catch(() => {});
+    };
+
     const handleOverlayKeydown = (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
+        markUserInteraction();
         startCountdown();
       }
     };
 
     if (startOverlay) {
       startOverlay.addEventListener('click', () => {
-        audioCtx?.resume().catch(() => {});
+        markUserInteraction();
         startCountdown();
       });
       startOverlay.addEventListener('keydown', handleOverlayKeydown);
     } else if (countdownNumber) {
+      markUserInteraction();
       updateCountdownDisplay(currentValue);
       playBeat();
       applyRevealSchedule();
