@@ -21,7 +21,7 @@
 
     <main class="content-card">
       <div class="card-shell">
-        <div class="countdown-wrapper" aria-live="polite">
+        <div class="countdown-wrapper" aria-live="polite" data-video-sources="assets/video.mp4">
           <p class="eyebrow">Celebration Countdown</p>
           <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown at 10">10</div>
           <p class="countdown-note">Counting down the final moments until the big day.</p>
@@ -50,10 +50,53 @@
       });
     });
 
+    const countdownWrapper = document.querySelector('.countdown-wrapper');
     const countdownNumber = document.getElementById('countdownNumber');
     const countdownStart = 10;
     const countdownNote = document.querySelector('.countdown-note');
+    const cardShell = document.querySelector('.card-shell');
+    const videoSources = countdownWrapper?.dataset.videoSources
+      ? countdownWrapper.dataset.videoSources
+          .split(',')
+          .map((src) => src.trim())
+          .filter(Boolean)
+      : [];
+    const fallbackVideos = ['assets/video.mp4'];
     let currentValue = countdownStart;
+    let hasDisplayedVideos = false;
+
+    const showVideos = () => {
+      if (hasDisplayedVideos || !cardShell) {
+        return;
+      }
+
+      const sources = videoSources.length ? videoSources : fallbackVideos;
+
+      if (!sources.length) {
+        return;
+      }
+
+      const videoContainer = document.createElement('div');
+      videoContainer.className = 'video-gallery';
+
+      sources.forEach((src, index) => {
+        const videoWrapper = document.createElement('div');
+        videoWrapper.className = 'video-frame';
+
+        const video = document.createElement('video');
+        video.src = src;
+        video.controls = true;
+        video.preload = 'metadata';
+        video.playsInline = true;
+        video.setAttribute('aria-label', `Celebration video ${index + 1}`);
+
+        videoWrapper.appendChild(video);
+        videoContainer.appendChild(videoWrapper);
+      });
+
+      cardShell.replaceChildren(videoContainer);
+      hasDisplayedVideos = true;
+    };
 
     if (countdownNumber) {
       countdownNumber.textContent = String(currentValue);
@@ -62,13 +105,17 @@
         currentValue -= 1;
         countdownNumber.classList.add('is-transitioning');
 
-        if (currentValue <= 1) {
-          countdownNumber.textContent = '1';
+        if (currentValue <= 0) {
+          countdownNumber.textContent = '0';
           countdownNumber.setAttribute('aria-label', 'Countdown finished');
           window.clearInterval(countdownInterval);
           if (countdownNote) {
             countdownNote.textContent = 'It\'s time to celebrate!';
           }
+          window.setTimeout(() => {
+            countdownNumber.classList.remove('is-transitioning');
+            showVideos();
+          }, 200);
         } else {
           countdownNumber.textContent = String(currentValue);
           countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
