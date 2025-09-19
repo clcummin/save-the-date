@@ -184,6 +184,105 @@ body {
   min-height: inherit;
 }
 
+.countdown-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--emerald-dark);
+  color: var(--cream);
+  z-index: 5;
+  font-family: var(--countdown-font);
+  font-size: clamp(2.6rem, 9vw, 6rem);
+  letter-spacing: 0.2em;
+  transition: opacity 0.6s ease;
+  overflow: hidden;
+}
+
+.countdown-overlay.start-prompt {
+  cursor: pointer;
+}
+
+.countdown-overlay:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 6px;
+}
+
+.countdown-overlay-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: clamp(48px, 14vh, 160px) clamp(24px, 12vw, 80px);
+  gap: clamp(28px, 7vh, 52px);
+  pointer-events: auto;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.countdown-overlay-line {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
+.countdown-overlay-line--top,
+.countdown-overlay-line--bottom {
+  align-self: center;
+}
+
+.countdown-overlay-button {
+  font-family: 'Spectral', serif;
+  font-size: clamp(0.8rem, 2.4vw, 1rem);
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  padding: clamp(10px, 1.8vw, 14px) clamp(22px, 4vw, 32px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--cream);
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease,
+    border-color 0.25s ease, box-shadow 0.25s ease;
+  pointer-events: auto;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+.countdown-overlay-button:hover,
+.countdown-overlay-button:focus-visible {
+  background: var(--cream);
+  color: var(--emerald-dark);
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.32);
+}
+
+.countdown-overlay-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.countdown-overlay-content.is-clearing {
+  opacity: 0;
+  transform: scale(0.97);
+  pointer-events: none;
+}
+
+.countdown-overlay.is-counting {
+  background: transparent;
+  pointer-events: none;
+}
+
+.countdown-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .countdown-wrapper.has-video {
   gap: clamp(10px, 2.6vw, 18px);
   padding: clamp(16px, 3.6vw, 30px);
@@ -577,5 +676,9 @@ h1 {
 @media (max-width: 520px) {
   .content-card::before {
     inset: clamp(10px, 3vw, 18px);
+  }
+
+  .countdown-overlay-line {
+    font-size: clamp(2.2rem, 12vw, 4.4rem);
   }
 }
