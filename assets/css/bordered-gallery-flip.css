@@ -6,6 +6,7 @@
   --text-muted: rgba(12, 44, 29, 0.72);
   --accent: #ffe3a2;
   --card-radius: clamp(24px, 4vw, 40px);
+  --card-border: rgba(12, 44, 29, 0.14);
   --transition: 0.35s ease;
   --countdown-font: 'Cinzel Decorative', serif;
 }
@@ -167,6 +168,11 @@ body {
   justify-content: center;
 }
 
+.card-shell.has-flip {
+  perspective: 1200px;
+  cursor: pointer;
+}
+
 .card-shell.is-video {
   width: min(620px, 100%);
   padding: clamp(24px, 3.5vw, 44px);
@@ -216,6 +222,153 @@ body {
 
 .countdown-wrapper.has-video::before {
   content: none;
+}
+
+.flip-card {
+  width: 100%;
+  min-height: clamp(320px, 60vw, 520px);
+}
+
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.7s ease;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-front,
+.flip-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--text-dark);
+  border-radius: var(--card-radius);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2);
+  border: 1.5px solid var(--card-border);
+  padding: clamp(24px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 3vw, 28px);
+}
+
+.flip-front:hover {
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.24);
+  transform: translateY(-3px);
+}
+
+.flip-back {
+  transform: rotateY(180deg);
+  text-align: left;
+  gap: clamp(12px, 2.6vw, 22px);
+}
+
+.wedding-names {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.08em;
+  color: var(--text-dark);
+}
+
+.wedding-date {
+  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
+  color: var(--emerald-mid);
+  letter-spacing: 0.04em;
+}
+
+.flip-countdown {
+  font-size: clamp(1rem, 2.6vw, 1.2rem);
+  color: var(--text-muted);
+}
+
+.flip-back p {
+  margin: 0;
+  line-height: 1.6;
+  font-size: clamp(0.95rem, 2.4vw, 1.05rem);
+}
+
+.cant-attend-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.6rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--emerald-mid);
+  color: var(--cream);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.cant-attend-btn:hover,
+.cant-attend-btn:focus-visible {
+  background: var(--emerald-dark);
+  transform: translateY(-1px);
+}
+
+.card-form-container {
+  width: 100%;
+}
+
+.card-form-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+
+.card-form-container input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(12, 44, 29, 0.2);
+  font-size: 1rem;
+}
+
+.card-form-container button[type='submit'] {
+  align-self: center;
+  padding: 0.65rem 1.6rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--emerald-mid);
+  color: var(--cream);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.card-form-container button[type='submit']:hover,
+.card-form-container button[type='submit']:focus-visible {
+  background: var(--emerald-dark);
+  transform: translateY(-1px);
+}
+
+.thank-you-message {
+  margin: 0;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--emerald-mid);
+  font-weight: 600;
+}
+
+.form-error-message {
+  color: #a23a3a;
 }
 
 .countdown-video-frame {
