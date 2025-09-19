@@ -198,10 +198,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const adjustCardSize = () => {
       if (!flipCard || !front || !back) return;
       const buffer = 20; // Add extra space to prevent text from spilling over
-      const width = Math.max(front.scrollWidth, back.scrollWidth) + buffer;
-      const height = Math.max(front.scrollHeight, back.scrollHeight) + buffer;
+      flipCard.style.width = '';
+      flipCard.style.height = '';
+
+      const stage = document.querySelector('.gallery-stage');
+      const shell = introCard.querySelector('.intro-card-shell');
+      const stageStyles = stage ? window.getComputedStyle(stage) : null;
+      const shellStyles = shell ? window.getComputedStyle(shell) : null;
+      const stagePaddingX = stageStyles ? parseFloat(stageStyles.paddingLeft) + parseFloat(stageStyles.paddingRight) : 0;
+      const stagePaddingY = stageStyles ? parseFloat(stageStyles.paddingTop) + parseFloat(stageStyles.paddingBottom) : 0;
+      const shellPaddingX = shellStyles ? parseFloat(shellStyles.paddingLeft) + parseFloat(shellStyles.paddingRight) : 0;
+      const shellPaddingY = shellStyles ? parseFloat(shellStyles.paddingTop) + parseFloat(shellStyles.paddingBottom) : 0;
+
+      const availableWidth = Math.max(window.innerWidth - stagePaddingX - shellPaddingX - buffer, 0);
+      const availableHeight = Math.max(window.innerHeight - stagePaddingY - shellPaddingY - buffer, 0);
+      const naturalWidth = Math.max(front.scrollWidth, back.scrollWidth) + buffer;
+      const width = availableWidth ? Math.min(naturalWidth, availableWidth) : naturalWidth;
       flipCard.style.width = `${width}px`;
-      flipCard.style.height = `${height}px`;
+
+      requestAnimationFrame(() => {
+        const recalculatedHeight = Math.max(front.scrollHeight, back.scrollHeight) + buffer;
+        const height = availableHeight ? Math.min(recalculatedHeight, availableHeight) : recalculatedHeight;
+        flipCard.style.height = `${height}px`;
+      });
     };
 
     adjustCardSize();
