@@ -34,5 +34,18 @@
     <div class="border-cell bottom-center"><img src="assets/images/AUG5127_bw.jpg" alt="Holding close"></div>
     <div class="border-cell bottom-right"><img src="assets/images/AUG5139_bw.jpg" alt="Walking by the lake"></div>
   </div>
+  <script>
+    const borderCells = Array.from(document.querySelectorAll('.border-cell'));
+
+    borderCells.forEach((cell, index) => {
+      cell.style.setProperty('--border-cell-delay', `${index * 0.35}s`);
+    });
+
+    requestAnimationFrame(() => {
+      borderCells.forEach((cell) => {
+        cell.classList.add('is-ready');
+      });
+    });
+  </script>
 </body>
 </html>
