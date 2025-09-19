@@ -39,7 +39,7 @@ body {
     'middle-left main main middle-right'
     'middle-left-lower main main middle-right-lower'
     'bottom-left bottom-left-center bottom-right-center bottom-right';
-  gap: clamp(12px, 3vw, 30px);
+  gap: 0;
   width: 100%;
   height: 100vh;
   overflow: hidden;
