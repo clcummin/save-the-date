@@ -21,19 +21,11 @@
 
     <main class="content-card">
       <div class="card-shell">
-        <article class="card-content" aria-labelledby="weddingNames">
-          <p class="eyebrow">Save the Date</p>
-          <h1 class="wedding-names" id="weddingNames">Lorraine<br>&amp;<br>Christopher</h1>
-          <p class="wedding-date">September 12, 2026&nbsp;&bull;&nbsp;Portola, CA</p>
-          <div class="card-countdown" aria-live="polite">
-            <span class="card-countdown-label">Countdown to our celebration</span>
-            <span class="card-countdown-value" id="countdown" role="status" aria-live="polite">Loading…</span>
-          </div>
-          <div class="card-message" id="backContent">
-            <p>Wedding details and site coming soon, please plan in advance. We will release room blocks in a few months.</p>
-            <p class="card-note">Out of towners should plan on a weekend trip. If you definitely cannot make it please inform Chris or Lorraine.</p>
-          </div>
-        </article>
+        <div class="countdown-wrapper" aria-live="polite">
+          <p class="eyebrow">Celebration Countdown</p>
+          <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown at 10">10</div>
+          <p class="countdown-note">Counting down the final moments until the big day.</p>
+        </div>
       </div>
     </main>
 
@@ -58,30 +50,34 @@
       });
     });
 
-    const countdownEl = document.getElementById('countdown');
-    if (countdownEl) {
-      const updateCountdown = () => {
-        const target = new Date('2026-09-12T00:00:00-07:00');
-        const diff = target.getTime() - Date.now();
+    const countdownNumber = document.getElementById('countdownNumber');
+    const countdownStart = 10;
+    const countdownNote = document.querySelector('.countdown-note');
+    let currentValue = countdownStart;
 
-        if (diff <= 0) {
-          countdownEl.textContent = "It's today!";
-          countdownEl.setAttribute('aria-label', "It's today!");
-          window.clearInterval(intervalId);
-          return;
+    if (countdownNumber) {
+      countdownNumber.textContent = String(currentValue);
+
+      const countdownInterval = window.setInterval(() => {
+        currentValue -= 1;
+        countdownNumber.classList.add('is-transitioning');
+
+        if (currentValue <= 1) {
+          countdownNumber.textContent = '1';
+          countdownNumber.setAttribute('aria-label', 'Countdown finished');
+          window.clearInterval(countdownInterval);
+          if (countdownNote) {
+            countdownNote.textContent = 'It\'s time to celebrate!';
+          }
+        } else {
+          countdownNumber.textContent = String(currentValue);
+          countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
         }
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-        const formatted = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        countdownEl.textContent = formatted;
-        countdownEl.setAttribute('aria-label', `Countdown: ${formatted}`);
-      };
-
-      updateCountdown();
-      const intervalId = window.setInterval(updateCountdown, 1000);
+        window.setTimeout(() => {
+          countdownNumber.classList.remove('is-transitioning');
+        }, 200);
+      }, 1000);
     }
   </script>
 </body>
