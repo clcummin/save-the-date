@@ -76,7 +76,8 @@
 
       const dateLine = document.createElement('p');
       dateLine.className = 'save-date-date';
-      dateLine.textContent = 'September 12, 2026 · Portola, California';
+      dateLine.innerHTML = '<span class="save-date-date-main">September 12, 2026</span>' +
+        '<span class="save-date-date-location">Portola, California</span>';
 
       const countdownContainer = document.createElement('div');
       countdownContainer.className = 'save-date-countdown';
