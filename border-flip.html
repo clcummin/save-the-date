@@ -55,6 +55,17 @@
   </div>
 
   <script>
+    const borderCells = Array.from(document.querySelectorAll('.border-cell'));
+    borderCells.forEach((cell, index) => {
+      cell.style.setProperty('--border-cell-delay', `${index * 0.18}s`);
+    });
+
+    requestAnimationFrame(() => {
+      borderCells.forEach((cell) => {
+        cell.classList.add('is-ready');
+      });
+    });
+
     const flipCard = document.getElementById('flipCard');
     const actionButtons = flipCard ? Array.from(flipCard.querySelectorAll('.flip-action')) : [];
     const [frontButton, backButton] = actionButtons;
