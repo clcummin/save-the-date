@@ -20,11 +20,11 @@
     <div class="border-cell mid-right-upper"><img src="assets/images/AUG4869_bw.jpg" alt="Dancing together"></div>
 
     <main class="content-card">
-      <div class="card-shell">
+      <div class="card-shell" id="cardShell">
         <div class="countdown-wrapper" aria-live="polite">
-          <p class="countdown-prompt countdown-prompt--top">get ready</p>
+          <p class="eyebrow">Celebration Countdown</p>
           <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown at 10">10</div>
-          <p class="countdown-prompt countdown-prompt--bottom">to party</p>
+          <p class="countdown-note">Counting down the final moments until the big day.</p>
         </div>
       </div>
     </main>
@@ -50,20 +50,22 @@
       });
     });
 
-    const countdownWrapper = document.querySelector('.countdown-wrapper');
-    const cardShell = countdownWrapper ? countdownWrapper.closest('.card-shell') : null;
+    const cardShell = document.getElementById('cardShell');
+    const initialCountdownWrapper = cardShell ? cardShell.querySelector('.countdown-wrapper') : null;
     const countdownNumber = document.getElementById('countdownNumber');
+    const countdownNote = initialCountdownWrapper ? initialCountdownWrapper.querySelector('.countdown-note') : null;
     const countdownStart = 10;
     let currentValue = countdownStart;
 
     const showSaveTheDateDetails = () => {
-      if (!countdownWrapper) {
+      if (!cardShell) {
         return;
       }
 
-      countdownWrapper.classList.remove('has-video');
-      countdownWrapper.classList.add('has-details');
-      countdownWrapper.innerHTML = '';
+      cardShell.innerHTML = '';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'countdown-wrapper has-details';
 
       const eyebrow = document.createElement('p');
       eyebrow.className = 'eyebrow';
@@ -84,32 +86,32 @@
       note.className = 'countdown-note save-date-note';
       note.textContent = 'Formal invite to follow';
 
-      countdownWrapper.appendChild(eyebrow);
-      countdownWrapper.appendChild(title);
-      countdownWrapper.appendChild(dateLine);
-      countdownWrapper.appendChild(note);
+      wrapper.appendChild(eyebrow);
+      wrapper.appendChild(title);
+      wrapper.appendChild(dateLine);
+      wrapper.appendChild(note);
 
-      if (cardShell) {
-        cardShell.classList.remove('is-video');
-        cardShell.classList.add('is-details');
-      }
+      cardShell.appendChild(wrapper);
+      cardShell.classList.remove('is-video');
+      cardShell.classList.add('is-details');
     };
 
     const showCelebrationVideo = () => {
-      if (!countdownWrapper) {
+      if (!cardShell) {
         return;
       }
 
-      countdownWrapper.classList.add('has-video');
-      countdownWrapper.classList.remove('has-details');
-      countdownWrapper.innerHTML = '';
+      cardShell.innerHTML = '';
 
-      const videoFrame = document.createElement('div');
-      videoFrame.className = 'countdown-video-frame';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'countdown-wrapper has-video';
 
       const videoHashtag = document.createElement('p');
       videoHashtag.className = 'video-hashtag';
       videoHashtag.textContent = '#BECOMINGCUMMINGS';
+
+      const videoFrame = document.createElement('div');
+      videoFrame.className = 'countdown-video-frame';
 
       const celebrationVideo = document.createElement('video');
       celebrationVideo.className = 'countdown-video';
@@ -127,16 +129,15 @@
       }, { once: true });
 
       videoFrame.appendChild(celebrationVideo);
-      countdownWrapper.appendChild(videoHashtag);
-      countdownWrapper.appendChild(videoFrame);
+      wrapper.appendChild(videoHashtag);
+      wrapper.appendChild(videoFrame);
 
-      if (cardShell) {
-        cardShell.classList.remove('is-details');
-        cardShell.classList.add('is-video');
-      }
+      cardShell.appendChild(wrapper);
+      cardShell.classList.remove('is-details');
+      cardShell.classList.add('is-video');
     };
 
-    if (countdownNumber) {
+    if (countdownNumber && initialCountdownWrapper) {
       countdownNumber.textContent = String(currentValue);
 
       const countdownInterval = window.setInterval(() => {
@@ -147,6 +148,9 @@
           countdownNumber.textContent = '0';
           countdownNumber.setAttribute('aria-label', 'Countdown finished');
           window.clearInterval(countdownInterval);
+          if (countdownNote) {
+            countdownNote.textContent = "It's time to celebrate!";
+          }
           window.setTimeout(() => {
             showCelebrationVideo();
           }, 400);
@@ -159,6 +163,8 @@
           countdownNumber.classList.remove('is-transitioning');
         }, 200);
       }, 1000);
+    } else {
+      showCelebrationVideo();
     }
   </script>
 </body>
