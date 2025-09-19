@@ -239,7 +239,7 @@ html, body {
   transform: scale(0.84);
 }
 
-.countdown-video {
+.countdown-video { 
   position: absolute;
   inset: clamp(14px, 2.6vw, 30px);
   border-radius: clamp(16px, 2.6vw, 24px);
@@ -253,6 +253,18 @@ html, body {
 
 .countdown-square.show-video .countdown-video {
   opacity: 1;
+}
+
+.countdown-video-fallback {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: opacity 0.4s ease;
+}
+
+.countdown-video.has-video .countdown-video-fallback {
+  opacity: 0;
 }
 
 .countdown-video video {

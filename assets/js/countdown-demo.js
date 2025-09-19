@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const videoWrapper = square.querySelector('.countdown-video');
-  const video = videoWrapper?.querySelector('video') || null;
+  let video = null;
   let hasStarted = false;
 
   const countdownImageSources = [
@@ -180,25 +180,82 @@ document.addEventListener('DOMContentLoaded', () => {
     countdownTimer = finish;
   });
 
-  const waitForVideo = new Promise((resolve) => {
-    if (!video) {
-      resolve();
-      return;
-    }
-    if (video.readyState >= 2) {
-      resolve();
-    } else {
-      const onReady = () => {
-        video.removeEventListener('canplay', onReady);
-        video.removeEventListener('loadeddata', onReady);
-        resolve();
-      };
-      video.addEventListener('canplay', onReady);
-      video.addEventListener('loadeddata', onReady);
-    }
-  });
-
   let intervalId = null;
+
+  const loadVideoElement = () =>
+    new Promise((resolve) => {
+      if (!videoWrapper) {
+        resolve(null);
+        return;
+      }
+
+      if (video) {
+        resolve(video);
+        return;
+      }
+
+      const sourceUrl = videoWrapper.dataset.videoSrc;
+      if (!sourceUrl) {
+        resolve(null);
+        return;
+      }
+
+      const videoEl = document.createElement('video');
+      videoEl.preload = 'auto';
+      videoEl.controls = false;
+      videoEl.loop = false;
+      videoEl.muted = false;
+      videoEl.playsInline = true;
+      videoEl.setAttribute('playsinline', '');
+      videoEl.setAttribute('aria-hidden', 'true');
+      videoEl.tabIndex = -1;
+
+      const posterUrl = videoWrapper.dataset.videoPoster;
+      if (posterUrl) {
+        videoEl.poster = posterUrl;
+      }
+
+      const sourceEl = document.createElement('source');
+      sourceEl.src = sourceUrl;
+      const mimeType = videoWrapper.dataset.videoType;
+      if (mimeType) {
+        sourceEl.type = mimeType;
+      }
+      videoEl.appendChild(sourceEl);
+
+      let resolved = false;
+      const finalize = (resultVideo) => {
+        if (resolved) return;
+        resolved = true;
+        videoEl.removeEventListener('canplay', handleReady);
+        videoEl.removeEventListener('loadeddata', handleReady);
+        videoEl.removeEventListener('error', handleError);
+        if (resultVideo) {
+          videoWrapper.classList.add('has-video');
+          video = resultVideo;
+        }
+        resolve(resultVideo);
+      };
+
+      const handleReady = () => {
+        finalize(videoEl);
+      };
+
+      const handleError = () => {
+        finalize(null);
+      };
+
+      videoEl.addEventListener('canplay', handleReady);
+      videoEl.addEventListener('loadeddata', handleReady);
+      videoEl.addEventListener('error', handleError);
+
+      videoWrapper.appendChild(videoEl);
+      videoEl.load();
+
+      if (videoEl.readyState >= 2) {
+        handleReady();
+      }
+    });
 
   const finishCountdown = () => {
     if (intervalId) {
@@ -223,19 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     audioCtx.resume().catch(() => {});
-
-    if (video) {
-      video.muted = true;
-      const prime = video.play();
-      if (prime !== undefined) {
-        prime
-          .then(() => {
-            video.pause();
-            video.currentTime = 0;
-          })
-          .catch(() => {});
-      }
-    }
 
     let n = countdownStartValue;
     numberEl.style.transition = 'opacity 0.45s ease, transform 0.7s var(--ease-med), font-size 0.7s var(--ease-med)';
@@ -270,16 +314,18 @@ document.addEventListener('DOMContentLoaded', () => {
   startOverlay.setAttribute('role', 'button');
   startOverlay.setAttribute('aria-label', 'Start countdown');
 
-  Promise.all([countdownComplete, waitForVideo]).then(() => {
-    square.classList.add('show-video');
-    if (video) {
-      video.muted = false;
-      video.currentTime = 0;
-      const playback = video.play();
-      if (playback) {
-        playback.catch(() => {});
+  countdownComplete
+    .then(() => loadVideoElement())
+    .then((loadedVideo) => {
+      square.classList.add('show-video');
+      if (loadedVideo) {
+        loadedVideo.muted = false;
+        loadedVideo.currentTime = 0;
+        const playback = loadedVideo.play();
+        if (playback) {
+          playback.catch(() => {});
+        }
       }
-    }
-    document.body.classList.remove('no-scroll');
-  });
+      document.body.classList.remove('no-scroll');
+    });
 });
