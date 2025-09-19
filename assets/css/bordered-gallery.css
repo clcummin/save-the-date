@@ -33,7 +33,7 @@ body {
 .page-border {
   display: grid;
   grid-template-columns: minmax(120px, 18vw) minmax(200px, 1fr) minmax(200px, 1fr) minmax(120px, 18vw);
-  grid-template-rows: minmax(120px, 18vh) minmax(160px, 24vh) minmax(160px, 24vh) minmax(120px, 18vh);
+  grid-template-rows: minmax(120px, 18vh) minmax(160px, 32vh) minmax(160px, 32vh) minmax(120px, 18vh);
   grid-template-areas:
     'top-left-wide top-left-wide top-center top-right'
     'middle-left-tall main main right-tall'
@@ -605,7 +605,7 @@ h1 {
 @media (max-width: 960px) {
   .page-border {
     grid-template-columns: minmax(90px, 22vw) 1fr minmax(90px, 22vw);
-    grid-template-rows: minmax(90px, 22vh) 1fr minmax(90px, 22vh);
+    grid-template-rows: minmax(90px, 25vh) minmax(0, 50vh) minmax(90px, 25vh);
   }
 }
 
@@ -616,7 +616,7 @@ h1 {
 
   .page-border {
     grid-template-columns: minmax(70px, 25vw) 1fr minmax(70px, 25vw);
-    grid-template-rows: minmax(70px, 24vh) 1fr minmax(70px, 24vh);
+    grid-template-rows: minmax(70px, 30vh) minmax(0, 40vh) minmax(70px, 30vh);
   }
 
   .content-card {
@@ -633,9 +633,9 @@ h1 {
   .page-border {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: none;
-    grid-auto-rows: minmax(140px, 32vh);
+    grid-auto-rows: 1fr;
     grid-template-areas: none;
-    height: auto;
+    height: 100vh;
     min-height: 100vh;
     padding: clamp(16px, 8vw, 34px);
     gap: clamp(12px, 6vw, 24px);
