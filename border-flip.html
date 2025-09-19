@@ -19,6 +19,7 @@
   >
     <div class="countdown-overlay-content">
       <span class="countdown-overlay-line countdown-overlay-line--top">get ready</span>
+      <button class="countdown-overlay-button" id="startCountdownButton" type="button">click here</button>
       <span class="countdown-overlay-line countdown-overlay-line--bottom">to party</span>
     </div>
   </div>
@@ -81,9 +82,14 @@
     const countdownStart = 10;
     let currentValue = countdownStart;
     const startOverlay = document.getElementById('startOverlay');
+    const startOverlayContent = startOverlay
+      ? startOverlay.querySelector('.countdown-overlay-content')
+      : null;
+    const startButton = document.getElementById('startCountdownButton');
     let countdownInterval = null;
     let revealIndex = 0;
     let hasUserInteracted = false;
+    let hasClearedStartPrompt = false;
 
     const totalCountdownSteps = countdownStart + 1;
     const totalBorderCells = borderCells.length;
@@ -248,11 +254,24 @@
       }
     };
 
+    const clearStartPrompt = () => {
+      if (hasClearedStartPrompt || !startOverlayContent) {
+        return;
+      }
+
+      hasClearedStartPrompt = true;
+      startOverlayContent.classList.add('is-clearing');
+      window.setTimeout(() => {
+        startOverlayContent.innerHTML = '';
+      }, 320);
+    };
+
     const startCountdown = () => {
       if (!countdownNumber || countdownInterval !== null) {
         return;
       }
 
+      clearStartPrompt();
       startOverlay?.classList.remove('start-prompt');
       startOverlay?.classList.add('is-counting');
       startOverlay?.setAttribute('aria-hidden', 'true');
@@ -330,6 +349,14 @@
           finishCountdown();
         }
       }, 1000);
+    }
+
+    if (startButton) {
+      startButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        markUserInteraction();
+        startCountdown();
+      });
     }
   </script>
 </body>
