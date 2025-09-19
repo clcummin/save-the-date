@@ -484,30 +484,9 @@ body {
   pointer-events: none;
 }
 
-.countdown-overlay::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: clamp(140px, 32vw, 360px);
-  height: clamp(140px, 32vw, 360px);
-  border-radius: clamp(18px, 3vw, 32px);
-  border: 2px solid rgba(255, 255, 255, 0.28);
-  background: rgba(0, 0, 0, 0.35);
-  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.48);
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.86);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
 .countdown-overlay.is-counting {
   background: transparent;
   pointer-events: none;
-}
-
-.countdown-overlay.is-counting::before {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
 }
 
 .countdown-overlay.hidden {
