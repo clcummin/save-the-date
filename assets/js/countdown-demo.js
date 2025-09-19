@@ -231,6 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
       videoEl.style.height = '100%';
       videoEl.style.display = 'block';
       videoEl.style.objectFit = 'cover';
+      videoEl.style.maxWidth = '100%';
+      videoEl.style.maxHeight = '100%';
 
       const posterUrl = videoWrapper.dataset.videoPoster;
       if (posterUrl) {
@@ -254,6 +256,12 @@ document.addEventListener('DOMContentLoaded', () => {
         videoEl.removeEventListener('error', handleError);
         if (resultVideo) {
           videoWrapper.classList.add('has-video');
+          const fallbackImage = videoWrapper.querySelector('.countdown-video-fallback');
+          if (fallbackImage) {
+            fallbackImage.remove();
+          }
+          videoWrapper.style.width = '100%';
+          videoWrapper.style.height = '100%';
           video = resultVideo;
         }
         resolve(resultVideo);
