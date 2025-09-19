@@ -206,42 +206,19 @@ body {
   letter-spacing: 0.12em;
   color: var(--text-dark);
   text-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  min-height: clamp(160px, 24vw, 240px);
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .countdown-number.is-transitioning {
-  opacity: 0;
-  transform: scale(1.18);
+  opacity: 0.6;
+  transform: scale(0.9);
 }
 
-.video-gallery {
-  display: grid;
-  gap: clamp(16px, 4vw, 28px);
-  width: 100%;
-  max-width: 100%;
-}
-
-.video-frame {
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.video-frame video {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: clamp(18px, 3vw, 30px);
-  background: #000;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+.countdown-note {
+  margin: 0;
+  line-height: 1.6;
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  color: var(--text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
