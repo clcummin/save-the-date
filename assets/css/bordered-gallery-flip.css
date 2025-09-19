@@ -161,6 +161,7 @@ body {
   padding: clamp(24px, 4vw, 48px);
   border: 1px solid rgba(12, 44, 29, 0.12);
   width: min(460px, 100%);
+  max-width: 100%;
   min-height: clamp(320px, 60vw, 520px);
   display: flex;
   align-items: center;
@@ -225,6 +226,7 @@ body {
   padding: clamp(32px, 5vw, 52px);
   gap: clamp(14px, 4vw, 28px);
   align-items: center;
+  max-width: min(520px, 100%);
 }
 
 .countdown-video-frame {
@@ -269,26 +271,39 @@ body {
 
 .save-date-title {
   font-family: var(--countdown-font);
-  font-size: clamp(2.2rem, 7vw, 3.8rem);
-  letter-spacing: 0.18em;
+  font-size: clamp(2rem, 6.6vw, 3.4rem);
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--text-dark);
   margin: 0;
   text-align: center;
+  text-wrap: balance;
 }
 
 .save-date-title span {
   display: inline-block;
-  margin: 0 clamp(8px, 1.6vw, 14px);
+  margin: 0 clamp(6px, 1.2vw, 12px);
 }
 
 .save-date-date {
   margin: 0;
-  font-size: clamp(1.05rem, 2.8vw, 1.4rem);
-  letter-spacing: 0.08em;
+  font-size: clamp(1.05rem, 2.6vw, 1.3rem);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(12, 44, 29, 0.82);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1vw, 8px);
+}
+
+.save-date-date span {
+  display: block;
+}
+
+.save-date-date-location {
+  font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+  letter-spacing: 0.18em;
 }
 
 .save-date-countdown {
@@ -334,7 +349,7 @@ body {
 }
 
 .card-shell.is-details {
-  width: min(620px, 100%);
+  width: min(560px, 100%);
   padding: clamp(28px, 5vw, 56px);
 }
 
@@ -367,6 +382,19 @@ body {
   .card-shell {
     padding: clamp(18px, 6vw, 32px);
   }
+
+  .card-shell.is-details {
+    width: min(520px, 100%);
+  }
+
+  .save-date-title {
+    font-size: clamp(1.8rem, 7vw, 3rem);
+    letter-spacing: 0.12em;
+  }
+
+  .save-date-date {
+    letter-spacing: 0.12em;
+  }
 }
 
 @media (max-width: 520px) {
@@ -377,5 +405,30 @@ body {
 
   .card-shell::before {
     inset: clamp(10px, 3vw, 18px);
+  }
+
+  .card-shell.is-details {
+    width: min(480px, 100%);
+  }
+
+  .countdown-wrapper.has-details {
+    padding: clamp(26px, 7vw, 42px);
+    gap: clamp(12px, 5vw, 22px);
+  }
+
+  .countdown-grid {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+
+  .save-date-title {
+    letter-spacing: 0.1em;
+  }
+
+  .save-date-date {
+    font-size: clamp(0.95rem, 4.5vw, 1.2rem);
+  }
+
+  .save-date-date-location {
+    letter-spacing: 0.16em;
   }
 }
