@@ -109,11 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.min(window.innerWidth, window.innerHeight) * 0.55;
   };
 
+  const countdownStartValue = 10;
+
   const sizeFor = (val) => {
     const base = measureSquare();
     const minSize = base * 0.34;
     const maxSize = base * 0.74;
-    const progress = Math.max(0, Math.min(1, (11 - val) / 11));
+    const totalSteps = countdownStartValue + 1;
+    const progress = Math.max(0, Math.min(1, (totalSteps - val) / totalSteps));
     const eased = progress * progress;
     const next = minSize + (maxSize - minSize) * eased;
     return `${Math.max(minSize, Math.min(next, maxSize))}px`;
@@ -124,6 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const baseDuration = 0.78;
   const minDuration = 0.28;
   const durationStep = totalImages > 1 ? (baseDuration - minDuration) / (totalImages - 1) : 0;
+
+  const totalCountdownSteps = countdownStartValue + 1;
+  const baseRevealCount = totalCountdownSteps > 0 ? Math.floor(totalImages / totalCountdownSteps) : 0;
+  const extraRevealSteps = totalCountdownSteps > 0 ? totalImages % totalCountdownSteps : 0;
+  const revealSchedule = Array.from({ length: totalCountdownSteps }, (_, index) =>
+    baseRevealCount + (index < extraRevealSteps ? 1 : 0)
+  );
+
+  let revealStepIndex = 0;
 
   const revealNextImages = (count = 1) => {
     for (let i = 0; i < count; i += 1) {
@@ -140,12 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const revealForNumber = (value) => {
-    const remainingImages = totalImages - (currentImage + 1);
-    if (remainingImages <= 0) return;
-    const remainingSteps = Math.max(1, value + 1);
-    const toReveal = Math.max(1, Math.ceil(remainingImages / remainingSteps));
-    revealNextImages(toReveal);
+  const applyScheduledReveal = () => {
+    const count = revealSchedule[revealStepIndex] ?? 0;
+    if (count > 0) {
+      revealNextImages(count);
+    }
+    revealStepIndex += 1;
   };
 
   const updateNumber = (value) => {
@@ -225,24 +237,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    let n = 10;
+    let n = countdownStartValue;
     numberEl.style.transition = 'opacity 0.45s ease, transform 0.7s var(--ease-med), font-size 0.7s var(--ease-med)';
     updateNumber(n);
-    revealForNumber(n);
+    applyScheduledReveal();
     playBeat();
 
     intervalId = setInterval(() => {
       n -= 1;
-      if (n < 0) n = 0;
       updateNumber(n);
       playBeat();
+      applyScheduledReveal();
 
-      revealForNumber(n);
-
-      if (n <= 1) {
+      if (n <= 0) {
+        n = 0;
         clearInterval(intervalId);
         setTimeout(() => {
-          revealForNumber(0);
           finishCountdown();
         }, 650);
       }
