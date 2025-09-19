@@ -10,6 +10,19 @@
   <link rel="stylesheet" href="assets/css/bordered-gallery.css">
 </head>
 <body>
+  <div
+    class="countdown-overlay start-prompt"
+    id="startOverlay"
+    role="button"
+    tabindex="0"
+    aria-label="Start the countdown"
+  >
+    <div class="countdown-overlay-content">
+      <span class="countdown-overlay-line countdown-overlay-line--top">get ready</span>
+      <button class="countdown-overlay-button" id="startCountdownButton" type="button">click here</button>
+      <span class="countdown-overlay-line countdown-overlay-line--bottom">to party</span>
+    </div>
+  </div>
   <div class="page-border">
     <div class="border-cell top-left" data-reveal-index="1"><img src="assets/images/AUG4710_bw.jpg" alt="Couple laughing together"></div>
     <div class="border-cell top-left-center" data-reveal-index="2"><img src="assets/images/AUG4726_bw.jpg" alt="Holding hands"></div>
@@ -36,13 +49,40 @@
     <div class="border-cell bottom-right" data-reveal-index="12"><img src="assets/images/AUG5201_bw.jpg" alt="Strolling along the shoreline"></div>
   </div>
   <script>
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = AudioContext ? new AudioContext() : null;
+
+    const playBeat = () => {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(82, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(1.3, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+      osc.start(now);
+      osc.stop(now + 0.34);
+    };
+
     const borderCells = Array.from(document.querySelectorAll('.border-cell')).sort((first, second) => {
       const firstIndex = Number(first.dataset.revealIndex) || 0;
       const secondIndex = Number(second.dataset.revealIndex) || 0;
       return firstIndex - secondIndex;
     });
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotionQuery = typeof window.matchMedia === 'function'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)')
+      : null;
+    const prefersReducedMotion = prefersReducedMotionQuery?.matches ?? false;
 
     if (prefersReducedMotion) {
       borderCells.forEach((cell) => {
@@ -57,6 +97,12 @@
     const countdownStart = borderCells.length > 0 ? borderCells.length : 10;
     let currentValue = countdownStart;
     let revealedCells = 0;
+    let countdownIntervalId = null;
+    let hasStarted = false;
+
+    const startOverlay = document.getElementById('startOverlay');
+    const startOverlayContent = startOverlay?.querySelector('.countdown-overlay-content') ?? null;
+    const startButton = document.getElementById('startCountdownButton');
 
     const revealNextBorderCell = () => {
       if (prefersReducedMotion) {
@@ -122,7 +168,8 @@
       celebrationVideo.className = 'countdown-video';
       celebrationVideo.src = 'assets/video.mp4';
       celebrationVideo.autoplay = true;
-      celebrationVideo.muted = true;
+      celebrationVideo.muted = false;
+      celebrationVideo.controls = true;
       celebrationVideo.setAttribute('playsinline', '');
 
       celebrationVideo.addEventListener('ended', () => {
@@ -139,39 +186,107 @@
       wrapper.appendChild(videoFrame);
 
       cardShell.appendChild(wrapper);
+
+      const attemptVideoPlayback = () => {
+        const playPromise = celebrationVideo.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {});
+        }
+      };
+
+      if (celebrationVideo.readyState >= 2) {
+        attemptVideoPlayback();
+      } else {
+        celebrationVideo.addEventListener('canplay', attemptVideoPlayback, { once: true });
+      }
+    };
+    const handleCountdownTick = () => {
+      if (!countdownNumber) {
+        return;
+      }
+
+      currentValue -= 1;
+      countdownNumber.classList.add('is-transitioning');
+      playBeat();
+
+      if (currentValue <= 0) {
+        countdownNumber.textContent = '0';
+        countdownNumber.setAttribute('aria-label', 'Countdown finished');
+        window.clearInterval(countdownIntervalId);
+        revealNextBorderCell();
+        if (countdownNote) {
+          countdownNote.textContent = "It's time to celebrate!";
+        }
+        window.setTimeout(() => {
+          showCelebrationVideo();
+        }, 400);
+      } else {
+        countdownNumber.textContent = String(currentValue);
+        countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
+        revealNextBorderCell();
+      }
+
+      window.setTimeout(() => {
+        countdownNumber.classList.remove('is-transitioning');
+      }, 360);
     };
 
-    if (countdownNumber && initialCountdownWrapper) {
+    const startCountdownFlow = () => {
+      if (!countdownNumber || !initialCountdownWrapper) {
+        showCelebrationVideo();
+        return;
+      }
+
       countdownNumber.textContent = String(currentValue);
       countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
       revealNextBorderCell();
-      const countdownInterval = window.setInterval(() => {
-        currentValue -= 1;
-        countdownNumber.classList.add('is-transitioning');
+      playBeat();
+      countdownIntervalId = window.setInterval(handleCountdownTick, 1100);
+    };
 
-        if (currentValue <= 0) {
-          countdownNumber.textContent = '0';
-          countdownNumber.setAttribute('aria-label', 'Countdown finished');
-          window.clearInterval(countdownInterval);
-          revealNextBorderCell();
-          if (countdownNote) {
-            countdownNote.textContent = "It's time to celebrate!";
-          }
-          window.setTimeout(() => {
-            showCelebrationVideo();
-          }, 400);
-        } else {
-          countdownNumber.textContent = String(currentValue);
-          countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
-          revealNextBorderCell();
-        }
+    const startExperience = () => {
+      if (hasStarted) {
+        return;
+      }
 
+      hasStarted = true;
+
+      if (startOverlayContent) {
+        startOverlayContent.classList.add('is-clearing');
+      }
+
+      if (startOverlay) {
+        startOverlay.classList.add('is-counting');
         window.setTimeout(() => {
-          countdownNumber.classList.remove('is-transitioning');
-        }, 360);
-      }, 1100);
-    } else {
-      showCelebrationVideo();
+          startOverlay.classList.add('hidden');
+        }, 420);
+      }
+
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+
+      startCountdownFlow();
+    };
+
+    const handleOverlayKeyDown = (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        startExperience();
+      }
+    };
+
+    if (startButton) {
+      startButton.addEventListener('click', startExperience);
+    }
+
+    if (startOverlay) {
+      startOverlay.addEventListener('click', startExperience);
+      startOverlay.addEventListener('keydown', handleOverlayKeyDown);
+    }
+
+    if (!startOverlay || !startButton) {
+      startExperience();
     }
   </script>
 </body>
