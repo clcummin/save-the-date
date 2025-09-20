@@ -565,7 +565,7 @@ h1 {
 
 }
 
-@media (max-width: 640px) {
+@media (max-width: 640px), (max-height: 520px) {
   body {
     display: block;
     overflow-y: auto;
