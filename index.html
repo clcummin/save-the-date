@@ -210,6 +210,22 @@
         alt: cellImage?.getAttribute('alt') ?? '',
       };
     });
+    const mobilePhotoLoopCount = prefersReducedMotion ? 1 : 2;
+
+    const getMobilePhotoDisplayDuration = ({ cycleIndex, photoIndex }) => {
+      if (prefersReducedMotion) {
+        return 1600;
+      }
+
+      const cycleDurations = [
+        { start: 2000, step: 140, min: 1200 },
+        { start: 1100, step: 160, min: 420 },
+      ];
+
+      const settings = cycleDurations[cycleIndex] ?? cycleDurations[cycleDurations.length - 1];
+      const duration = settings.start - settings.step * photoIndex;
+      return Math.max(settings.min, duration);
+    };
 
     const cardShell = document.getElementById('cardShell');
     const initialCountdownWrapper = cardShell?.querySelector('.countdown-wrapper');
@@ -543,14 +559,26 @@
       safelyPlayVideo(celebrationVideo);
     };
 
-    const showMobilePhotoAtIndex = (index) => {
+    const showMobilePhotoAtIndex = (index, cycleIndex = 0) => {
       if (!mobileStage) {
+        return;
+      }
+
+      if (cycleIndex >= mobilePhotoLoopCount) {
+        showMobileVideo();
+        return;
+      }
+
+      if (index >= mobilePhotoDetails.length) {
+        showMobilePhotoAtIndex(0, cycleIndex + 1);
         return;
       }
 
       const photoDetails = mobilePhotoDetails[index];
       if (!photoDetails || !photoDetails.src) {
-        showMobileVideo();
+        window.setTimeout(() => {
+          showMobilePhotoAtIndex(index + 1, cycleIndex);
+        }, 0);
         return;
       }
 
@@ -563,9 +591,12 @@
       playBeat();
       swapMobileFrame(frame);
 
-      const displayDuration = prefersReducedMotion ? 1600 : 2000;
+      const displayDuration = getMobilePhotoDisplayDuration({
+        cycleIndex,
+        photoIndex: index,
+      });
       window.setTimeout(() => {
-        showMobilePhotoAtIndex(index + 1);
+        showMobilePhotoAtIndex(index + 1, cycleIndex);
       }, displayDuration);
     };
 
@@ -580,7 +611,7 @@
         return;
       }
 
-      showMobilePhotoAtIndex(0);
+      showMobilePhotoAtIndex(0, 0);
     };
     const handleCountdownTick = () => {
       if (!countdownNumber) {
