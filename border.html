@@ -67,6 +67,80 @@
       osc.stop(now + 0.34);
     };
 
+    const playBoom = () => {
+      if (!audioCtx) return;
+
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+
+      const now = audioCtx.currentTime;
+      const duration = 0.82;
+
+      const toneOscillator = audioCtx.createOscillator();
+      const toneGain = audioCtx.createGain();
+      toneOscillator.type = 'sine';
+      toneOscillator.frequency.setValueAtTime(180, now);
+      toneOscillator.frequency.exponentialRampToValueAtTime(52, now + duration);
+      toneGain.gain.setValueAtTime(0.0001, now);
+      toneGain.gain.exponentialRampToValueAtTime(1.1, now + 0.02);
+      toneGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      toneOscillator.connect(toneGain);
+      toneGain.connect(audioCtx.destination);
+
+      toneOscillator.start(now);
+      toneOscillator.stop(now + duration);
+
+      const noiseBuffer = audioCtx.createBuffer(1, Math.ceil(audioCtx.sampleRate * duration), audioCtx.sampleRate);
+      const noiseChannelData = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < noiseChannelData.length; i += 1) {
+        const decay = 1 - i / noiseChannelData.length;
+        noiseChannelData[i] = (Math.random() * 2 - 1) * decay * decay;
+      }
+
+      const noiseSource = audioCtx.createBufferSource();
+      noiseSource.buffer = noiseBuffer;
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.5, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      noiseSource.connect(noiseGain);
+      noiseGain.connect(audioCtx.destination);
+
+      noiseSource.start(now);
+      noiseSource.stop(now + duration);
+    };
+
+    const launchConfetti = () => {
+      if (prefersReducedMotion) {
+        return;
+      }
+
+      if (!document.body) {
+        return;
+      }
+
+      const confettiContainer = document.createElement('div');
+      confettiContainer.className = 'confetti-container';
+      const colors = ['#ffe3a2', '#f6b8d1', '#95d5b2', '#7fd1ff', '#ffffff'];
+      const pieceCount = 80;
+
+      for (let index = 0; index < pieceCount; index += 1) {
+        const piece = document.createElement('span');
+        piece.className = 'confetti-piece';
+        piece.style.setProperty('--confetti-left', `${Math.random() * 100}%`);
+        piece.style.setProperty('--confetti-delay', `${Math.random() * 0.45}s`);
+        piece.style.setProperty('--confetti-duration', `${2.6 + Math.random()}s`);
+        piece.style.setProperty('--confetti-drift', `${Math.random() * 120 - 60}px`);
+        piece.style.backgroundColor = colors[index % colors.length];
+        confettiContainer.appendChild(piece);
+      }
+
+      document.body.appendChild(confettiContainer);
+      window.setTimeout(() => {
+        confettiContainer.remove();
+      }, 4200);
+    };
+
     const borderCells = Array.from(document.querySelectorAll('.border-cell')).sort((first, second) => {
       const firstIndex = Number(first.dataset.revealIndex) || 0;
       const secondIndex = Number(second.dataset.revealIndex) || 0;
@@ -110,7 +184,7 @@
       }
     };
 
-    const showSaveTheDateDetails = () => {
+    const showSaveTheDateDetails = ({ withCelebrateEffects = false } = {}) => {
       if (!cardShell) return;
       cardShell.innerHTML = '';
 
@@ -142,6 +216,23 @@
       wrapper.appendChild(note);
 
       cardShell.appendChild(wrapper);
+
+      if (withCelebrateEffects && !prefersReducedMotion) {
+        window.requestAnimationFrame(() => {
+          title.classList.add('save-date-title--spiral');
+        });
+
+        window.setTimeout(() => {
+          wrapper.classList.add('is-revealed');
+        }, 420);
+
+        window.setTimeout(() => {
+          playBoom();
+          launchConfetti();
+        }, 520);
+      } else {
+        wrapper.classList.add('is-revealed');
+      }
     };
 
     const showCelebrationVideo = () => {
@@ -167,7 +258,9 @@
       celebrationVideo.setAttribute('playsinline', '');
 
       celebrationVideo.addEventListener('ended', () => {
-        showSaveTheDateDetails();
+        window.setTimeout(() => {
+          showSaveTheDateDetails({ withCelebrateEffects: true });
+        }, 600);
       }, { once: true });
 
       celebrationVideo.addEventListener('error', () => {
