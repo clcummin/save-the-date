@@ -122,6 +122,12 @@ body {
     opacity: 1;
     transform: none;
   }
+
+  .mobile-frame {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .content-card {
@@ -171,6 +177,96 @@ body {
 .card-shell > * {
   width: 100%;
   height: 100%;
+}
+
+.mobile-experience {
+  display: none;
+  width: 100%;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 8vw, 40px);
+  background: var(--emerald-dark);
+}
+
+.mobile-stage {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline: auto;
+  position: relative;
+}
+
+.mobile-frame {
+  width: 100%;
+  border-radius: clamp(20px, 6vw, 30px);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.82);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.38);
+  opacity: 0;
+  transform: translateY(16px) scale(0.98);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.mobile-frame.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.mobile-frame--photo {
+  aspect-ratio: 3 / 4;
+}
+
+.mobile-frame--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mobile-frame--video {
+  aspect-ratio: 9 / 16;
+  background: #000;
+  display: flex;
+  align-items: stretch;
+}
+
+.mobile-frame--video .countdown-wrapper {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  align-items: stretch;
+  gap: 0;
+}
+
+.mobile-frame--video .video-hashtag {
+  display: none;
+}
+
+.mobile-frame--video .countdown-video-frame {
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  height: 100%;
+}
+
+.mobile-frame--video .countdown-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mobile-frame--card {
+  background: transparent;
+  box-shadow: none;
+}
+
+.mobile-frame--card .countdown-wrapper {
+  height: 100%;
+  justify-content: center;
 }
 
 .countdown-wrapper {
@@ -715,48 +811,32 @@ h1 {
   }
 
   .page-border {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: none;
-    grid-auto-rows: 1fr;
-    grid-template-areas: none;
-    height: 100vh;
-    min-height: 100vh;
-    padding: clamp(16px, 8vw, 34px);
-    gap: clamp(12px, 6vw, 24px);
-    align-content: start;
+    display: none;
   }
 
-  .page-border > * {
-    grid-area: auto !important;
+  .mobile-experience {
+    display: flex;
+    padding: clamp(24px, 12vw, 48px);
   }
 
-  .content-card {
-    grid-column: 1 / -1;
-    margin: 0;
-    padding: clamp(18px, 7vw, 34px);
+  .mobile-stage {
+    max-width: min(520px, 100%);
   }
 
-  .card-shell {
-    max-width: none;
-    width: 100%;
-    min-height: clamp(280px, 68vh, 480px);
+  .mobile-frame {
+    border-radius: clamp(22px, 10vw, 28px);
   }
 
-  .countdown-wrapper {
-    padding: clamp(22px, 7vw, 36px);
-    gap: clamp(16px, 6vw, 28px);
+  .mobile-frame--video {
+    aspect-ratio: 9 / 16;
   }
 
-  .countdown-wrapper.has-video {
-    max-width: 100%;
+  .mobile-frame--video .countdown-video-frame {
+    border-radius: clamp(18px, 8vw, 26px);
   }
 
-  .countdown-video-frame {
-    aspect-ratio: 4 / 3;
-  }
-
-  .border-cell {
-    border-radius: clamp(16px, 8vw, 24px);
+  .mobile-frame--card .countdown-wrapper {
+    padding: clamp(28px, 9vw, 42px);
   }
 }
 
