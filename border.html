@@ -42,6 +42,9 @@
     <div class="border-cell bottom-wide" data-reveal-index="7"><img src="assets/images/AUG5127_bw.jpg" alt="Holding close"></div>
     <div class="border-cell bottom-right" data-reveal-index="8"><img src="assets/images/AUG5201_bw.jpg" alt="Strolling along the shoreline"></div>
   </div>
+  <div class="mobile-experience" id="mobileExperience" aria-live="polite" aria-label="Slideshow of our memories">
+    <div class="mobile-stage" id="mobileStage"></div>
+  </div>
   <script>
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = AudioContext ? new AudioContext() : null;
@@ -158,6 +161,33 @@
       });
     }
 
+    const mobileExperience = document.getElementById('mobileExperience');
+    const mobileStage = document.getElementById('mobileStage');
+    const mobileBreakpointQuery = typeof window.matchMedia === 'function'
+      ? window.matchMedia('(max-width: 640px)')
+      : null;
+    let isMobileExperienceActive = mobileBreakpointQuery?.matches ?? false;
+
+    const updateMobileExperiencePreference = (event) => {
+      isMobileExperienceActive = event.matches;
+    };
+
+    if (mobileBreakpointQuery) {
+      if (typeof mobileBreakpointQuery.addEventListener === 'function') {
+        mobileBreakpointQuery.addEventListener('change', updateMobileExperiencePreference);
+      } else if (typeof mobileBreakpointQuery.addListener === 'function') {
+        mobileBreakpointQuery.addListener(updateMobileExperiencePreference);
+      }
+    }
+
+    const mobilePhotoDetails = borderCells.map((cell) => {
+      const cellImage = cell.querySelector('img');
+      return {
+        src: cellImage?.getAttribute('src') ?? '',
+        alt: cellImage?.getAttribute('alt') ?? '',
+      };
+    });
+
     const cardShell = document.getElementById('cardShell');
     const initialCountdownWrapper = cardShell?.querySelector('.countdown-wrapper');
     const countdownNumber = document.getElementById('countdownNumber');
@@ -173,7 +203,7 @@
     const startButton = document.getElementById('startCountdownButton');
 
     const revealNextBorderCell = () => {
-      if (prefersReducedMotion) {
+      if (prefersReducedMotion || isMobileExperienceActive) {
         return;
       }
 
@@ -184,10 +214,7 @@
       }
     };
 
-    const showSaveTheDateDetails = ({ withCelebrateEffects = false } = {}) => {
-      if (!cardShell) return;
-      cardShell.innerHTML = '';
-
+    const buildSaveTheDateDetails = () => {
       const wrapper = document.createElement('div');
       wrapper.className = 'countdown-wrapper has-details';
 
@@ -215,8 +242,10 @@
       wrapper.appendChild(dateLine);
       wrapper.appendChild(note);
 
-      cardShell.appendChild(wrapper);
+      return { wrapper, title };
+    };
 
+    const revealSaveTheDateDetails = ({ wrapper, title }, { withCelebrateEffects = false } = {}) => {
       if (withCelebrateEffects && !prefersReducedMotion) {
         window.requestAnimationFrame(() => {
           title.classList.add('save-date-title--spiral');
@@ -235,10 +264,19 @@
       }
     };
 
-    const showCelebrationVideo = () => {
-      if (!cardShell) return;
-      cardShell.innerHTML = '';
+    const showSaveTheDateDetails = ({
+      targetContainer = cardShell,
+      withCelebrateEffects = false,
+    } = {}) => {
+      if (!targetContainer) return;
 
+      const elements = buildSaveTheDateDetails();
+      targetContainer.innerHTML = '';
+      targetContainer.appendChild(elements.wrapper);
+      revealSaveTheDateDetails(elements, { withCelebrateEffects });
+    };
+
+    const buildCelebrationVideo = () => {
       const wrapper = document.createElement('div');
       wrapper.className = 'countdown-wrapper has-video';
 
@@ -257,22 +295,49 @@
       celebrationVideo.controls = true;
       celebrationVideo.setAttribute('playsinline', '');
 
-      celebrationVideo.addEventListener('ended', () => {
-        window.setTimeout(() => {
-          showSaveTheDateDetails({ withCelebrateEffects: true });
-        }, 600);
-      }, { once: true });
-
-      celebrationVideo.addEventListener('error', () => {
-        showSaveTheDateDetails();
-      }, { once: true });
-
       videoFrame.appendChild(celebrationVideo);
 
       wrapper.appendChild(videoHashtag);
       wrapper.appendChild(videoFrame);
 
-      cardShell.appendChild(wrapper);
+      return { wrapper, celebrationVideo };
+    };
+
+    const showCelebrationVideo = ({
+      targetContainer = cardShell,
+      onVideoEnded,
+      onVideoError,
+      withCelebrateEffectsOnComplete = true,
+    } = {}) => {
+      if (!targetContainer) return;
+
+      const { wrapper, celebrationVideo } = buildCelebrationVideo();
+      targetContainer.innerHTML = '';
+      targetContainer.appendChild(wrapper);
+
+      const resolvedOnEnded = typeof onVideoEnded === 'function'
+        ? onVideoEnded
+        : () => {
+            if (withCelebrateEffectsOnComplete) {
+              showSaveTheDateDetails({ targetContainer, withCelebrateEffects: true });
+            } else {
+              showSaveTheDateDetails({ targetContainer });
+            }
+          };
+
+      const resolvedOnError = typeof onVideoError === 'function'
+        ? onVideoError
+        : () => {
+            showSaveTheDateDetails({ targetContainer });
+          };
+
+      celebrationVideo.addEventListener('ended', () => {
+        window.setTimeout(resolvedOnEnded, 600);
+      }, { once: true });
+
+      celebrationVideo.addEventListener('error', () => {
+        resolvedOnError();
+      }, { once: true });
 
       const attemptVideoPlayback = () => {
         const playPromise = celebrationVideo.play();
@@ -286,6 +351,135 @@
       } else {
         celebrationVideo.addEventListener('canplay', attemptVideoPlayback, { once: true });
       }
+    };
+
+    const createMobileFrame = (additionalClassName = '') => {
+      const frame = document.createElement('div');
+      frame.className = `mobile-frame${additionalClassName ? ` ${additionalClassName}` : ''}`;
+      return frame;
+    };
+
+    const swapMobileFrame = (newFrame) => {
+      if (!mobileStage) {
+        return;
+      }
+
+      const transitionDelay = prefersReducedMotion ? 0 : 520;
+      const existingFrame = mobileStage.firstElementChild;
+
+      const placeNewFrame = () => {
+        mobileStage.replaceChildren(newFrame);
+        if (prefersReducedMotion) {
+          newFrame.classList.add('is-visible');
+        } else {
+          window.requestAnimationFrame(() => {
+            newFrame.classList.add('is-visible');
+          });
+        }
+      };
+
+      if (existingFrame && !prefersReducedMotion) {
+        existingFrame.classList.remove('is-visible');
+        window.setTimeout(placeNewFrame, transitionDelay);
+      } else {
+        placeNewFrame();
+      }
+    };
+
+    const showMobileSaveTheDate = ({ withCelebrateEffects = true } = {}) => {
+      if (!mobileStage) {
+        return;
+      }
+
+      const elements = buildSaveTheDateDetails();
+      const frame = createMobileFrame('mobile-frame--card');
+      frame.appendChild(elements.wrapper);
+
+      swapMobileFrame(frame);
+
+      const reveal = () => {
+        revealSaveTheDateDetails(elements, { withCelebrateEffects });
+      };
+
+      if (prefersReducedMotion) {
+        reveal();
+      } else {
+        window.setTimeout(reveal, 80);
+      }
+    };
+
+    const showMobileVideo = () => {
+      if (!mobileStage) {
+        return;
+      }
+
+      const { wrapper, celebrationVideo } = buildCelebrationVideo();
+      const frame = createMobileFrame('mobile-frame--video');
+      frame.appendChild(wrapper);
+
+      swapMobileFrame(frame);
+
+      celebrationVideo.addEventListener('ended', () => {
+        window.setTimeout(() => {
+          showMobileSaveTheDate({ withCelebrateEffects: true });
+        }, 600);
+      }, { once: true });
+
+      celebrationVideo.addEventListener('error', () => {
+        showMobileSaveTheDate({ withCelebrateEffects: false });
+      }, { once: true });
+
+      const attemptVideoPlayback = () => {
+        const playPromise = celebrationVideo.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {});
+        }
+      };
+
+      if (celebrationVideo.readyState >= 2) {
+        attemptVideoPlayback();
+      } else {
+        celebrationVideo.addEventListener('canplay', attemptVideoPlayback, { once: true });
+      }
+    };
+
+    const showMobilePhotoAtIndex = (index) => {
+      if (!mobileStage) {
+        return;
+      }
+
+      const photoDetails = mobilePhotoDetails[index];
+      if (!photoDetails || !photoDetails.src) {
+        showMobileVideo();
+        return;
+      }
+
+      const frame = createMobileFrame('mobile-frame--photo');
+      const image = document.createElement('img');
+      image.src = photoDetails.src;
+      image.alt = photoDetails.alt || '';
+      frame.appendChild(image);
+
+      swapMobileFrame(frame);
+
+      const displayDuration = prefersReducedMotion ? 1600 : 2800;
+      window.setTimeout(() => {
+        showMobilePhotoAtIndex(index + 1);
+      }, displayDuration);
+    };
+
+    const startMobileSequence = () => {
+      if (!mobileStage) {
+        showCelebrationVideo({ targetContainer: cardShell });
+        return;
+      }
+
+      if (mobilePhotoDetails.length === 0) {
+        showMobileVideo();
+        return;
+      }
+
+      showMobilePhotoAtIndex(0);
     };
     const handleCountdownTick = () => {
       if (!countdownNumber) {
@@ -319,6 +513,11 @@
     };
 
     const startCountdownFlow = () => {
+      if (isMobileExperienceActive) {
+        startMobileSequence();
+        return;
+      }
+
       if (!countdownNumber || !initialCountdownWrapper) {
         showCelebrationVideo();
         return;
@@ -353,7 +552,11 @@
         audioCtx.resume().catch(() => {});
       }
 
-      startCountdownFlow();
+      if (isMobileExperienceActive) {
+        startMobileSequence();
+      } else {
+        startCountdownFlow();
+      }
     };
 
     const handleOverlayKeyDown = (event) => {
