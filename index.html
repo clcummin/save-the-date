@@ -2,69 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="refresh" content="0; url=border.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Save the Date</title>
   <link rel="icon" type="image/png" href="assets/images/favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Spectral:wght@400;700&display=swap" onload="this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Spectral:wght@400;700&display=swap"></noscript>
-  <link rel="stylesheet" href="assets/css/save-the-date.css">
+  <style>
+    body {
+      font-family: 'Spectral', serif;
+      display: grid;
+      min-height: 100vh;
+      margin: 0;
+      place-items: center;
+      background: #03281c;
+      color: #f5f1eb;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-  <main class="gallery-stage">
-    <div class="gallery-frame">
-      <div class="photo-grid" id="countdownImages"></div>
-      <div class="mobile-video-stage" id="mobileVideoStage">
-        <video
-          data-mobile-story-video
-          src="assets/video.mp4"
-          preload="auto"
-          playsinline
-          muted
-          aria-hidden="true"
-        ></video>
-      </div>
-      <div class="intro-card-container visible" id="introCard">
-        <div class="intro-card-shell">
-          <div class="flip-card">
-            <div class="flip-inner">
-              <div class="flip-front">
-                <h1 class="wedding-names">Lorraine<br>&amp;<br>Christopher</h1>
-                <div class="wedding-date">September 12, 2026&nbsp;&bull;&nbsp;Portola, CA</div>
-                <div id="countdown"></div>
-              </div>
-              <div class="flip-back">
-                <div id="backContent">
-                  <p>Wedding details and site coming soon, please plan in advance. We will release room blocks in a few months. Out of towners should plan on a weekend trip. If you definitely cannot make it please inform Chris or Lorraine.</p><br>
-                  <button id="showCantAttendForm" class="cant-attend-btn">Can't Attend</button>
-                </div>
-                <div id="cantAttendFormContainer" class="card-form-container" style="display:none;">
-                  <form action="https://script.google.com/macros/s/AKfycbw1oW3-NLd95psh53-YJFoUoa80b1jeyw9oEXX0TWffxMEyauwYvn6aVOn0UJdZgZF2IQ/exec" method="post">
-                    <label>
-                      Name: <input type="text" name="name" required>
-                    </label><br>
-                    <label>
-                      Email: <input type="email" name="email" required>
-                    </label><br><br>
-                    <button type="submit">Send</button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <main>
+    <p>Redirecting to our updated celebration experience. If you are not redirected automatically, <a href="border.html">click here</a>.</p>
   </main>
-  <div id="thankYouMessage" class="thank-you-container" style="display:none;">
-    <div class="thank-you-card">
-      <p>Thank you for submitting and we are sorry you will not be able to attend the wedding. We will email you the wedding site once it is available so you can still engage and be a part of the celebration.</p>
-    </div>
-  </div>
-
-  <script src="assets/js/save-the-date.js"></script>
-  <script src="assets/js/cant-attend.js"></script>
 </body>
 </html>
