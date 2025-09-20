@@ -1,8 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
   const introCard = document.getElementById('introCard');
-  const video = document.querySelector('.background-video video');
   const preCountdown = document.getElementById('preCountdown');
   const countdownImagesContainer = document.getElementById('countdownImages');
+  const mobileVideoStage = document.getElementById('mobileVideoStage');
+  const mobileVideo = mobileVideoStage?.querySelector('video') || null;
+  const mobileBreakpoint = window.matchMedia('(max-width: 768px)');
+  const isMobileStory = mobileBreakpoint.matches;
+  const desktopVideo = document.querySelector('.background-video video');
+  const video = isMobileStory ? mobileVideo : desktopVideo;
   const countdownImageSources = [
     'assets/images/AUG4670_bw.jpg',
     'assets/images/AUG4710_bw.jpg',
@@ -46,29 +51,142 @@ document.addEventListener('DOMContentLoaded', () => {
   const squareLayout = buildBorderLayout(gridSize);
   const randomBetween = (min, max) => Math.random() * (max - min) + min;
 
-  if (countdownImagesContainer) {
-    countdownImagesContainer.classList.add('countdown-grid');
-    const framesToUse = countdownImageSources.slice(0, squareLayout.length);
-    framesToUse.forEach((src, index) => {
-      const frame = document.createElement('div');
-      frame.className = 'countdown-image';
-      const layout = squareLayout[index];
-      if (layout) {
-        frame.style.gridRow = layout.row;
-        frame.style.gridColumn = layout.col;
-      }
-      const tilt = randomBetween(-5, 5);
-      frame.style.setProperty('--tilt-start', `${tilt.toFixed(2)}deg`);
-      frame.style.setProperty('--tilt-mid', `${(tilt * 0.35).toFixed(2)}deg`);
+  const runMobileStory = () => {
+    if (!countdownImagesContainer) return;
+
+    document.body.classList.add('mobile-story-active');
+
+    if (introCard) {
+      introCard.classList.remove('visible');
+    }
+
+    countdownImagesContainer.innerHTML = '';
+    countdownImagesContainer.classList.add('mobile-photo-sequence');
+    countdownImagesContainer.classList.remove('is-hidden');
+
+    if (mobileVideoStage) {
+      mobileVideoStage.classList.remove('is-visible');
+    }
+
+    if (mobileVideo) {
+      mobileVideo.pause();
+      mobileVideo.currentTime = 0;
+      mobileVideo.muted = true;
+    }
+
+    const photoElements = countdownImageSources.map((src) => {
       const img = document.createElement('img');
       img.src = src;
       img.alt = 'Lorraine and Christopher';
       img.loading = 'eager';
       img.decoding = 'async';
-      frame.appendChild(img);
-      countdownImagesContainer.appendChild(frame);
-      countdownFrames.push(frame);
+      img.className = 'mobile-photo';
+      countdownImagesContainer.appendChild(img);
+      return img;
     });
+
+    let currentIndex = -1;
+    const photoHold = 2400;
+    const finalHold = 3200;
+
+    const showCard = () => {
+      if (!introCard?.classList.contains('visible')) {
+        revealIntroCard();
+      }
+    };
+
+    const startVideoStage = () => {
+      if (!mobileVideoStage || !mobileVideo) {
+        showCard();
+        return;
+      }
+
+      mobileVideoStage.classList.add('is-visible');
+      mobileVideo.currentTime = 0;
+
+      const handleCompletion = () => {
+        window.clearTimeout(fallbackTimer);
+        mobileVideo.removeEventListener('ended', handleCompletion);
+        mobileVideo.removeEventListener('error', handleCompletion);
+        mobileVideo.pause();
+        mobileVideoStage.classList.remove('is-visible');
+        showCard();
+      };
+
+      const fallbackTimer = window.setTimeout(
+        handleCompletion,
+        Number.isFinite(mobileVideo.duration) && mobileVideo.duration > 0
+          ? Math.ceil(mobileVideo.duration * 1000) + 500
+          : 16000,
+      );
+
+      mobileVideo.addEventListener('ended', handleCompletion, { once: true });
+      mobileVideo.addEventListener('error', handleCompletion, { once: true });
+
+      const attemptPlay = () => {
+        const playPromise = mobileVideo.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {
+            mobileVideo.muted = true;
+            return mobileVideo.play().catch(() => {
+              handleCompletion();
+            });
+          });
+        }
+      };
+
+      requestAnimationFrame(attemptPlay);
+    };
+
+    const showNextPhoto = () => {
+      const previous = photoElements[currentIndex];
+      if (previous) {
+        previous.classList.remove('is-visible');
+      }
+
+      currentIndex += 1;
+      if (currentIndex >= photoElements.length) {
+        countdownImagesContainer.classList.add('is-hidden');
+        window.setTimeout(startVideoStage, 600);
+        return;
+      }
+
+      const current = photoElements[currentIndex];
+      current.classList.add('is-visible');
+      const hold = currentIndex === photoElements.length - 1 ? finalHold : photoHold;
+      window.setTimeout(showNextPhoto, hold);
+    };
+
+    window.setTimeout(showNextPhoto, 400);
+  };
+
+  if (countdownImagesContainer) {
+    if (isMobileStory) {
+      runMobileStory();
+    } else {
+      countdownImagesContainer.classList.add('countdown-grid');
+      const framesToUse = countdownImageSources.slice(0, squareLayout.length);
+      framesToUse.forEach((src, index) => {
+        const frame = document.createElement('div');
+        frame.className = 'countdown-image';
+        const layout = squareLayout[index];
+        if (layout) {
+          frame.style.gridRow = layout.row;
+          frame.style.gridColumn = layout.col;
+        }
+        const tilt = randomBetween(-5, 5);
+        frame.style.setProperty('--tilt-start', `${tilt.toFixed(2)}deg`);
+        frame.style.setProperty('--tilt-mid', `${(tilt * 0.35).toFixed(2)}deg`);
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Lorraine and Christopher';
+        img.loading = 'eager';
+        img.decoding = 'async';
+        frame.appendChild(img);
+        countdownImagesContainer.appendChild(frame);
+        countdownFrames.push(frame);
+      });
+    }
   }
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const playBeat = () => {
@@ -88,14 +206,14 @@ document.addEventListener('DOMContentLoaded', () => {
     osc.stop(now + 0.3);
   };
 
-  const revealIntroCard = () => {
+  function revealIntroCard() {
     if (!introCard) return;
     requestAnimationFrame(() => {
       introCard.classList.add('visible');
     });
-  };
+  }
 
-  if (video && introCard) {
+  if (video && introCard && !isMobileStory) {
     introCard.classList.remove('visible');
     const showAfterVideo = () => {
       revealIntroCard();
@@ -114,11 +232,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (video.ended) {
       handleAndClear();
     }
-  } else if (introCard && !introCard.classList.contains('visible')) {
+  } else if (introCard && !introCard.classList.contains('visible') && !isMobileStory) {
     revealIntroCard();
   }
 
-  if (preCountdown && video) {
+  if (preCountdown && video && !isMobileStory) {
     preCountdown.textContent = 'Tap to Start';
     preCountdown.classList.add('start-prompt');
     const start = () => {
@@ -203,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1000);
     };
     preCountdown.addEventListener('click', start);
-  } else if (video) {
+  } else if (video && !isMobileStory) {
     video.muted = false;
     video.volume = 1.0;
     const autoplay = video.play();
