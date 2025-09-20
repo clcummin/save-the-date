@@ -577,27 +577,45 @@ h1 {
 
   .mobile-experience {
     display: flex;
-    padding: clamp(24px, 12vw, 48px);
+    width: 100vw;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 0;
+    align-items: stretch;
   }
 
   .mobile-stage {
-    max-width: min(520px, 100%);
+    max-width: none;
+    height: 100%;
+    flex: 1 1 auto;
+    align-items: stretch;
+    justify-content: stretch;
+    margin: 0;
   }
 
   .mobile-frame {
-    border-radius: clamp(22px, 10vw, 28px);
+    border-radius: 0;
+    height: 100%;
+    width: 100%;
+    box-shadow: none;
+    display: flex;
   }
 
-  .mobile-frame--video {
-    aspect-ratio: 9 / 16;
+  .mobile-frame--photo,
+  .mobile-frame--video,
+  .mobile-frame--card {
+    aspect-ratio: auto;
   }
 
   .mobile-frame--video .countdown-video-frame {
-    border-radius: clamp(18px, 8vw, 26px);
+    border-radius: 0;
   }
 
   .mobile-frame--card .countdown-wrapper {
-    padding: clamp(28px, 9vw, 42px);
+    padding: clamp(28px, 12vw, 48px);
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
   }
 }
 
