@@ -365,6 +365,50 @@ body {
   text-wrap: balance;
 }
 
+.save-date-title--spiral {
+  animation: spiralSpinIn 1.1s ease-out forwards;
+}
+
+.countdown-wrapper.has-details .eyebrow,
+.countdown-wrapper.has-details .save-date-date,
+.countdown-wrapper.has-details .save-date-note {
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.countdown-wrapper.has-details:not(.is-revealed) .eyebrow,
+.countdown-wrapper.has-details:not(.is-revealed) .save-date-date,
+.countdown-wrapper.has-details:not(.is-revealed) .save-date-note {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.countdown-wrapper.has-details.is-revealed .eyebrow,
+.countdown-wrapper.has-details.is-revealed .save-date-date,
+.countdown-wrapper.has-details.is-revealed .save-date-note {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes spiralSpinIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-540deg);
+    filter: blur(6px);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.08) rotate(18deg);
+    filter: blur(0);
+  }
+  75% {
+    transform: scale(0.96) rotate(-8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
 .save-date-title span {
   display: block;
   margin: 0;
@@ -403,6 +447,42 @@ body {
 
 .save-date-note {
   font-size: clamp(0.92rem, 2vw, 1.1rem);
+}
+
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: clamp(8px, 1.2vw, 12px);
+  height: clamp(14px, 3vh, 18px);
+  border-radius: 2px;
+  top: -12vh;
+  left: var(--confetti-left, 50%);
+  transform: translate3d(calc(-50% + var(--confetti-drift, 0px)), 0, 0) rotate(0deg);
+  opacity: 0;
+  animation: confettiFall var(--confetti-duration, 3s) linear forwards;
+  animation-delay: var(--confetti-delay, 0s);
+  mix-blend-mode: screen;
+}
+
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translate3d(calc(-50% + var(--confetti-drift, 0px)), -12vh, 0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + var(--confetti-drift, 0px)), 110vh, 0) rotate(540deg);
+  }
 }
 
 .flip-card {
