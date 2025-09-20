@@ -183,7 +183,7 @@
     const mobileExperience = document.getElementById('mobileExperience');
     const mobileStage = document.getElementById('mobileStage');
     const mobileBreakpointQuery = typeof window.matchMedia === 'function'
-      ? window.matchMedia('(max-width: 640px)')
+      ? window.matchMedia('(max-width: 640px), (max-height: 520px)')
       : null;
     let isMobileExperienceActive = mobileBreakpointQuery?.matches ?? false;
 
