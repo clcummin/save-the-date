@@ -220,6 +220,71 @@
     let revealedCells = 0;
     let countdownIntervalId = null;
     let hasStarted = false;
+    let tearDownOrientationPrompt = null;
+
+    const clearOrientationPrompt = () => {
+      if (typeof tearDownOrientationPrompt === 'function') {
+        tearDownOrientationPrompt();
+        tearDownOrientationPrompt = null;
+      }
+    };
+
+    const setupOrientationPrompt = ({ container, video }) => {
+      if (!container || !video) {
+        return () => {};
+      }
+
+      const prompt = document.createElement('div');
+      prompt.className = 'orientation-prompt';
+      prompt.setAttribute('role', 'status');
+      prompt.setAttribute('aria-live', 'polite');
+      prompt.setAttribute('aria-hidden', 'true');
+
+      const promptText = document.createElement('span');
+      promptText.className = 'orientation-prompt__text';
+      promptText.textContent = 'Rotate your device to watch in full screen';
+
+      prompt.appendChild(promptText);
+      container.appendChild(prompt);
+
+      const updatePromptVisibility = () => {
+        const viewportWidth = window.innerWidth || 0;
+        const viewportHeight = window.innerHeight || 0;
+        const isViewportPortrait = viewportHeight > viewportWidth;
+        const hasMetadata = video.videoWidth > 0 && video.videoHeight > 0;
+        const isVideoLandscape = hasMetadata ? video.videoWidth >= video.videoHeight : false;
+
+        if (isViewportPortrait && isVideoLandscape) {
+          prompt.classList.add('is-visible');
+          prompt.setAttribute('aria-hidden', 'false');
+        } else {
+          prompt.classList.remove('is-visible');
+          prompt.setAttribute('aria-hidden', 'true');
+        }
+      };
+
+      const handleLoadedMetadata = () => {
+        updatePromptVisibility();
+      };
+
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      window.addEventListener('resize', updatePromptVisibility);
+      window.addEventListener('orientationchange', updatePromptVisibility);
+
+      window.setTimeout(updatePromptVisibility, 0);
+
+      return () => {
+        prompt.remove();
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        window.removeEventListener('resize', updatePromptVisibility);
+        window.removeEventListener('orientationchange', updatePromptVisibility);
+      };
+    };
+
+    const applyOrientationPrompt = ({ container, video }) => {
+      clearOrientationPrompt();
+      tearDownOrientationPrompt = setupOrientationPrompt({ container, video });
+    };
 
     const startOverlay = document.getElementById('startOverlay');
     const startOverlayContent = startOverlay?.querySelector('.countdown-overlay-content') ?? null;
@@ -406,6 +471,8 @@
         return;
       }
 
+      clearOrientationPrompt();
+
       const transitionDelay = prefersReducedMotion ? 0 : 520;
       const existingFrame = mobileStage.firstElementChild;
 
@@ -460,6 +527,8 @@
       frame.appendChild(wrapper);
 
       swapMobileFrame(frame);
+
+      applyOrientationPrompt({ container: frame, video: celebrationVideo });
 
       celebrationVideo.addEventListener('ended', () => {
         window.setTimeout(() => {
