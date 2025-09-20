@@ -73,6 +73,10 @@ html, body {
   pointer-events: none;
 }
 
+.mobile-video-stage {
+  display: none;
+}
+
 .photo-grid::after {
   content: '';
   grid-column: 3;
@@ -946,5 +950,105 @@ button.loading::after {
 
   .thank-you-card {
     padding: clamp(22px, 8vw, 32px);
+  }
+}
+
+@media (max-width: 768px) {
+  body.mobile-story-active .gallery-stage {
+    padding: 0;
+    height: 100vh;
+  }
+
+  body.mobile-story-active .gallery-frame {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+
+  body.mobile-story-active .photo-grid {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: #000;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  body.mobile-story-active .photo-grid.mobile-photo-sequence {
+    transition: opacity 0.8s ease;
+  }
+
+  body.mobile-story-active .photo-grid.mobile-photo-sequence.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  body.mobile-story-active .photo-grid.mobile-photo-sequence .mobile-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+
+  body.mobile-story-active .photo-grid.mobile-photo-sequence .mobile-photo.is-visible {
+    opacity: 1;
+  }
+
+  body.mobile-story-active .mobile-video-stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    opacity: 0;
+    transition: opacity 1s ease;
+    z-index: 2;
+  }
+
+  body.mobile-story-active .mobile-video-stage.is-visible {
+    opacity: 1;
+  }
+
+  body.mobile-story-active .mobile-video-stage video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  body.mobile-story-active .intro-card-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: none;
+    transform: none;
+    opacity: 0;
+    pointer-events: none;
+    animation: none;
+    padding: clamp(24px, 8vw, 40px);
+    z-index: 3;
+  }
+
+  body.mobile-story-active .intro-card-container.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  body.mobile-story-active .intro-card-shell {
+    width: min(92vw, 420px);
+    min-height: auto;
+  }
+
+  body.mobile-story-active .flip-card {
+    max-width: none;
   }
 }
