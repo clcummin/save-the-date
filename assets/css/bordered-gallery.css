@@ -176,7 +176,7 @@ body {
   box-shadow: 0 24px 52px rgba(0, 0, 0, 0.38);
   opacity: 0;
   transform: translateY(16px) scale(0.98);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition: opacity 0.45s ease, transform 0.45s ease;
 }
 
 .mobile-frame.is-visible {
