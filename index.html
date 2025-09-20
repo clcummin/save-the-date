@@ -491,9 +491,10 @@
       image.alt = photoDetails.alt || '';
       frame.appendChild(image);
 
+      playBeat();
       swapMobileFrame(frame);
 
-      const displayDuration = prefersReducedMotion ? 1600 : 2800;
+      const displayDuration = prefersReducedMotion ? 1600 : 2000;
       window.setTimeout(() => {
         showMobilePhotoAtIndex(index + 1);
       }, displayDuration);
