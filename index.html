@@ -68,6 +68,123 @@
         { start: 1100, step: 160, min: 420 },
       ];
 
+      // Media state --------------------------------------------------------
+      let sharedCelebrationVideoElement = null;
+      let sharedCelebrationVideoEndedHandler = null;
+      let sharedCelebrationVideoErrorHandler = null;
+      let hasPrimedMobileVideoPlayback = false;
+
+      const createCelebrationVideoElement = () => {
+        const video = document.createElement('video');
+        video.className = 'countdown-video';
+        video.src = 'assets/video.mp4';
+        video.preload = 'auto';
+        video.autoplay = true;
+        video.muted = false;
+        video.controls = true;
+        video.setAttribute('playsinline', '');
+        return video;
+      };
+
+      const getCelebrationVideoElement = () => {
+        if (!sharedCelebrationVideoElement) {
+          sharedCelebrationVideoElement = createCelebrationVideoElement();
+        }
+
+        return sharedCelebrationVideoElement;
+      };
+
+      const resetCelebrationVideoHandlers = (video) => {
+        if (!video) {
+          return;
+        }
+
+        if (sharedCelebrationVideoEndedHandler) {
+          video.removeEventListener('ended', sharedCelebrationVideoEndedHandler);
+          sharedCelebrationVideoEndedHandler = null;
+        }
+
+        if (sharedCelebrationVideoErrorHandler) {
+          video.removeEventListener('error', sharedCelebrationVideoErrorHandler);
+          sharedCelebrationVideoErrorHandler = null;
+        }
+      };
+
+      const attachCelebrationVideoHandlers = (video, { onEnded, onError }) => {
+        if (!video) {
+          return;
+        }
+
+        resetCelebrationVideoHandlers(video);
+
+        if (typeof onEnded === 'function') {
+          sharedCelebrationVideoEndedHandler = onEnded;
+          video.addEventListener('ended', sharedCelebrationVideoEndedHandler, { once: true });
+        }
+
+        if (typeof onError === 'function') {
+          sharedCelebrationVideoErrorHandler = onError;
+          video.addEventListener('error', sharedCelebrationVideoErrorHandler, { once: true });
+        }
+      };
+
+      const primeMobileCelebrationVideoPlayback = () => {
+        if (hasPrimedMobileVideoPlayback) {
+          return;
+        }
+
+        const video = getCelebrationVideoElement();
+        if (!video) {
+          return;
+        }
+
+        if (!video.paused && !video.ended) {
+          return;
+        }
+
+        const body = document.body;
+        if (!body) {
+          return;
+        }
+
+        const primerContainer = document.createElement('div');
+        primerContainer.style.position = 'fixed';
+        primerContainer.style.width = '1px';
+        primerContainer.style.height = '1px';
+        primerContainer.style.overflow = 'hidden';
+        primerContainer.style.pointerEvents = 'none';
+        primerContainer.style.opacity = '0';
+        primerContainer.setAttribute('aria-hidden', 'true');
+
+        primerContainer.appendChild(video);
+        body.appendChild(primerContainer);
+
+        const originalMuted = video.muted;
+        video.muted = true;
+
+        const finalizePrimer = (wasSuccessful) => {
+          video.pause();
+          video.currentTime = 0;
+          video.muted = originalMuted;
+          primerContainer.remove();
+
+          if (wasSuccessful) {
+            hasPrimedMobileVideoPlayback = true;
+          }
+        };
+
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.then(() => {
+            finalizePrimer(true);
+          }).catch(() => {
+            finalizePrimer(false);
+          });
+        } else {
+          finalizePrimer(true);
+        }
+      };
+
       // Audio helpers ------------------------------------------------------
       const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
       let audioCtx = null;
@@ -432,11 +549,11 @@
         const videoFrame = document.createElement('div');
         videoFrame.className = 'countdown-video-frame';
 
-        const celebrationVideo = document.createElement('video');
-        celebrationVideo.className = 'countdown-video';
-        celebrationVideo.src = 'assets/video.mp4';
-        celebrationVideo.autoplay = true;
+        const celebrationVideo = getCelebrationVideoElement();
+        celebrationVideo.pause();
+        celebrationVideo.currentTime = 0;
         celebrationVideo.muted = false;
+        celebrationVideo.autoplay = true;
         celebrationVideo.controls = true;
         celebrationVideo.setAttribute('playsinline', '');
 
@@ -477,6 +594,8 @@
           return;
         }
 
+        clearOrientationPrompt();
+
         const { wrapper, celebrationVideo } = buildCelebrationVideo();
         targetContainer.innerHTML = '';
         targetContainer.appendChild(wrapper);
@@ -497,13 +616,14 @@
               showSaveTheDateDetails({ targetContainer });
             };
 
-        celebrationVideo.addEventListener('ended', () => {
-          window.setTimeout(resolvedOnEnded, VIDEO_COMPLETE_DELAY_MS);
-        }, { once: true });
-
-        celebrationVideo.addEventListener('error', () => {
-          resolvedOnError();
-        }, { once: true });
+        attachCelebrationVideoHandlers(celebrationVideo, {
+          onEnded: () => {
+            window.setTimeout(resolvedOnEnded, VIDEO_COMPLETE_DELAY_MS);
+          },
+          onError: () => {
+            resolvedOnError();
+          },
+        });
 
         safelyPlayVideo(celebrationVideo);
       };
@@ -579,15 +699,16 @@
 
         applyOrientationPrompt({ container: frame, video: celebrationVideo });
 
-        celebrationVideo.addEventListener('ended', () => {
-          window.setTimeout(() => {
-            showMobileSaveTheDate({ withCelebrateEffects: true });
-          }, VIDEO_COMPLETE_DELAY_MS);
-        }, { once: true });
-
-        celebrationVideo.addEventListener('error', () => {
-          showMobileSaveTheDate({ withCelebrateEffects: false });
-        }, { once: true });
+        attachCelebrationVideoHandlers(celebrationVideo, {
+          onEnded: () => {
+            window.setTimeout(() => {
+              showMobileSaveTheDate({ withCelebrateEffects: true });
+            }, VIDEO_COMPLETE_DELAY_MS);
+          },
+          onError: () => {
+            showMobileSaveTheDate({ withCelebrateEffects: false });
+          },
+        });
 
         safelyPlayVideo(celebrationVideo);
       };
@@ -678,6 +799,7 @@
 
       const startCountdownFlow = () => {
         if (isMobileExperienceActive) {
+          primeMobileCelebrationVideoPlayback();
           startMobileSequence();
           return;
         }
@@ -727,6 +849,7 @@
         resumeContextIfSuspended(context);
 
         if (isMobileExperienceActive) {
+          primeMobileCelebrationVideoPlayback();
           startMobileSequence();
         } else {
           startCountdownFlow();
