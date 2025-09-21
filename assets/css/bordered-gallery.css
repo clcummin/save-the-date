@@ -685,6 +685,21 @@ body {
 
 .sneak-peek-wrapper .save-date-back-button {
   margin-top: clamp(4px, 1.6vw, 12px);
+  color: var(--cream);
+  border-color: rgba(245, 241, 235, 0.6);
+  background: rgba(245, 241, 235, 0.08);
+}
+
+.sneak-peek-wrapper .save-date-back-button .save-date-action__icon {
+  background: rgba(245, 241, 235, 0.2);
+  color: var(--emerald-dark);
+}
+
+.sneak-peek-wrapper .save-date-back-button:hover,
+.sneak-peek-wrapper .save-date-back-button:focus-visible {
+  background: rgba(245, 241, 235, 0.18);
+  border-color: rgba(245, 241, 235, 0.82);
+  box-shadow: 0 12px 26px rgba(3, 40, 28, 0.32);
 }
 
 .confetti-container {
