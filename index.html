@@ -67,8 +67,7 @@
         { start: 2000, step: 140, min: 1200 },
         { start: 1100, step: 160, min: 420 },
       ];
-      const VENUE_SNEAK_PEEK_EMBED_URL =
-        'https://github.com/clcummin/save-the-date/releases/download/v1.0.0/ChaletView.mp4';
+      const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/ChaletView480.mp4';
 
       // Media state --------------------------------------------------------
       let sharedCelebrationVideoElement = null;
@@ -662,16 +661,15 @@
         const videoFrame = document.createElement('div');
         videoFrame.className = 'countdown-video-frame sneak-peek-frame';
 
-        const embed = document.createElement('iframe');
-        embed.className = 'sneak-peek-embed';
-        embed.src = VENUE_SNEAK_PEEK_EMBED_URL;
-        embed.title = 'Sneak peek of the celebration venue';
-        embed.allow =
-          'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-        embed.setAttribute('allowfullscreen', '');
-        embed.setAttribute('loading', 'lazy');
+        const video = document.createElement('video');
+        video.className = 'sneak-peek-embed';
+        video.src = VENUE_SNEAK_PEEK_VIDEO_SOURCE;
+        video.controls = true;
+        video.preload = 'metadata';
+        video.setAttribute('playsinline', '');
+        video.setAttribute('aria-label', 'Sneak peek of the celebration venue');
 
-        videoFrame.appendChild(embed);
+        videoFrame.appendChild(video);
 
         const caption = document.createElement('p');
         caption.className = 'countdown-note sneak-peek-caption';
@@ -684,7 +682,7 @@
         wrapper.appendChild(caption);
         wrapper.appendChild(backButton);
 
-        return { wrapper, embed, backButton };
+        return { wrapper, video, backButton };
       };
 
       const safelyPlayVideo = (videoElement) => {
@@ -757,7 +755,7 @@
 
         clearOrientationPrompt();
 
-        const { wrapper, backButton } = buildSneakPeekVideo();
+        const { wrapper, video, backButton } = buildSneakPeekVideo();
         targetContainer.innerHTML = '';
         targetContainer.appendChild(wrapper);
 
@@ -765,6 +763,10 @@
           backButton.addEventListener('click', () => {
             showSaveTheDateDetails({ targetContainer });
           });
+        }
+
+        if (video) {
+          video.currentTime = 0;
         }
       };
 
@@ -868,11 +870,16 @@
           return;
         }
 
-        const { wrapper, backButton } = buildSneakPeekVideo();
+        const { wrapper, video, backButton } = buildSneakPeekVideo();
         const frame = createMobileFrame('mobile-frame--video');
         frame.appendChild(wrapper);
 
         swapMobileFrame(frame);
+
+        if (video) {
+          video.currentTime = 0;
+          applyOrientationPrompt({ container: frame, video });
+        }
 
         if (backButton) {
           backButton.addEventListener('click', () => {
