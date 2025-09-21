@@ -967,6 +967,10 @@
         const clickCleanup = eventListenerManager.add(link, 'click', (event) => {
           // Generate a fresh blob URL for each download attempt
           const freshBlobUrl = getCalendarIcsUrl();
+          // Revoke previous blob URL if present to prevent memory leaks
+          if (link.href && link.href.startsWith('blob:')) {
+            URL.revokeObjectURL(link.href);
+          }
           link.href = freshBlobUrl;
           
           // For iOS Safari, we need to handle the download differently
