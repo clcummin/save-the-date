@@ -954,6 +954,7 @@
     link.className = 'save-date-calendar-link';
     link.setAttribute('role', 'menuitem');
     link.textContent = label;
+    link.href = "#";
     
     if (download) {
       // For download links, don't set href initially - it will be set fresh on each click
