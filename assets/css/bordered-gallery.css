@@ -111,10 +111,16 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center; /* Default: center horizontally for vertical images */
   display: block;
   transform: scale(1.05);
   transition: transform var(--transition), filter var(--transition);
   filter: saturate(0.75) contrast(1.05);
+}
+
+/* Horizontal images: anchor at top to preserve subjects */
+.border-cell.is-horizontal img {
+  object-position: center top;
 }
 
 .border-cell:hover img {
@@ -243,7 +249,13 @@ body {
   width: 100vw;
   height: 100dvh;
   object-fit: cover;
+  object-position: center center; /* Default: center horizontally for vertical images */
   display: block;
+}
+
+/* Horizontal images in mobile frames: anchor at top to preserve subjects */
+.mobile-frame--photo img.mobile-frame--photo-top {
+  object-position: center top;
 }
 
 .mobile-frame--video {
@@ -277,6 +289,7 @@ body {
   width: 100vw;
   height: 100dvh;
   object-fit: cover;
+  object-position: center center; /* Center for videos */
   display: block;
 }
 
@@ -753,6 +766,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center; /* Center for videos */
   display: block;
 }
 
