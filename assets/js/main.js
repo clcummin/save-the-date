@@ -520,31 +520,40 @@
 
     // Create SVG icon
     const hasCustomFactory = typeof iconFactory === 'function';
-    let svg = hasCustomFactory ? iconFactory() : null;
+    let iconElement = hasCustomFactory ? iconFactory() : null;
 
-    if (!svg) {
+    if (!iconElement) {
       if (!iconPath) {
         return button;
       }
 
-      svg = document.createElementNS(SVG_NAMESPACE, 'svg');
-      svg.setAttribute('viewBox', viewBox);
+      iconElement = document.createElementNS(SVG_NAMESPACE, 'svg');
+      iconElement.setAttribute('viewBox', viewBox);
 
       const path = document.createElementNS(SVG_NAMESPACE, 'path');
       path.setAttribute('d', iconPath);
       path.setAttribute('fill', 'currentColor');
-      svg.appendChild(path);
+      iconElement.appendChild(path);
     }
 
-    if (!svg.hasAttribute('aria-hidden')) {
-      svg.setAttribute('aria-hidden', 'true');
+    if (iconElement?.namespaceURI === SVG_NAMESPACE) {
+      if (!iconElement.hasAttribute('aria-hidden')) {
+        iconElement.setAttribute('aria-hidden', 'true');
+      }
+      if (!iconElement.hasAttribute('focusable')) {
+        iconElement.setAttribute('focusable', 'false');
+      }
+    } else if (iconElement instanceof HTMLImageElement) {
+      if (!iconElement.hasAttribute('alt')) {
+        iconElement.alt = '';
+      }
+      iconElement.decoding = 'async';
+      iconElement.loading = 'lazy';
     }
-    if (!svg.hasAttribute('focusable')) {
-      svg.setAttribute('focusable', 'false');
-    }
-    svg.classList.add('save-date-action__icon-graphic');
 
-    icon.appendChild(svg);
+    iconElement.classList.add('save-date-action__icon-graphic');
+
+    icon.appendChild(iconElement);
 
     // Create label
     const labelEl = document.createElement('span');
@@ -559,48 +568,18 @@
   };
 
   /**
-   * Creates the custom "C & L" monogram icon used for wedding links
-   * @returns {SVGElement} Styled SVG element representing the initials
+   * Creates an icon element that reuses the site favicon
+   * @returns {HTMLImageElement} Image element referencing the favicon
    */
-  const createInitialsMonogramIcon = () => {
-    const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
-    svg.setAttribute('viewBox', '0 0 48 48');
-
-    const outerCircle = document.createElementNS(SVG_NAMESPACE, 'circle');
-    outerCircle.setAttribute('cx', '24');
-    outerCircle.setAttribute('cy', '24');
-    outerCircle.setAttribute('r', '20');
-    outerCircle.setAttribute('fill', 'none');
-    outerCircle.setAttribute('stroke', 'currentColor');
-    outerCircle.setAttribute('stroke-width', '2');
-    svg.appendChild(outerCircle);
-
-    const innerCircle = document.createElementNS(SVG_NAMESPACE, 'circle');
-    innerCircle.setAttribute('cx', '24');
-    innerCircle.setAttribute('cy', '24');
-    innerCircle.setAttribute('r', '15');
-    innerCircle.setAttribute('fill', 'none');
-    innerCircle.setAttribute('stroke', 'currentColor');
-    innerCircle.setAttribute('stroke-width', '1');
-    innerCircle.setAttribute('stroke-dasharray', '3 3');
-    innerCircle.setAttribute('stroke-opacity', '0.65');
-    innerCircle.setAttribute('stroke-linecap', 'round');
-    svg.appendChild(innerCircle);
-
-    const text = document.createElementNS(SVG_NAMESPACE, 'text');
-    text.setAttribute('x', '24');
-    text.setAttribute('y', '24');
-    text.setAttribute('text-anchor', 'middle');
-    text.setAttribute('dominant-baseline', 'middle');
-    text.setAttribute('fill', 'currentColor');
-    text.setAttribute('font-family', "'Cinzel Decorative', serif");
-    text.setAttribute('font-size', '12');
-    text.setAttribute('font-weight', '600');
-    text.setAttribute('letter-spacing', '1.6px');
-    text.textContent = 'C & L';
-    svg.appendChild(text);
-
-    return svg;
+  const createFaviconIcon = () => {
+    const image = document.createElement('img');
+    // Dynamically get the favicon URL from the DOM, fallback to default if not found
+    const faviconUrl = document.querySelector('link[rel="icon"]')?.href || '/assets/favicon.png';
+    image.src = faviconUrl;
+    image.alt = '';
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    return image;
   };
 
   /**
@@ -658,7 +637,7 @@
     // Wedding website link
     const websiteLink = createSaveTheDateActionButton({
       label: 'Wedding website',
-      iconFactory: createInitialsMonogramIcon,
+      iconFactory: createFaviconIcon,
       element: 'a',
       href: 'https://becomingcummings.love',
       isIconOnly: true,
