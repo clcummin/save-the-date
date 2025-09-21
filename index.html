@@ -64,6 +64,7 @@
       const SAVE_THE_DATE_REVEAL_DELAY_MS = 80;
       const COUNTDOWN_START_FALLBACK = 10;
       const MOBILE_PHOTO_DEFAULT_DURATION_MS = 1600;
+      const MOBILE_PHOTO_TRANSITION_BUFFER_MS = 80;
       const MOBILE_PHOTO_CYCLE_DURATIONS = [
         { start: 2000, step: 140, min: 1200 },
         { start: 1100, step: 160, min: 420 },
@@ -879,10 +880,16 @@
         playBeat();
         swapMobileFrame(frame);
 
+        const transitionDelay = prefersReducedMotion ? 0 : CELEBRATION_TRANSITION_DELAY_MS;
         const displayDuration = getMobilePhotoDisplayDuration({ cycleIndex, photoIndex: index });
+        const minimumDelay = transitionDelay > 0
+          ? transitionDelay + MOBILE_PHOTO_TRANSITION_BUFFER_MS
+          : 0;
+        const scheduleDelay = Math.max(displayDuration, minimumDelay);
+
         window.setTimeout(() => {
           showMobilePhotoAtIndex(index + 1, cycleIndex);
-        }, displayDuration);
+        }, scheduleDelay);
       };
 
       const startMobileSequence = () => {
