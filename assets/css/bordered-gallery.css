@@ -188,7 +188,6 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: stretch;
-  min-height: 100dvh;
   height: 100dvh;
 }
 
