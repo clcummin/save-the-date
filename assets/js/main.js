@@ -824,6 +824,7 @@
     details.addEventListener('focusout', (event) => {
       if (!details.contains(event.relatedTarget)) {
         details.open = false;
+        setExpanded(false);
       }
     });
 
