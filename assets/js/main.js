@@ -390,12 +390,12 @@
     };
   });
   
-  const mobilePhotoLoopCount = prefersReducedMotion ? 1 : 2;
+  const mobilePhotoLoopCount = 1;
 
   /**
-   * Calculates display duration for mobile photos based on cycle and position
+   * Calculates display duration for mobile photos based on position
    * @param {Object} params - Parameters object
-   * @param {number} params.cycleIndex - Current cycle iteration
+   * @param {number} params.cycleIndex - Current cycle iteration (unused but kept for compatibility)
    * @param {number} params.photoIndex - Index of photo in sequence
    * @returns {number} Duration in milliseconds
    */
@@ -404,8 +404,8 @@
       return MOBILE_PHOTO_DEFAULT_DURATION_MS;
     }
 
-    const settings = MOBILE_PHOTO_CYCLE_DURATIONS[cycleIndex]
-      ?? MOBILE_PHOTO_CYCLE_DURATIONS[MOBILE_PHOTO_CYCLE_DURATIONS.length - 1];
+    // Use first cycle settings consistently
+    const settings = MOBILE_PHOTO_CYCLE_DURATIONS[0];
     const duration = settings.start - settings.step * photoIndex;
     return Math.max(settings.min, duration);
   };
