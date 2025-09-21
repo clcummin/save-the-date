@@ -767,14 +767,48 @@
   };
 
   /**
+   * Shows a hint message for ICS downloads
+   * @param {HTMLElement} container - Container element to append the hint to
+   */
+  const showDownloadHint = (container) => {
+    // Remove any existing hint
+    const existingHint = container.querySelector('.download-hint');
+    if (existingHint) {
+      existingHint.remove();
+    }
+
+    const hint = document.createElement('div');
+    hint.className = 'download-hint';
+    hint.setAttribute('role', 'status');
+    hint.setAttribute('aria-live', 'polite');
+    hint.textContent = "If your event didn't open automatically, tap the downloaded file to add it to your calendar app.";
+    
+    container.appendChild(hint);
+
+    // Auto-hide the hint after 6 seconds
+    setTimeout(() => {
+      if (hint.parentNode) {
+        hint.classList.add('download-hint--hiding');
+        // Remove from DOM after fade animation
+        setTimeout(() => {
+          if (hint.parentNode) {
+            hint.remove();
+          }
+        }, 300);
+      }
+    }, 6000);
+  };
+
+  /**
    * Creates a calendar option link element
    * @param {Object} options - Link configuration options
    * @param {string} options.label - The text label for the link
    * @param {string} options.href - The destination URL
    * @param {boolean} [options.download] - Whether to trigger a download
+   * @param {HTMLElement} [options.hintContainer] - Container for showing download hints
    * @returns {HTMLAnchorElement} Configured anchor element
    */
-  const createCalendarOptionLink = ({ label, href, download = false }) => {
+  const createCalendarOptionLink = ({ label, href, download = false, hintContainer = null }) => {
     const link = document.createElement('a');
     link.className = 'save-date-calendar-link';
     link.textContent = label;
@@ -782,6 +816,16 @@
     if (download) {
       link.setAttribute('download', 'wedding-weekend.ics');
       link.setAttribute('type', 'text/calendar');
+      
+      // Add click handler to show hint message after download
+      if (hintContainer) {
+        link.addEventListener('click', () => {
+          // Small delay to ensure download has started
+          setTimeout(() => {
+            showDownloadHint(hintContainer);
+          }, 100);
+        });
+      }
     } else {
       link.setAttribute('target', '_blank');
       link.setAttribute('rel', 'noreferrer noopener');
@@ -829,6 +873,7 @@
       label: 'Apple, Outlook & others (ICS)',
       href: getCalendarIcsUrl(),
       download: true,
+      hintContainer: container,
     });
 
     menu.append(googleLink, universalLink);
