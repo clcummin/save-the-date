@@ -1112,17 +1112,6 @@ h1 {
   }
 
   /* Disable hover behaviors for action icons on mobile */
-  .save-date-action--icon-only:hover::after {
-    opacity: 0;
-    transform: translate3d(-50%, -8px, 0);
-  }
-
-  .save-date-calendar-summary:hover::after,
-  .save-date-calendar-details:hover .save-date-calendar-summary::after {
-    opacity: 0;
-    transform: translate3d(-50%, -8px, 0);
-  }
-
   /* Make action icon tooltips always visible on mobile for better UX */
   .save-date-action--icon-only::after {
     display: none; /* Hide tooltips on mobile - they're not needed */
