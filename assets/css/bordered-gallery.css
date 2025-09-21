@@ -472,7 +472,7 @@ body {
   position: absolute;
   top: calc(100% + 8px);
   left: 50%;
-  transform: translate3d(-50%, 8px, 0);
+  transform: translate3d(-50%, -8px, 0);
   background: rgba(12, 44, 29, 0.92);
   color: var(--cream);
   padding: 6px 12px;
