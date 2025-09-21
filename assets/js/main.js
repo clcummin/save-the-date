@@ -954,9 +954,9 @@
     link.className = 'save-date-calendar-link';
     link.setAttribute('role', 'menuitem');
     link.textContent = label;
-    link.href = href;
     
     if (download) {
+      // For download links, don't set href initially - it will be set fresh on each click
       link.setAttribute('download', 'wedding-weekend.ics');
       // Improved MIME type for better mobile compatibility
       link.setAttribute('type', 'text/calendar; charset=utf-8');
@@ -965,6 +965,14 @@
       // Enhanced click handler with better mobile support
       if (hintContainer) {
         const clickCleanup = eventListenerManager.add(link, 'click', (event) => {
+          // Generate a fresh blob URL for each download attempt
+          const freshBlobUrl = getCalendarIcsUrl();
+          // Revoke previous blob URL if present to prevent memory leaks
+          if (link.href && link.href.startsWith('blob:')) {
+            URL.revokeObjectURL(link.href);
+          }
+          link.href = freshBlobUrl;
+          
           // For iOS Safari, we need to handle the download differently
           const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
                              /Safari/.test(navigator.userAgent) && 
@@ -973,7 +981,7 @@
           if (isIOSSafari) {
             // iOS Safari needs special handling - open in new window
             event.preventDefault();
-            window.open(href, '_blank');
+            window.open(freshBlobUrl, '_blank');
           }
           
           // Show hint with appropriate delay for different platforms
@@ -987,6 +995,8 @@
         link._eventCleanup = clickCleanup;
       }
     } else {
+      // For non-download links (like Google Calendar), set href normally
+      link.href = href;
       link.setAttribute('target', '_blank');
       link.setAttribute('rel', 'noreferrer noopener');
       link.setAttribute('aria-describedby', 'google-calendar-hint');
@@ -1038,7 +1048,6 @@
 
     const universalLink = createCalendarOptionLink({
       label: 'Apple, Outlook & others (ICS)',
-      href: getCalendarIcsUrl(),
       download: true,
       hintContainer: container,
     });
