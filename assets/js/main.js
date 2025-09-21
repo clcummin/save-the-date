@@ -460,6 +460,9 @@
    * @param {string} [config.viewBox='0 0 24 24'] - SVG viewBox
    * @param {string} [config.element='button'] - HTML element type ('button' or 'a')
    * @param {string} [config.href=''] - Link URL for anchor elements
+   * @param {boolean} [config.isIconOnly=false] - Whether to render as icon-only button
+   * @param {string} [config.tooltipText=''] - Optional tooltip text
+   * @param {string} [config.ariaLabel=''] - Custom accessible label
    * @returns {HTMLElement} The configured button element
    */
   const createSaveTheDateActionButton = ({
@@ -469,10 +472,13 @@
     viewBox = '0 0 24 24',
     element = 'button',
     href = '',
+    isIconOnly = false,
+    tooltipText = '',
+    ariaLabel = '',
   }) => {
     const tagName = element === 'a' ? 'a' : 'button';
     const button = document.createElement(tagName);
-    
+
     // Configure element based on type
     if (tagName === 'button') {
       button.type = 'button';
@@ -483,8 +489,27 @@
     } else {
       button.href = '#';
     }
-    
-    button.className = `save-date-action${additionalClassName ? ` ${additionalClassName}` : ''}`;
+
+    if (ariaLabel) {
+      button.setAttribute('aria-label', ariaLabel);
+    }
+
+    const buttonClassNames = ['save-date-action'];
+    if (additionalClassName) {
+      buttonClassNames.push(additionalClassName);
+    }
+    if (isIconOnly) {
+      buttonClassNames.push('save-date-action--icon-only');
+    }
+
+    button.className = buttonClassNames.join(' ');
+
+
+    const tooltipLabel = tooltipText || (isIconOnly ? label : '');
+    if (tooltipLabel) {
+      button.dataset.tooltip = tooltipLabel;
+      button.setAttribute('title', tooltipLabel);
+    }
 
     // Create icon container
     const icon = document.createElement('span');
@@ -506,6 +531,9 @@
     // Create label
     const labelEl = document.createElement('span');
     labelEl.className = 'save-date-action__label';
+    if (isIconOnly) {
+      labelEl.classList.add('visually-hidden');
+    }
     labelEl.textContent = label;
 
     button.append(icon, labelEl);
@@ -570,25 +598,33 @@
       iconPath: 'M12 4a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3h1V8a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v1h4V8a2 2 0 0 0-2-2zm5 5H8a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1z',
       element: 'a',
       href: 'https://becomingcummings.love',
+      isIconOnly: true,
+      tooltipText: 'Wedding website',
+      ariaLabel: 'Visit our wedding website (opens in a new tab)',
     });
-    websiteLink.setAttribute('aria-label', 'Visit our wedding website (opens in a new tab)');
 
     // Replay video button
     const replayButton = createSaveTheDateActionButton({
       label: 'Replay celebration video',
       iconPath: 'M12 5.5V2L5.5 8.5 12 15V10.6c3.15 0 5.9 2.55 5.9 5.9s-2.55 5.9-5.9 5.9-5.9-2.55-5.9-5.9h-2c0 4.36 3.54 7.9 7.9 7.9s7.9-3.54 7.9-7.9S16.36 8.6 12 8.6z',
+      isIconOnly: true,
+      tooltipText: 'Replay video',
+      ariaLabel: 'Replay celebration video',
     });
-    replayButton.setAttribute('aria-label', 'Replay celebration video');
 
     // Venue sneak peek button
     const sneakPeekButton = createSaveTheDateActionButton({
       label: 'Venue sneak peek',
       iconPath: 'M8 5.5v13l11-6.5-11-6.5z',
-      additionalClassName: 'save-date-action--secondary',
+      additionalClassName: 'save-date-action--secondary save-date-action--full',
     });
     sneakPeekButton.setAttribute('aria-label', 'Play the venue sneak peek video');
 
-    actions.append(websiteLink, replayButton, sneakPeekButton);
+    const iconActions = document.createElement('div');
+    iconActions.className = 'save-date-action-icons';
+    iconActions.append(replayButton, websiteLink);
+
+    actions.append(sneakPeekButton, iconActions);
     return { actions, websiteLink, replayButton, sneakPeekButton };
   };
 
