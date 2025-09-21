@@ -1110,6 +1110,55 @@ h1 {
     background: rgba(255, 255, 255, 0.22);
     color: var(--emerald-dark);
   }
+
+  /* Disable hover behaviors for action icons on mobile */
+  /* Make action icon tooltips always visible on mobile for better UX */
+  .save-date-action--icon-only::after {
+    display: none; /* Hide tooltips on mobile - they're not needed */
+  }
+
+  .save-date-calendar-summary::after {
+    display: none; /* Hide calendar tooltips on mobile - they're not needed */
+  }
+
+  /* Improve action icons layout on mobile */
+  .save-date-action-icons {
+    gap: clamp(16px, 4vw, 24px);
+  }
+
+  .save-date-action--icon-only {
+    width: clamp(60px, 16vw, 80px);
+    height: clamp(60px, 16vw, 80px);
+    padding: clamp(12px, 3vw, 16px);
+  }
+
+  /* Override calendar positioning to prevent off-screen issues */
+  .save-date-calendar {
+    position: static;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .save-date-calendar-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .save-date-calendar-menu {
+    position: static;
+    width: min(100%, 320px);
+    max-width: min(100%, 320px);
+    margin-top: 12px;
+    margin-inline: auto;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 12px;
+  }
 }
 
 @media (max-width: 520px) {
