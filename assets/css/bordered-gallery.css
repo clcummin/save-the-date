@@ -903,10 +903,8 @@ body {
   gap: 0;
   background: rgba(12, 63, 43, 0.12);
   min-height: 48px; /* Enhanced touch target for accessibility */
-}
   border-color: rgba(12, 44, 29, 0.2);
 }
-
 .save-date-action--icon-only::after {
   content: attr(data-tooltip);
   position: absolute;
