@@ -2,6 +2,66 @@
   'use strict';
 
   // =====================================================================
+  // EVENT LISTENER MANAGEMENT MODULE
+  // =====================================================================
+
+  /**
+   * Centralized event listener management to prevent memory leaks
+   */
+  const eventListenerManager = {
+    listeners: new Map(),
+    
+    /**
+     * Adds an event listener with automatic cleanup tracking
+     * @param {EventTarget} target - The target element
+     * @param {string} event - The event type
+     * @param {Function} handler - The event handler
+     * @param {Object} options - Event listener options
+     * @returns {Function} Cleanup function
+     */
+    add(target, event, handler, options = {}) {
+      if (!target || !event || !handler) {
+        console.warn('Invalid event listener parameters');
+        return () => {};
+      }
+
+      target.addEventListener(event, handler, options);
+      
+      const key = `${target.constructor.name}_${Date.now()}_${Math.random()}`;
+      const cleanup = () => {
+        try {
+          target.removeEventListener(event, handler, options);
+          this.listeners.delete(key);
+        } catch (error) {
+          console.debug('Event listener cleanup error:', error.message);
+        }
+      };
+      
+      this.listeners.set(key, { target, event, handler, options, cleanup });
+      return cleanup;
+    },
+
+    /**
+     * Removes all tracked event listeners
+     */
+    cleanup() {
+      for (const [key, listener] of this.listeners) {
+        try {
+          listener.cleanup();
+        } catch (error) {
+          console.debug('Event listener cleanup error:', error.message);
+        }
+      }
+      this.listeners.clear();
+    }
+  };
+
+  // Global cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    eventListenerManager.cleanup();
+  });
+
+  // =====================================================================
   // CONFIGURATION CONSTANTS
   // =====================================================================
 
@@ -127,20 +187,33 @@
    * Attempts to play video safely with proper error handling
    * @param {HTMLVideoElement} videoElement - The video to play
    */
+  /**
+   * Safely attempts to play a video with proper error handling
+   * @param {HTMLVideoElement} videoElement - The video element to play
+   */
   const safelyPlayVideo = (videoElement) => {
-    if (!videoElement) return;
+    if (!videoElement || typeof videoElement.play !== 'function') {
+      console.warn('Invalid video element for playback');
+      return;
+    }
 
     const attemptVideoPlayback = () => {
       const playPromise = videoElement.play();
       if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => {});
+        playPromise.catch((error) => {
+          console.debug('Video playback failed:', error.message);
+          // Handle autoplay policy restrictions gracefully
+          if (error.name === 'NotAllowedError') {
+            console.debug('Video autoplay was prevented by browser policy');
+          }
+        });
       }
     };
 
     if (videoElement.readyState >= 2) {
       attemptVideoPlayback();
     } else {
-      videoElement.addEventListener('canplay', attemptVideoPlayback, { once: true });
+      eventListenerManager.add(videoElement, 'canplay', attemptVideoPlayback, { once: true });
     }
   };
 
@@ -368,11 +441,12 @@
       : mobileBreakpointQuery?.matches ?? false;
   };
 
-  // Set up mobile breakpoint listener
+  // Set up mobile breakpoint listener with proper cleanup
   if (mobileBreakpointQuery) {
     if (typeof mobileBreakpointQuery.addEventListener === 'function') {
-      mobileBreakpointQuery.addEventListener('change', updateMobileExperiencePreference);
+      eventListenerManager.add(mobileBreakpointQuery, 'change', updateMobileExperiencePreference);
     } else if (typeof mobileBreakpointQuery.addListener === 'function') {
+      // Fallback for older browsers
       mobileBreakpointQuery.addListener(updateMobileExperiencePreference);
     }
   }
@@ -728,7 +802,7 @@
   };
 
   /**
-   * Creates (or returns a cached) object URL for the ICS download
+   * Creates (or returns a cached) object URL for the ICS download with enhanced mobile support
    * @returns {string} Object URL pointing to ICS data
    */
   const getCalendarIcsUrl = () => {
@@ -737,17 +811,41 @@
     }
 
     const icsContent = createCalendarIcsContent();
-    const blob = new Blob([icsContent], { type: 'text/calendar' });
+    
+    // Enhanced blob creation with better MIME type for mobile compatibility
+    const blob = new Blob([icsContent], { 
+      type: 'text/calendar; charset=utf-8' 
+    });
+    
     cachedCalendarBlobUrl = window.URL.createObjectURL(blob);
     return cachedCalendarBlobUrl;
   };
 
-  window.addEventListener('beforeunload', () => {
+  // Enhanced cleanup with better error handling
+  const cleanupCalendarBlobUrl = () => {
     if (cachedCalendarBlobUrl) {
-      window.URL.revokeObjectURL(cachedCalendarBlobUrl);
+      try {
+        window.URL.revokeObjectURL(cachedCalendarBlobUrl);
+      } catch (error) {
+        // Silently handle revocation errors (URL might already be revoked)
+        console.debug('Calendar blob URL cleanup:', error.message);
+      }
       cachedCalendarBlobUrl = null;
     }
-  });
+  };
+
+  // Multiple cleanup triggers for better resource management
+  window.addEventListener('beforeunload', cleanupCalendarBlobUrl);
+  window.addEventListener('pagehide', cleanupCalendarBlobUrl);
+  
+  // Cleanup when page becomes hidden (mobile browser behavior)
+  if (document.addEventListener) {
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        cleanupCalendarBlobUrl();
+      }
+    });
+  }
 
   /**
    * Builds the Google Calendar template URL
@@ -767,11 +865,11 @@
   };
 
   /**
-   * Shows a hint message for ICS downloads
+   * Shows a hint message for ICS downloads with improved mobile support
    * @param {HTMLElement} container - Container element to append the hint to
    */
   const showDownloadHint = (container) => {
-    // Remove any existing hint
+    // Remove any existing hint to prevent duplicates
     const existingHint = container.querySelector('.download-hint');
     if (existingHint) {
       existingHint.remove();
@@ -779,13 +877,30 @@
 
     const hint = document.createElement('div');
     hint.className = 'download-hint';
+    hint.id = 'calendar-download-hint';
     hint.setAttribute('role', 'status');
     hint.setAttribute('aria-live', 'polite');
-    hint.textContent = "If your event didn't open automatically, tap the downloaded file to add it to your calendar app.";
+    hint.setAttribute('aria-atomic', 'true');
     
+    // Platform-specific messaging for better UX
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroidDevice = /Android/.test(navigator.userAgent);
+    
+    let hintText;
+    if (isIOSDevice) {
+      hintText = "Tap the file in Safari's downloads or open your Files app to add the event to your calendar.";
+    } else if (isAndroidDevice) {
+      hintText = "Check your downloads or notification panel. Tap the file to add the event to your calendar.";
+    } else {
+      hintText = "If your event didn't open automatically, check your downloads folder and open the file to add it to your calendar.";
+    }
+    
+    hint.textContent = hintText;
     container.appendChild(hint);
 
-    // Auto-hide the hint after 6 seconds
+    // Auto-hide the hint after appropriate duration based on text length
+    const hideDelay = hintText.length > 80 ? 8000 : 6000;
+    
     setTimeout(() => {
       if (hint.parentNode) {
         hint.classList.add('download-hint--hiding');
@@ -796,7 +911,7 @@
           }
         }, 300);
       }
-    }, 6000);
+    }, hideDelay);
   };
 
   /**
@@ -811,30 +926,50 @@
   const createCalendarOptionLink = ({ label, href, download = false, hintContainer = null }) => {
     const link = document.createElement('a');
     link.className = 'save-date-calendar-link';
+    link.setAttribute('role', 'menuitem');
     link.textContent = label;
     link.href = href;
+    
     if (download) {
       link.setAttribute('download', 'wedding-weekend.ics');
-      link.setAttribute('type', 'text/calendar');
+      // Improved MIME type for better mobile compatibility
+      link.setAttribute('type', 'text/calendar; charset=utf-8');
+      link.setAttribute('aria-describedby', 'calendar-download-hint');
       
-      // Add click handler to show hint message after download
+      // Enhanced click handler with better mobile support
       if (hintContainer) {
-        link.addEventListener('click', () => {
-          // Small delay to ensure download has started
+        const clickCleanup = eventListenerManager.add(link, 'click', (event) => {
+          // For iOS Safari, we need to handle the download differently
+          const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+                             /Safari/.test(navigator.userAgent) && 
+                             !/CriOS|FxiOS|OPiOS|mercury/.test(navigator.userAgent);
+          
+          if (isIOSSafari) {
+            // iOS Safari needs special handling - open in new window
+            event.preventDefault();
+            window.open(href, '_blank');
+          }
+          
+          // Show hint with appropriate delay for different platforms
+          const delay = isIOSSafari ? 200 : 100;
           setTimeout(() => {
             showDownloadHint(hintContainer);
-          }, 100);
+          }, delay);
         });
+        
+        // Store cleanup function for potential cleanup
+        link._eventCleanup = clickCleanup;
       }
     } else {
       link.setAttribute('target', '_blank');
       link.setAttribute('rel', 'noreferrer noopener');
+      link.setAttribute('aria-describedby', 'google-calendar-hint');
     }
     return link;
   };
 
   /**
-   * Creates the Add to calendar control for the save the date details
+   * Creates the Add to calendar control with improved accessibility
    * @returns {Object} Object containing container and interactive elements
    */
   const createCalendarInviteControls = () => {
@@ -843,11 +978,15 @@
 
     const details = document.createElement('details');
     details.className = 'save-date-calendar-details';
+    details.setAttribute('role', 'group');
+    details.setAttribute('aria-labelledby', 'calendar-summary');
 
     const summary = document.createElement('summary');
     summary.className = 'save-date-calendar-summary';
+    summary.id = 'calendar-summary';
     summary.setAttribute('aria-label', 'Add the wedding weekend to your calendar');
     summary.setAttribute('aria-expanded', 'false');
+    summary.setAttribute('aria-haspopup', 'menu');
     summary.setAttribute('title', 'Add to calendar');
     summary.dataset.tooltip = 'Add to calendar';
 
@@ -863,6 +1002,8 @@
 
     const menu = document.createElement('div');
     menu.className = 'save-date-calendar-menu';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-labelledby', 'calendar-summary');
 
     const googleLink = createCalendarOptionLink({
       label: 'Google Calendar',
@@ -884,36 +1025,97 @@
       summary.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     };
 
-    // Let native <details> element handle click behavior while maintaining accessibility.
-    // The toggle event handles both click and keyboard activation.
-    details.addEventListener('toggle', () => {
+    // Handle native details toggle event
+    const toggleCleanup = eventListenerManager.add(details, 'toggle', () => {
       setExpanded(details.open);
+      
+      // Focus management for accessibility
+      if (details.open) {
+        // Focus first menu item when opened
+        requestAnimationFrame(() => {
+          const firstMenuItem = menu.querySelector('[role="menuitem"]');
+          if (firstMenuItem) {
+            firstMenuItem.focus();
+          }
+        });
+      }
     });
 
-    // Handle keyboard accessibility - only for keyboard navigation
-    summary.addEventListener('keydown', (event) => {
+    // Enhanced keyboard navigation
+    const summaryKeydownCleanup = eventListenerManager.add(summary, 'keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
-        // Let the native behavior handle this, just ensure it's open
+        event.preventDefault();
+        details.open = !details.open;
+      } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
         if (!details.open) {
           details.open = true;
         }
       }
     });
 
-    // Close dropdown when clicking outside or navigating away
-    document.addEventListener('click', (event) => {
-      if (details.open && !details.contains(event.target)) {
-        details.open = false;
+    // Menu keyboard navigation
+    const menuKeydownCleanup = eventListenerManager.add(menu, 'keydown', (event) => {
+      const menuItems = Array.from(menu.querySelectorAll('[role="menuitem"]'));
+      const currentIndex = menuItems.indexOf(document.activeElement);
+
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          const nextIndex = (currentIndex + 1) % menuItems.length;
+          menuItems[nextIndex].focus();
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          const prevIndex = currentIndex <= 0 ? menuItems.length - 1 : currentIndex - 1;
+          menuItems[prevIndex].focus();
+          break;
+        case 'Escape':
+          event.preventDefault();
+          details.open = false;
+          summary.focus();
+          break;
+        case 'Tab':
+          // Allow normal tab behavior, but close menu if tabbing out
+          if (!event.shiftKey && currentIndex === menuItems.length - 1) {
+            details.open = false;
+          }
+          break;
       }
     });
 
-    // Close dropdown when focus moves outside the details element
-    details.addEventListener('focusout', (event) => {
-      if (!details.contains(event.relatedTarget)) {
+    // Close dropdown when clicking outside
+    const handleOutsideClick = (event) => {
+      if (details.open && !details.contains(event.target)) {
         details.open = false;
-        setExpanded(false);
       }
-    });
+    };
+
+    // Improved focus management
+    const handleFocusOut = (event) => {
+      // Use setTimeout to allow for focus to settle
+      setTimeout(() => {
+        if (!details.contains(document.activeElement)) {
+          details.open = false;
+          setExpanded(false);
+        }
+      }, 0);
+    };
+
+    const clickCleanup = eventListenerManager.add(document, 'click', handleOutsideClick);
+    const focusCleanup = eventListenerManager.add(details, 'focusout', handleFocusOut);
+
+    // Comprehensive cleanup function
+    const cleanup = () => {
+      toggleCleanup();
+      summaryKeydownCleanup();
+      menuKeydownCleanup();
+      clickCleanup();
+      focusCleanup();
+    };
+
+    // Store cleanup function for potential future use
+    container._cleanup = cleanup;
 
     return { container, details };
   };
@@ -997,16 +1199,21 @@
    * @param {Function} [handlers.onReplay] - Replay button click handler
    * @param {Function} [handlers.onSneakPeek] - Sneak peek button click handler
    */
+  /**
+   * Wires up save the date action buttons with event listeners
+   * @param {Object} elements - Button elements
+   * @param {Object} handlers - Event handler functions
+   */
   const wireSaveTheDateActions = (
     { replayButton, sneakPeekButton },
     { onReplay, onSneakPeek } = {}
   ) => {
     if (replayButton && typeof onReplay === 'function') {
-      replayButton.addEventListener('click', onReplay);
+      eventListenerManager.add(replayButton, 'click', onReplay);
     }
 
     if (sneakPeekButton && typeof onSneakPeek === 'function') {
-      sneakPeekButton.addEventListener('click', onSneakPeek);
+      eventListenerManager.add(sneakPeekButton, 'click', onSneakPeek);
     }
   };
 
@@ -1472,14 +1679,14 @@
     }
   };
 
-  // Wire up interactions ----------------------------------------------
+  // Wire up interactions with proper event management --------------
   if (startButton) {
-    startButton.addEventListener('click', startExperience);
+    eventListenerManager.add(startButton, 'click', startExperience);
   }
 
   if (startOverlay) {
-    startOverlay.addEventListener('click', startExperience);
-    startOverlay.addEventListener('keydown', handleOverlayKeyDown);
+    eventListenerManager.add(startOverlay, 'click', startExperience);
+    eventListenerManager.add(startOverlay, 'keydown', handleOverlayKeyDown);
   }
 
   if (!startOverlay || !startButton) {
