@@ -1,16 +1,27 @@
+/* ===================================================================
+   SAVE THE DATE WEBSITE STYLES
+   ================================================================= */
+
+/* CSS CUSTOM PROPERTIES (VARIABLES)
+   ================================================================= */
 :root {
+  /* Color palette */
   --emerald-dark: #03281c;
   --emerald-mid: #0c3f2b;
   --cream: #f5f1eb;
   --text-dark: #0c2c1d;
   --text-muted: rgba(12, 44, 29, 0.72);
   --accent: #ffe3a2;
+  
+  /* Layout and effects */
   --transition: 0.35s ease;
   --card-radius: clamp(20px, 4vw, 36px);
   --card-border: rgba(12, 44, 29, 0.14);
   --countdown-font: 'Cinzel Decorative', serif;
 }
 
+/* GLOBAL RESET & BASE STYLES
+   ================================================================= */
 * {
   box-sizing: border-box;
 }
@@ -33,6 +44,8 @@ body {
   min-height: 100dvh;
 }
 
+/* MAIN LAYOUT GRID
+   ================================================================= */
 .page-border {
   display: grid;
   grid-template-columns: minmax(120px, 18vw) minmax(200px, 1fr) minmax(200px, 1fr) minmax(120px, 18vw);
@@ -52,6 +65,10 @@ body {
   padding: 0;
 }
 
+/* BORDER CELL PHOTO GALLERY
+   ================================================================= */
+
+/* Base border cell styles */
 .border-cell {
   position: relative;
   overflow: hidden;
@@ -67,6 +84,7 @@ body {
   transform: none;
 }
 
+/* Overlay effect for photos */
 .border-cell::after {
   content: '';
   position: absolute;
@@ -76,6 +94,7 @@ body {
   pointer-events: none;
 }
 
+/* Image styling and hover effects */
 .border-cell img {
   width: 100%;
   height: 100%;
@@ -91,6 +110,7 @@ body {
   filter: saturate(1) contrast(1.1);
 }
 
+/* Grid area assignments */
 .border-cell.top-left-wide {
   grid-area: top-left-wide;
 }
