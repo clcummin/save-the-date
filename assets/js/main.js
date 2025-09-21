@@ -1,11 +1,14 @@
 (() => {
   'use strict';
 
-  // Configuration constants that define animation timing and interaction behavior.
+  // =====================================================================
+  // CONFIGURATION CONSTANTS
+  // =====================================================================
+
+  // User interaction settings
   const KEYBOARD_ACTIVATION_KEYS = new Set(['Enter', ' ', 'Spacebar']);
-  const CELEBRATION_CONFETTI_PIECES = 80;
-  const CELEBRATION_CONFETTI_COLORS = ['#03281c', '#000000', '#ffffff'];
-  const CELEBRATION_CONFETTI_LIFETIME_MS = 4200;
+
+  // Animation timing constants
   const CELEBRATION_TRANSITION_DELAY_MS = 520;
   const VIDEO_COMPLETE_DELAY_MS = 600;
   const COUNTDOWN_INTERVAL_MS = 1100;
@@ -13,21 +16,38 @@
   const COUNTDOWN_TRANSITION_RESET_MS = 360;
   const START_OVERLAY_CLEAR_DELAY_MS = 420;
   const SAVE_THE_DATE_REVEAL_DELAY_MS = 80;
-  const COUNTDOWN_START_FALLBACK = 10;
+
+  // Confetti animation settings
+  const CELEBRATION_CONFETTI_PIECES = 80;
+  const CELEBRATION_CONFETTI_COLORS = ['#03281c', '#000000', '#ffffff'];
+  const CELEBRATION_CONFETTI_LIFETIME_MS = 4200;
+
+  // Mobile photo sequence settings
   const MOBILE_PHOTO_DEFAULT_DURATION_MS = 1600;
   const MOBILE_PHOTO_TRANSITION_BUFFER_MS = 80;
   const MOBILE_PHOTO_CYCLE_DURATIONS = [
     { start: 2000, step: 140, min: 1200 },
     { start: 1100, step: 160, min: 420 },
   ];
+
+  // Content settings
+  const COUNTDOWN_START_FALLBACK = 10;
   const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/ChaletView480.mp4';
 
-  // Media state --------------------------------------------------------
+  // =====================================================================
+  // VIDEO MANAGEMENT MODULE
+  // =====================================================================
+
+  // Shared video state
   let sharedCelebrationVideoElement = null;
   let sharedCelebrationVideoEndedHandler = null;
   let sharedCelebrationVideoErrorHandler = null;
   let hasPrimedMobileVideoPlayback = false;
 
+  /**
+   * Creates a new celebration video element with appropriate settings
+   * @returns {HTMLVideoElement} The configured video element
+   */
   const createCelebrationVideoElement = () => {
     const video = document.createElement('video');
     video.className = 'countdown-video';
@@ -40,18 +60,23 @@
     return video;
   };
 
+  /**
+   * Gets or creates the shared celebration video element
+   * @returns {HTMLVideoElement} The shared video element
+   */
   const getCelebrationVideoElement = () => {
     if (!sharedCelebrationVideoElement) {
       sharedCelebrationVideoElement = createCelebrationVideoElement();
     }
-
     return sharedCelebrationVideoElement;
   };
 
+  /**
+   * Removes existing event handlers from the video element
+   * @param {HTMLVideoElement} video - The video element to clean up
+   */
   const resetCelebrationVideoHandlers = (video) => {
-    if (!video) {
-      return;
-    }
+    if (!video) return;
 
     if (sharedCelebrationVideoEndedHandler) {
       video.removeEventListener('ended', sharedCelebrationVideoEndedHandler);
@@ -64,10 +89,13 @@
     }
   };
 
+  /**
+   * Attaches new event handlers to the video element
+   * @param {HTMLVideoElement} video - The video element
+   * @param {Object} handlers - Object with onEnded and onError callbacks
+   */
   const attachCelebrationVideoHandlers = (video, { onEnded, onError }) => {
-    if (!video) {
-      return;
-    }
+    if (!video) return;
 
     resetCelebrationVideoHandlers(video);
 
@@ -82,25 +110,41 @@
     }
   };
 
-  const primeMobileCelebrationVideoPlayback = () => {
-    if (hasPrimedMobileVideoPlayback) {
-      return;
+  /**
+   * Attempts to play video safely with proper error handling
+   * @param {HTMLVideoElement} videoElement - The video to play
+   */
+  const safelyPlayVideo = (videoElement) => {
+    if (!videoElement) return;
+
+    const attemptVideoPlayback = () => {
+      const playPromise = videoElement.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {});
+      }
+    };
+
+    if (videoElement.readyState >= 2) {
+      attemptVideoPlayback();
+    } else {
+      videoElement.addEventListener('canplay', attemptVideoPlayback, { once: true });
     }
+  };
+
+  /**
+   * Primes video playback for mobile devices by attempting a silent play
+   * This helps with autoplay restrictions on mobile browsers
+   */
+  const primeMobileCelebrationVideoPlayback = () => {
+    if (hasPrimedMobileVideoPlayback) return;
 
     const video = getCelebrationVideoElement();
-    if (!video) {
-      return;
-    }
-
-    if (!video.paused && !video.ended) {
-      return;
-    }
+    if (!video || (!video.paused && !video.ended)) return;
 
     const body = document.body;
-    if (!body) {
-      return;
-    }
+    if (!body) return;
 
+    // Create a hidden container for the priming attempt
     const primerContainer = document.createElement('div');
     primerContainer.style.position = 'fixed';
     primerContainer.style.width = '1px';
@@ -129,53 +173,58 @@
 
     const playPromise = video.play();
     if (playPromise && typeof playPromise.then === 'function') {
-      playPromise.then(() => {
-        finalizePrimer(true);
-      }).catch(() => {
-        finalizePrimer(false);
-      });
+      playPromise.then(() => finalizePrimer(true)).catch(() => finalizePrimer(false));
     } else {
       finalizePrimer(true);
     }
   };
 
-  // Audio helpers ------------------------------------------------------
+  // =====================================================================
+  // AUDIO MANAGEMENT MODULE  
+  // =====================================================================
+
   const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
   let audioCtx = null;
 
+  /**
+   * Gets or creates the shared audio context
+   * @returns {AudioContext|null} The audio context or null if unavailable
+   */
   const getAudioContext = () => {
-    if (!AudioContextConstructor) {
-      return null;
-    }
+    if (!AudioContextConstructor) return null;
 
     if (!audioCtx) {
       try {
         audioCtx = new AudioContextConstructor();
       } catch (error) {
-        audioCtx = null;
         return null;
       }
     }
-
     return audioCtx;
   };
 
+  /**
+   * Resumes audio context if it's suspended (required for some browsers)
+   * @param {AudioContext} context - The audio context to resume
+   */
   const resumeContextIfSuspended = (context) => {
     if (context?.state === 'suspended') {
       context.resume().catch(() => {});
     }
   };
 
+  /**
+   * Plays a subtle transition sound effect
+   */
   const playTransitionSound = () => {
     const context = getAudioContext();
-    if (!context) {
-      return;
-    }
+    if (!context) return;
 
     resumeContextIfSuspended(context);
 
     const oscillator = context.createOscillator();
     const gain = context.createGain();
+    
     oscillator.type = 'sine';
     oscillator.frequency.setValueAtTime(82, context.currentTime);
     oscillator.connect(gain);
@@ -185,21 +234,24 @@
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(1.3, now + 0.012);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+    
     oscillator.start(now);
     oscillator.stop(now + 0.34);
   };
 
+  /**
+   * Plays a celebratory boom sound effect
+   */
   const playBoom = () => {
     const context = getAudioContext();
-    if (!context) {
-      return;
-    }
+    if (!context) return;
 
     resumeContextIfSuspended(context);
 
     const now = context.currentTime;
     const duration = 0.82;
 
+    // Create tone oscillator
     const toneOscillator = context.createOscillator();
     const toneGain = context.createGain();
     toneOscillator.type = 'sine';
@@ -214,11 +266,12 @@
     toneOscillator.start(now);
     toneOscillator.stop(now + duration);
 
+    // Create noise buffer for impact effect
     const noiseBuffer = context.createBuffer(1, Math.ceil(context.sampleRate * duration), context.sampleRate);
     const noiseChannelData = noiseBuffer.getChannelData(0);
-    for (let index = 0; index < noiseChannelData.length; index += 1) {
-      const decay = 1 - index / noiseChannelData.length;
-      noiseChannelData[index] = (Math.random() * 2 - 1) * decay * decay;
+    for (let i = 0; i < noiseChannelData.length; i++) {
+      const decay = 1 - i / noiseChannelData.length;
+      noiseChannelData[i] = (Math.random() * 2 - 1) * decay * decay;
     }
 
     const noiseSource = context.createBufferSource();
@@ -233,29 +286,33 @@
     noiseSource.stop(now + duration);
   };
 
-  // Motion preferences -------------------------------------------------
+  // =====================================================================
+  // ANIMATION & VISUAL EFFECTS MODULE
+  // =====================================================================
+
+  // Motion preferences detection
   const prefersReducedMotionQuery = typeof window.matchMedia === 'function'
     ? window.matchMedia('(prefers-reduced-motion: reduce)')
     : null;
   const prefersReducedMotion = prefersReducedMotionQuery?.matches ?? false;
 
-  // Celebration visuals -----------------------------------------------
+  /**
+   * Creates and launches confetti animation for celebrations
+   */
   const launchConfetti = () => {
-    if (prefersReducedMotion || !document.body) {
-      return;
-    }
+    if (prefersReducedMotion || !document.body) return;
 
     const confettiContainer = document.createElement('div');
     confettiContainer.className = 'confetti-container';
 
-    for (let index = 0; index < CELEBRATION_CONFETTI_PIECES; index += 1) {
+    for (let i = 0; i < CELEBRATION_CONFETTI_PIECES; i++) {
       const piece = document.createElement('span');
       piece.className = 'confetti-piece';
       piece.style.setProperty('--confetti-left', `${Math.random() * 100}%`);
       piece.style.setProperty('--confetti-delay', `${Math.random() * 0.45}s`);
       piece.style.setProperty('--confetti-duration', `${2.6 + Math.random()}s`);
       piece.style.setProperty('--confetti-drift', `${Math.random() * 120 - 60}px`);
-      piece.style.backgroundColor = CELEBRATION_CONFETTI_COLORS[index % CELEBRATION_CONFETTI_COLORS.length];
+      piece.style.backgroundColor = CELEBRATION_CONFETTI_COLORS[i % CELEBRATION_CONFETTI_COLORS.length];
       confettiContainer.appendChild(piece);
     }
 
@@ -265,33 +322,40 @@
     }, CELEBRATION_CONFETTI_LIFETIME_MS);
   };
 
-  // Layout references -------------------------------------------------
-  const borderCells = Array.from(document.querySelectorAll('.border-cell')).sort((first, second) => {
-    const firstIndex = Number(first.dataset.revealIndex) || 0;
-    const secondIndex = Number(second.dataset.revealIndex) || 0;
-    return firstIndex - secondIndex;
+  // =====================================================================
+  // LAYOUT & RESPONSIVE MANAGEMENT
+  // =====================================================================
+
+  // Border cell management for countdown animation
+  const borderCells = Array.from(document.querySelectorAll('.border-cell')).sort((a, b) => {
+    const aIndex = Number(a.dataset.revealIndex) || 0;
+    const bIndex = Number(b.dataset.revealIndex) || 0;
+    return aIndex - bIndex;
   });
 
+  // Show all cells immediately if motion is reduced
   if (prefersReducedMotion) {
-    borderCells.forEach((cell) => {
-      cell.classList.add('is-visible');
-    });
+    borderCells.forEach((cell) => cell.classList.add('is-visible'));
   }
 
+  // Mobile experience management
   const mobileStage = document.getElementById('mobileStage');
   const mobileBreakpointQuery = typeof window.matchMedia === 'function'
     ? window.matchMedia('(max-width: 640px), (max-height: 520px)')
     : null;
   let isMobileExperienceActive = mobileBreakpointQuery?.matches ?? false;
 
+  /**
+   * Updates mobile experience preference based on viewport changes
+   * @param {MediaQueryListEvent} event - The media query change event
+   */
   const updateMobileExperiencePreference = (event) => {
-    if (typeof event?.matches === 'boolean') {
-      isMobileExperienceActive = event.matches;
-    } else if (mobileBreakpointQuery) {
-      isMobileExperienceActive = mobileBreakpointQuery.matches;
-    }
+    isMobileExperienceActive = typeof event?.matches === 'boolean' 
+      ? event.matches 
+      : mobileBreakpointQuery?.matches ?? false;
   };
 
+  // Set up mobile breakpoint listener
   if (mobileBreakpointQuery) {
     if (typeof mobileBreakpointQuery.addEventListener === 'function') {
       mobileBreakpointQuery.addEventListener('change', updateMobileExperiencePreference);
@@ -300,7 +364,11 @@
     }
   }
 
-  // Mobile photo data -------------------------------------------------
+  // =====================================================================
+  // MOBILE PHOTO SEQUENCE DATA
+  // =====================================================================
+
+  // Extract photo data from border cells for mobile slideshow
   const mobilePhotoDetails = borderCells.map((cell) => {
     const cellImage = cell.querySelector('img');
     return {
@@ -308,8 +376,16 @@
       alt: cellImage?.getAttribute('alt') ?? '',
     };
   });
+  
   const mobilePhotoLoopCount = prefersReducedMotion ? 1 : 2;
 
+  /**
+   * Calculates display duration for mobile photos based on cycle and position
+   * @param {Object} params - Parameters object
+   * @param {number} params.cycleIndex - Current cycle iteration
+   * @param {number} params.photoIndex - Index of photo in sequence
+   * @returns {number} Duration in milliseconds
+   */
   const getMobilePhotoDisplayDuration = ({ cycleIndex, photoIndex }) => {
     if (prefersReducedMotion) {
       return MOBILE_PHOTO_DEFAULT_DURATION_MS;
@@ -321,31 +397,36 @@
     return Math.max(settings.min, duration);
   };
 
-  // Countdown state ---------------------------------------------------
+  // =====================================================================
+  // COUNTDOWN STATE & CONTROLS
+  // =====================================================================
+
+  // DOM references and countdown state
   const cardShell = document.getElementById('cardShell');
   const initialCountdownWrapper = cardShell?.querySelector('.countdown-wrapper');
   const countdownNumber = document.getElementById('countdownNumber');
   const countdownNote = initialCountdownWrapper?.querySelector('.countdown-note');
   const countdownStart = borderCells.length > 0 ? borderCells.length : COUNTDOWN_START_FALLBACK;
+  
   let currentValue = countdownStart;
   let revealedCells = 0;
   let countdownIntervalId = null;
   let hasStarted = false;
 
-  // Orientation prompts -----------------------------------------------
+  // Orientation prompts (placeholder functions for future enhancement)
   const clearOrientationPrompt = () => {};
-
   const applyOrientationPrompt = () => {};
 
-  // Overlay controls --------------------------------------------------
+  // Overlay control elements
   const startOverlay = document.getElementById('startOverlay');
   const startOverlayContent = startOverlay?.querySelector('.countdown-overlay-content') ?? null;
   const startButton = document.getElementById('startCountdownButton');
 
+  /**
+   * Reveals the next border cell in sequence during countdown
+   */
   const revealNextBorderCell = () => {
-    if (prefersReducedMotion || isMobileExperienceActive) {
-      return;
-    }
+    if (prefersReducedMotion || isMobileExperienceActive) return;
 
     const nextCell = borderCells[revealedCells];
     if (nextCell) {
@@ -354,7 +435,21 @@
     }
   };
 
-  // Save-the-date builders -------------------------------------------
+  // =====================================================================
+  // SAVE THE DATE COMPONENTS
+  // =====================================================================
+
+  /**
+   * Creates a styled action button for save-the-date interface
+   * @param {Object} config - Button configuration
+   * @param {string} config.label - Button text label
+   * @param {string} config.iconPath - SVG path data for icon
+   * @param {string} [config.additionalClassName=''] - Additional CSS classes
+   * @param {string} [config.viewBox='0 0 24 24'] - SVG viewBox
+   * @param {string} [config.element='button'] - HTML element type ('button' or 'a')
+   * @param {string} [config.href=''] - Link URL for anchor elements
+   * @returns {HTMLElement} The configured button element
+   */
   const createSaveTheDateActionButton = ({
     label,
     iconPath,
@@ -365,6 +460,8 @@
   }) => {
     const tagName = element === 'a' ? 'a' : 'button';
     const button = document.createElement(tagName);
+    
+    // Configure element based on type
     if (tagName === 'button') {
       button.type = 'button';
     } else if (href) {
@@ -374,13 +471,14 @@
     } else {
       button.href = '#';
     }
-    button.className = `save-date-action${
-      additionalClassName ? ` ${additionalClassName}` : ''
-    }`;
+    
+    button.className = `save-date-action${additionalClassName ? ` ${additionalClassName}` : ''}`;
 
+    // Create icon container
     const icon = document.createElement('span');
     icon.className = 'save-date-action__icon';
 
+    // Create SVG icon
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', viewBox);
     svg.setAttribute('aria-hidden', 'true');
@@ -393,25 +491,23 @@
     svg.appendChild(path);
     icon.appendChild(svg);
 
+    // Create label
     const labelEl = document.createElement('span');
     labelEl.className = 'save-date-action__label';
     labelEl.textContent = label;
 
     button.append(icon, labelEl);
-
     return button;
   };
 
-  const buildSaveTheDateDetails = () => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'countdown-wrapper has-details';
-
-    const eyebrow = document.createElement('p');
-    eyebrow.className = 'eyebrow';
-    eyebrow.textContent = 'Save the Date';
-
+  /**
+   * Creates the title section with names and ampersand
+   * @returns {HTMLElement} The title element with nested spans
+   */
+  const createSaveTheDateTitle = () => {
     const title = document.createElement('h1');
     title.className = 'save-date-title';
+    
     const firstName = document.createElement('span');
     firstName.className = 'save-date-name';
     firstName.textContent = 'Lorraine';
@@ -425,9 +521,17 @@
     secondName.textContent = 'Christopher';
 
     title.append(firstName, ampersand, secondName);
+    return title;
+  };
 
+  /**
+   * Creates the date and location information section
+   * @returns {HTMLElement} The date line element
+   */
+  const createSaveTheDateInfo = () => {
     const dateLine = document.createElement('p');
     dateLine.className = 'save-date-date';
+    
     const dateMain = document.createElement('span');
     dateMain.className = 'save-date-date-main';
     dateMain.textContent = 'September 12, 2026';
@@ -437,14 +541,18 @@
     dateLocation.textContent = 'Portola, California';
 
     dateLine.append(dateMain, dateLocation);
+    return dateLine;
+  };
 
-    const note = document.createElement('p');
-    note.className = 'countdown-note save-date-note';
-    note.textContent = 'Formal invite to follow';
-
+  /**
+   * Creates the action buttons for the save the date interface
+   * @returns {HTMLElement} The actions container with all buttons
+   */
+  const createSaveTheDateActions = () => {
     const actions = document.createElement('div');
     actions.className = 'save-date-actions';
 
+    // Wedding website link
     const websiteLink = createSaveTheDateActionButton({
       label: 'Wedding website',
       iconPath: 'M12 4a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3h1V8a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v1h4V8a2 2 0 0 0-2-2zm5 5H8a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1z',
@@ -453,13 +561,14 @@
     });
     websiteLink.setAttribute('aria-label', 'Visit our wedding website (opens in a new tab)');
 
+    // Replay video button
     const replayButton = createSaveTheDateActionButton({
       label: 'Replay celebration video',
-      iconPath:
-        'M12 5.5V2L5.5 8.5 12 15V10.6c3.15 0 5.9 2.55 5.9 5.9s-2.55 5.9-5.9 5.9-5.9-2.55-5.9-5.9h-2c0 4.36 3.54 7.9 7.9 7.9s7.9-3.54 7.9-7.9S16.36 8.6 12 8.6z',
+      iconPath: 'M12 5.5V2L5.5 8.5 12 15V10.6c3.15 0 5.9 2.55 5.9 5.9s-2.55 5.9-5.9 5.9-5.9-2.55-5.9-5.9h-2c0 4.36 3.54 7.9 7.9 7.9s7.9-3.54 7.9-7.9S16.36 8.6 12 8.6z',
     });
     replayButton.setAttribute('aria-label', 'Replay celebration video');
 
+    // Venue sneak peek button
     const sneakPeekButton = createSaveTheDateActionButton({
       label: 'Venue sneak peek',
       iconPath: 'M8 5.5v13l11-6.5-11-6.5z',
@@ -468,7 +577,37 @@
     sneakPeekButton.setAttribute('aria-label', 'Play the venue sneak peek video');
 
     actions.append(websiteLink, replayButton, sneakPeekButton);
+    return { actions, websiteLink, replayButton, sneakPeekButton };
+  };
 
+  /**
+   * Builds the complete save the date details interface
+   * @returns {Object} Object containing wrapper and interactive elements
+   */
+  const buildSaveTheDateDetails = () => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'countdown-wrapper has-details';
+
+    // Create header
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'eyebrow';
+    eyebrow.textContent = 'Save the Date';
+
+    // Create title section
+    const title = createSaveTheDateTitle();
+
+    // Create date/location section
+    const dateLine = createSaveTheDateInfo();
+
+    // Create note
+    const note = document.createElement('p');
+    note.className = 'countdown-note save-date-note';
+    note.textContent = 'Formal invite to follow';
+
+    // Create action buttons
+    const { actions, websiteLink, replayButton, sneakPeekButton } = createSaveTheDateActions();
+
+    // Assemble the interface
     wrapper.appendChild(eyebrow);
     wrapper.appendChild(title);
     wrapper.appendChild(dateLine);
@@ -478,6 +617,12 @@
     return { wrapper, title, replayButton, sneakPeekButton, websiteLink };
   };
 
+  /**
+   * Reveals save the date details with optional celebration effects
+   * @param {Object} elements - Object containing title element
+   * @param {Object} options - Options object
+   * @param {boolean} [options.withCelebrateEffects=false] - Whether to play celebration effects
+   */
   const revealSaveTheDateDetails = ({ title }, { withCelebrateEffects = false } = {}) => {
     if (withCelebrateEffects && !prefersReducedMotion) {
       window.requestAnimationFrame(() => {
@@ -491,6 +636,10 @@
     }
   };
 
+  /**
+   * Creates a back to details button for navigation
+   * @returns {HTMLElement} The back button element
+   */
   const createBackToDetailsButton = () =>
     createSaveTheDateActionButton({
       label: 'Back to details',
@@ -498,6 +647,13 @@
       additionalClassName: 'save-date-action--ghost save-date-back-button',
     });
 
+  /**
+   * Wires up event handlers for save the date action buttons
+   * @param {Object} elements - Object containing button elements
+   * @param {Object} handlers - Object containing callback functions
+   * @param {Function} [handlers.onReplay] - Replay button click handler
+   * @param {Function} [handlers.onSneakPeek] - Sneak peek button click handler
+   */
   const wireSaveTheDateActions = (
     { replayButton, sneakPeekButton },
     { onReplay, onSneakPeek } = {}
@@ -511,17 +667,22 @@
     }
   };
 
+  /**
+   * Shows the save the date details interface in the specified container
+   * @param {Object} options - Configuration options
+   * @param {HTMLElement} [options.targetContainer] - Container element
+   * @param {boolean} [options.withCelebrateEffects=false] - Whether to show celebration effects
+   */
   const showSaveTheDateDetails = ({
     targetContainer = cardShell,
     withCelebrateEffects = false,
   } = {}) => {
-    if (!targetContainer) {
-      return;
-    }
+    if (!targetContainer) return;
 
     const elements = buildSaveTheDateDetails();
     targetContainer.innerHTML = '';
     targetContainer.appendChild(elements.wrapper);
+    
     wireSaveTheDateActions(elements, {
       onReplay: () => {
         showCelebrationVideo({ targetContainer, withCelebrateEffectsOnComplete: false });
@@ -530,10 +691,18 @@
         showSneakPeekVideo({ targetContainer });
       },
     });
+    
     revealSaveTheDateDetails(elements, { withCelebrateEffects });
   };
 
-  // Video helpers -----------------------------------------------------
+  // =====================================================================
+  // VIDEO INTERFACE BUILDERS
+  // =====================================================================
+
+  /**
+   * Builds the celebration video interface
+   * @returns {Object} Object containing wrapper and video elements
+   */
   const buildCelebrationVideo = () => {
     const wrapper = document.createElement('div');
     wrapper.className = 'countdown-wrapper has-video';
@@ -561,6 +730,10 @@
     return { wrapper, celebrationVideo };
   };
 
+  /**
+   * Builds the venue sneak peek video interface
+   * @returns {Object} Object containing wrapper, video, and back button elements
+   */
   const buildSneakPeekVideo = () => {
     const wrapper = document.createElement('div');
     wrapper.className = 'countdown-wrapper has-video sneak-peek-wrapper';
@@ -596,34 +769,25 @@
     return { wrapper, video, backButton };
   };
 
-  const safelyPlayVideo = (videoElement) => {
-    if (!videoElement) {
-      return;
-    }
+  // =====================================================================
+  // VIDEO DISPLAY CONTROLLERS
+  // =====================================================================
 
-    const attemptVideoPlayback = () => {
-      const playPromise = videoElement.play();
-      if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => {});
-      }
-    };
-
-    if (videoElement.readyState >= 2) {
-      attemptVideoPlayback();
-    } else {
-      videoElement.addEventListener('canplay', attemptVideoPlayback, { once: true });
-    }
-  };
-
+  /**
+   * Shows the celebration video in the specified container
+   * @param {Object} options - Configuration options
+   * @param {HTMLElement} [options.targetContainer] - Target container element
+   * @param {Function} [options.onVideoEnded] - Callback when video ends
+   * @param {Function} [options.onVideoError] - Callback on video error
+   * @param {boolean} [options.withCelebrateEffectsOnComplete=true] - Whether to show effects
+   */
   const showCelebrationVideo = ({
     targetContainer = cardShell,
     onVideoEnded,
     onVideoError,
     withCelebrateEffectsOnComplete = true,
   } = {}) => {
-    if (!targetContainer) {
-      return;
-    }
+    if (!targetContainer) return;
 
     clearOrientationPrompt();
 
@@ -659,10 +823,13 @@
     safelyPlayVideo(celebrationVideo);
   };
 
+  /**
+   * Shows the venue sneak peek video in the specified container
+   * @param {Object} options - Configuration options
+   * @param {HTMLElement} [options.targetContainer] - Target container element
+   */
   const showSneakPeekVideo = ({ targetContainer = cardShell } = {}) => {
-    if (!targetContainer) {
-      return;
-    }
+    if (!targetContainer) return;
 
     clearOrientationPrompt();
 
