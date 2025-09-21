@@ -685,7 +685,7 @@ body {
 
 .sneak-peek-wrapper .save-date-back-button {
   margin-top: clamp(4px, 1.6vw, 12px);
-  color: var(--cream);
+  color: var(--emerald-dark);
   border-color: rgba(245, 241, 235, 0.6);
   background: rgba(245, 241, 235, 0.08);
 }
@@ -825,6 +825,20 @@ h1 {
     border-radius: 0;
     box-shadow: none;
     border: none;
+  }
+
+  .mobile-frame--video .sneak-peek-wrapper .countdown-note {
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .mobile-frame--video .sneak-peek-wrapper .save-date-back-button {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .mobile-frame--video .sneak-peek-wrapper .save-date-back-button .save-date-action__icon {
+    background: rgba(255, 255, 255, 0.22);
+    color: var(--emerald-dark);
   }
 }
 
