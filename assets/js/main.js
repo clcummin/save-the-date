@@ -597,7 +597,6 @@
     text.setAttribute('font-size', '12');
     text.setAttribute('font-weight', '600');
     text.setAttribute('letter-spacing', '1.6px');
-    text.style.letterSpacing = '1.6px';
     text.textContent = 'C & L';
     svg.appendChild(text);
 
