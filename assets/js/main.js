@@ -573,7 +573,9 @@
    */
   const createFaviconIcon = () => {
     const image = document.createElement('img');
-    image.src = 'assets/favicon.png';
+    // Dynamically get the favicon URL from the DOM, fallback to default if not found
+    const faviconUrl = document.querySelector('link[rel="icon"]')?.href || '/assets/favicon.png';
+    image.src = faviconUrl;
     image.alt = '';
     image.loading = 'lazy';
     image.decoding = 'async';
