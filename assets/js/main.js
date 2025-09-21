@@ -45,6 +45,7 @@
   // Content settings
   const COUNTDOWN_START_FALLBACK = 10;
   const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/ChaletView480.mp4';
+  const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
   // =====================================================================
   // VIDEO MANAGEMENT MODULE
@@ -455,7 +456,8 @@
    * Creates a styled action button for save-the-date interface
    * @param {Object} config - Button configuration
    * @param {string} config.label - Button text label
-   * @param {string} config.iconPath - SVG path data for icon
+   * @param {string} [config.iconPath] - SVG path data for icon
+   * @param {Function} [config.iconFactory=null] - Optional factory returning a custom SVG element
    * @param {string} [config.additionalClassName=''] - Additional CSS classes
    * @param {string} [config.viewBox='0 0 24 24'] - SVG viewBox
    * @param {string} [config.element='button'] - HTML element type ('button' or 'a')
@@ -468,6 +470,7 @@
   const createSaveTheDateActionButton = ({
     label,
     iconPath,
+    iconFactory = null,
     additionalClassName = '',
     viewBox = '0 0 24 24',
     element = 'button',
@@ -516,16 +519,31 @@
     icon.className = 'save-date-action__icon';
 
     // Create SVG icon
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', viewBox);
-    svg.setAttribute('aria-hidden', 'true');
+    const hasCustomFactory = typeof iconFactory === 'function';
+    let svg = hasCustomFactory ? iconFactory() : null;
+
+    if (!svg) {
+      if (!iconPath) {
+        return button;
+      }
+
+      svg = document.createElementNS(SVG_NAMESPACE, 'svg');
+      svg.setAttribute('viewBox', viewBox);
+
+      const path = document.createElementNS(SVG_NAMESPACE, 'path');
+      path.setAttribute('d', iconPath);
+      path.setAttribute('fill', 'currentColor');
+      svg.appendChild(path);
+    }
+
+    if (!svg.hasAttribute('aria-hidden')) {
+      svg.setAttribute('aria-hidden', 'true');
+    }
+    if (!svg.hasAttribute('focusable')) {
+      svg.setAttribute('focusable', 'false');
+    }
     svg.classList.add('save-date-action__icon-graphic');
 
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', iconPath);
-    path.setAttribute('fill', 'currentColor');
-
-    svg.appendChild(path);
     icon.appendChild(svg);
 
     // Create label
@@ -538,6 +556,52 @@
 
     button.append(icon, labelEl);
     return button;
+  };
+
+  /**
+   * Creates the custom "C & L" monogram icon used for wedding links
+   * @returns {SVGElement} Styled SVG element representing the initials
+   */
+  const createInitialsMonogramIcon = () => {
+    const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
+    svg.setAttribute('viewBox', '0 0 48 48');
+
+    const outerCircle = document.createElementNS(SVG_NAMESPACE, 'circle');
+    outerCircle.setAttribute('cx', '24');
+    outerCircle.setAttribute('cy', '24');
+    outerCircle.setAttribute('r', '20');
+    outerCircle.setAttribute('fill', 'none');
+    outerCircle.setAttribute('stroke', 'currentColor');
+    outerCircle.setAttribute('stroke-width', '2');
+    svg.appendChild(outerCircle);
+
+    const innerCircle = document.createElementNS(SVG_NAMESPACE, 'circle');
+    innerCircle.setAttribute('cx', '24');
+    innerCircle.setAttribute('cy', '24');
+    innerCircle.setAttribute('r', '15');
+    innerCircle.setAttribute('fill', 'none');
+    innerCircle.setAttribute('stroke', 'currentColor');
+    innerCircle.setAttribute('stroke-width', '1');
+    innerCircle.setAttribute('stroke-dasharray', '3 3');
+    innerCircle.setAttribute('stroke-opacity', '0.65');
+    innerCircle.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(innerCircle);
+
+    const text = document.createElementNS(SVG_NAMESPACE, 'text');
+    text.setAttribute('x', '24');
+    text.setAttribute('y', '24');
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('fill', 'currentColor');
+    text.setAttribute('font-family', "'Cinzel Decorative', serif");
+    text.setAttribute('font-size', '12');
+    text.setAttribute('font-weight', '600');
+    text.setAttribute('letter-spacing', '1.6px');
+    text.style.letterSpacing = '1.6px';
+    text.textContent = 'C & L';
+    svg.appendChild(text);
+
+    return svg;
   };
 
   /**
@@ -595,7 +659,7 @@
     // Wedding website link
     const websiteLink = createSaveTheDateActionButton({
       label: 'Wedding website',
-      iconPath: 'M12 4a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3h1V8a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v1h4V8a2 2 0 0 0-2-2zm5 5H8a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1z',
+      iconFactory: createInitialsMonogramIcon,
       element: 'a',
       href: 'https://becomingcummings.love',
       isIconOnly: true,
