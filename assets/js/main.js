@@ -724,8 +724,20 @@
 
     const summary = document.createElement('summary');
     summary.className = 'save-date-calendar-summary';
-    summary.textContent = 'Add to calendar';
     summary.setAttribute('aria-label', 'Add the wedding weekend to your calendar');
+    summary.setAttribute('aria-expanded', 'false');
+    summary.setAttribute('title', 'Add to calendar');
+    summary.dataset.tooltip = 'Add to calendar';
+
+    const icon = document.createElement('span');
+    icon.className = 'save-date-calendar-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.innerHTML =
+      '<svg width="24" height="24" viewBox="0 0 24 24" role="img" focusable="false">' +
+      '<path fill="currentColor" d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1zm13 6H4v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1zm-5 3a1 1 0 0 1 1 1v3h-6v-3a1 1 0 0 1 1-1z"></path>' +
+      '</svg>';
+
+    summary.appendChild(icon);
 
     const menu = document.createElement('div');
     menu.className = 'save-date-calendar-menu';
@@ -745,7 +757,25 @@
     details.append(summary, menu);
     container.append(details);
 
+    const setExpanded = (expanded) => {
+      summary.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    };
+
+    // Removed mouseenter and mouseleave event listeners for accessibility compliance.
+    summary.addEventListener('focus', () => {
+      details.open = true;
+      setExpanded(true);
+    });
+
+    details.addEventListener('focusout', (event) => {
+      if (!details.contains(event.relatedTarget)) {
+        details.open = false;
+        setExpanded(false);
+      }
+    });
+
     details.addEventListener('toggle', () => {
+      setExpanded(details.open);
       if (!details.open) {
         summary.blur();
       }
@@ -782,9 +812,12 @@
     const calendarControls = createCalendarInviteControls();
     const { actions, websiteLink, replayButton, sneakPeekButton } = createSaveTheDateActions();
 
+    const header = document.createElement('div');
+    header.className = 'save-date-header';
+    header.append(calendarControls.container, eyebrow);
+
     // Assemble the interface
-    wrapper.appendChild(calendarControls.container);
-    wrapper.appendChild(eyebrow);
+    wrapper.appendChild(header);
     wrapper.appendChild(title);
     wrapper.appendChild(dateLine);
     wrapper.appendChild(note);
