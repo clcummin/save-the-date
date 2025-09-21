@@ -221,6 +221,10 @@
    * Primes video playback for mobile devices by attempting a silent play
    * This helps with autoplay restrictions on mobile browsers
    */
+  /**
+   * Primes video playback for mobile devices to improve reliability
+   * @returns {void}
+   */
   const primeMobileCelebrationVideoPlayback = () => {
     if (hasPrimedMobileVideoPlayback) return;
 
@@ -238,6 +242,7 @@
     primerContainer.style.overflow = 'hidden';
     primerContainer.style.pointerEvents = 'none';
     primerContainer.style.opacity = '0';
+    primerContainer.style.zIndex = '-1';
     primerContainer.setAttribute('aria-hidden', 'true');
 
     primerContainer.appendChild(video);
@@ -247,19 +252,41 @@
     video.muted = true;
 
     const finalizePrimer = (wasSuccessful) => {
-      video.pause();
-      video.currentTime = 0;
-      video.muted = originalMuted;
-      primerContainer.remove();
+      try {
+        video.pause();
+        video.currentTime = 0;
+        video.muted = originalMuted;
+        if (primerContainer.parentNode) {
+          primerContainer.remove();
+        }
 
-      if (wasSuccessful) {
-        hasPrimedMobileVideoPlayback = true;
+        if (wasSuccessful) {
+          hasPrimedMobileVideoPlayback = true;
+          console.debug('Mobile video playback primed successfully');
+        } else {
+          console.debug('Mobile video priming failed, but continuing gracefully');
+        }
+      } catch (error) {
+        console.debug('Mobile video primer cleanup error:', error.message);
+        // Attempt cleanup even if error occurred
+        try {
+          if (primerContainer.parentNode) {
+            primerContainer.remove();
+          }
+        } catch (cleanupError) {
+          // Ignore cleanup errors
+        }
       }
     };
 
     const playPromise = video.play();
     if (playPromise && typeof playPromise.then === 'function') {
-      playPromise.then(() => finalizePrimer(true)).catch(() => finalizePrimer(false));
+      playPromise
+        .then(() => finalizePrimer(true))
+        .catch((error) => {
+          console.debug('Mobile video primer play failed:', error.message);
+          finalizePrimer(false);
+        });
     } else {
       finalizePrimer(true);
     }
@@ -1388,7 +1415,7 @@
     targetContainer.appendChild(wrapper);
 
     if (backButton) {
-      backButton.addEventListener('click', () => {
+      eventListenerManager.add(backButton, 'click', () => {
         showSaveTheDateDetails({ targetContainer });
       });
     }
@@ -1511,7 +1538,7 @@
     }
 
     if (backButton) {
-      backButton.addEventListener('click', () => {
+      eventListenerManager.add(backButton, 'click', () => {
         showMobileSaveTheDate({ withCelebrateEffects: false });
       });
     }
