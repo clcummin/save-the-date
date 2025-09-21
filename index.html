@@ -215,7 +215,7 @@
         }
       };
 
-      const playBeat = () => {
+      const playTransitionSound = () => {
         const context = getAudioContext();
         if (!context) {
           return;
@@ -742,6 +742,7 @@
           return;
         }
 
+        playTransitionSound();
         clearOrientationPrompt();
 
         const transitionDelay = prefersReducedMotion ? 0 : CELEBRATION_TRANSITION_DELAY_MS;
@@ -877,7 +878,6 @@
         image.alt = photoDetails.alt || '';
         frame.appendChild(image);
 
-        playBeat();
         swapMobileFrame(frame);
 
         const transitionDelay = prefersReducedMotion ? 0 : CELEBRATION_TRANSITION_DELAY_MS;
@@ -914,7 +914,7 @@
 
         currentValue -= 1;
         countdownNumber.classList.add('is-transitioning');
-        playBeat();
+        playTransitionSound();
 
         if (currentValue <= 0) {
           countdownNumber.textContent = '0';
@@ -953,7 +953,7 @@
         countdownNumber.textContent = String(currentValue);
         countdownNumber.setAttribute('aria-label', `Countdown at ${currentValue}`);
         revealNextBorderCell();
-        playBeat();
+        playTransitionSound();
         countdownIntervalId = window.setInterval(handleCountdownTick, COUNTDOWN_INTERVAL_MS);
       };
 
