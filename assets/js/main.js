@@ -187,10 +187,6 @@
    * Attempts to play video safely with proper error handling
    * @param {HTMLVideoElement} videoElement - The video to play
    */
-  /**
-   * Safely attempts to play a video with proper error handling
-   * @param {HTMLVideoElement} videoElement - The video element to play
-   */
   const safelyPlayVideo = (videoElement) => {
     if (!videoElement || typeof videoElement.play !== 'function') {
       console.warn('Invalid video element for playback');
