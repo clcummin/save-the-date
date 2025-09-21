@@ -410,20 +410,27 @@ body {
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
   padding: clamp(26px, 4.4vw, 42px);
   gap: clamp(12px, 3vw, 20px);
-  align-items: center;
+  align-items: flex-start;
+  text-align: left;
   position: relative;
 }
 
+.save-date-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: clamp(10px, 2.4vw, 16px);
+  width: 100%;
+}
+
 .save-date-calendar {
-  position: absolute;
-  top: clamp(16px, 3.6vw, 28px);
-  right: clamp(16px, 3.6vw, 28px);
-  text-align: left;
+  position: relative;
+  display: inline-flex;
 }
 
 .save-date-calendar-details {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
 }
 
 .save-date-calendar-summary {
@@ -431,20 +438,18 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: var(--emerald-mid);
-  color: var(--cream);
-  font-weight: 600;
-  font-size: clamp(0.8rem, 1.8vw, 1rem);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  border-radius: 999px;
-  padding: 0.55em 1.4em 0.5em;
+  width: clamp(38px, 4vw, 44px);
+  height: clamp(38px, 4vw, 44px);
+  border-radius: 50%;
+  background: rgba(12, 63, 43, 0.12);
+  color: var(--emerald-mid);
+  border: 1px solid rgba(12, 44, 29, 0.18);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
   cursor: pointer;
-  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition), color var(--transition);
   user-select: none;
+  position: relative;
+  padding: 0;
 }
 
 .save-date-calendar-summary::-webkit-details-marker {
@@ -452,8 +457,8 @@ body {
 }
 
 .save-date-calendar-details[open] .save-date-calendar-summary {
-  background: var(--emerald-dark);
-  transform: translateY(1px);
+  background: rgba(12, 63, 43, 0.2);
+  color: var(--emerald-dark);
 }
 
 .save-date-calendar-summary:focus-visible {
@@ -461,10 +466,48 @@ body {
   outline-offset: 4px;
 }
 
+.save-date-calendar-summary::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 12px);
+  transform: translate3d(0, -50%, 0);
+  background: rgba(12, 44, 29, 0.92);
+  color: var(--cream);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: clamp(0.6rem, 1.4vw, 0.75rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.save-date-calendar-details:hover .save-date-calendar-summary::after,
+.save-date-calendar-details:focus-within .save-date-calendar-summary::after,
+.save-date-calendar-details[open] .save-date-calendar-summary::after {
+  opacity: 1;
+  transform: translate3d(8px, -50%, 0);
+}
+
+.save-date-calendar-icon {
+  display: inline-flex;
+  width: clamp(18px, 2.4vw, 22px);
+  height: clamp(18px, 2.4vw, 22px);
+}
+
+.save-date-calendar-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 .save-date-calendar-menu {
   position: absolute;
   top: calc(100% + 14px);
-  right: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -475,10 +518,18 @@ body {
   border: 1px solid rgba(12, 44, 29, 0.18);
   min-width: clamp(220px, 32vw, 240px);
   z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 8px, 0);
+  transition: opacity var(--transition), transform var(--transition);
 }
 
-.save-date-calendar-details:not([open]) .save-date-calendar-menu {
-  display: none;
+.save-date-calendar-details:hover .save-date-calendar-menu,
+.save-date-calendar-details:focus-within .save-date-calendar-menu,
+.save-date-calendar-details[open] .save-date-calendar-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0);
 }
 
 .save-date-calendar-link {
@@ -505,21 +556,19 @@ body {
 @media (max-width: 680px) {
   .save-date-calendar {
     position: static;
-    width: 100%;
-    display: flex;
-    justify-content: center;
   }
 
   .save-date-calendar-details {
     display: flex;
-    flex-direction: column;
-    align-items: center;
   }
 
   .save-date-calendar-menu {
     position: static;
     width: min(100%, 320px);
     margin-top: 14px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
   }
 }
 
