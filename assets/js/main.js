@@ -519,9 +519,6 @@
   let countdownIntervalId = null;
   let hasStarted = false;
 
-  // Orientation prompts (placeholder functions for future enhancement)
-  const clearOrientationPrompt = () => {};
-  const applyOrientationPrompt = () => {};
 
   // Overlay control elements
   const startOverlay = document.getElementById('startOverlay');
@@ -1370,8 +1367,6 @@
   } = {}) => {
     if (!targetContainer) return;
 
-    clearOrientationPrompt();
-
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
     targetContainer.innerHTML = '';
     targetContainer.appendChild(wrapper);
@@ -1412,8 +1407,6 @@
   const showSneakPeekVideo = ({ targetContainer = cardShell } = {}) => {
     if (!targetContainer) return;
 
-    clearOrientationPrompt();
-
     const { wrapper, video, backButton } = buildSneakPeekVideo();
     targetContainer.innerHTML = '';
     targetContainer.appendChild(wrapper);
@@ -1442,7 +1435,6 @@
     }
 
     playTransitionSound();
-    clearOrientationPrompt();
 
     const transitionDelay = prefersReducedMotion ? 0 : CELEBRATION_TRANSITION_DELAY_MS;
     const existingFrame = mobileStage.firstElementChild;
@@ -1508,8 +1500,6 @@
 
     swapMobileFrame(frame);
 
-    applyOrientationPrompt({ container: frame, video: celebrationVideo });
-
     attachCelebrationVideoHandlers(celebrationVideo, {
       onEnded: () => {
         window.setTimeout(() => {
@@ -1538,7 +1528,6 @@
 
     if (video) {
       video.currentTime = 0;
-      applyOrientationPrompt({ container: frame, video });
     }
 
     if (backButton) {
