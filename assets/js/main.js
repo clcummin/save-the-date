@@ -620,7 +620,7 @@
    * @returns {string} Formatted timestamp string
    */
   const formatIcsTimestamp = (date) =>
-    date.toISOString().replace(/[-:]/g, '').split('.')[0].concat('Z');
+    date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
 
   /**
    * Creates the ICS file contents for the wedding event
