@@ -435,7 +435,21 @@
     }
   };
 
-  // Save-the-date builders -------------------------------------------
+  // =====================================================================
+  // SAVE THE DATE COMPONENTS
+  // =====================================================================
+
+  /**
+   * Creates a styled action button for save-the-date interface
+   * @param {Object} config - Button configuration
+   * @param {string} config.label - Button text label
+   * @param {string} config.iconPath - SVG path data for icon
+   * @param {string} [config.additionalClassName=''] - Additional CSS classes
+   * @param {string} [config.viewBox='0 0 24 24'] - SVG viewBox
+   * @param {string} [config.element='button'] - HTML element type ('button' or 'a')
+   * @param {string} [config.href=''] - Link URL for anchor elements
+   * @returns {HTMLElement} The configured button element
+   */
   const createSaveTheDateActionButton = ({
     label,
     iconPath,
@@ -446,6 +460,8 @@
   }) => {
     const tagName = element === 'a' ? 'a' : 'button';
     const button = document.createElement(tagName);
+    
+    // Configure element based on type
     if (tagName === 'button') {
       button.type = 'button';
     } else if (href) {
@@ -455,13 +471,14 @@
     } else {
       button.href = '#';
     }
-    button.className = `save-date-action${
-      additionalClassName ? ` ${additionalClassName}` : ''
-    }`;
+    
+    button.className = `save-date-action${additionalClassName ? ` ${additionalClassName}` : ''}`;
 
+    // Create icon container
     const icon = document.createElement('span');
     icon.className = 'save-date-action__icon';
 
+    // Create SVG icon
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', viewBox);
     svg.setAttribute('aria-hidden', 'true');
@@ -474,25 +491,23 @@
     svg.appendChild(path);
     icon.appendChild(svg);
 
+    // Create label
     const labelEl = document.createElement('span');
     labelEl.className = 'save-date-action__label';
     labelEl.textContent = label;
 
     button.append(icon, labelEl);
-
     return button;
   };
 
-  const buildSaveTheDateDetails = () => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'countdown-wrapper has-details';
-
-    const eyebrow = document.createElement('p');
-    eyebrow.className = 'eyebrow';
-    eyebrow.textContent = 'Save the Date';
-
+  /**
+   * Creates the title section with names and ampersand
+   * @returns {HTMLElement} The title element with nested spans
+   */
+  const createSaveTheDateTitle = () => {
     const title = document.createElement('h1');
     title.className = 'save-date-title';
+    
     const firstName = document.createElement('span');
     firstName.className = 'save-date-name';
     firstName.textContent = 'Lorraine';
@@ -506,9 +521,17 @@
     secondName.textContent = 'Christopher';
 
     title.append(firstName, ampersand, secondName);
+    return title;
+  };
 
+  /**
+   * Creates the date and location information section
+   * @returns {HTMLElement} The date line element
+   */
+  const createSaveTheDateInfo = () => {
     const dateLine = document.createElement('p');
     dateLine.className = 'save-date-date';
+    
     const dateMain = document.createElement('span');
     dateMain.className = 'save-date-date-main';
     dateMain.textContent = 'September 12, 2026';
@@ -518,14 +541,18 @@
     dateLocation.textContent = 'Portola, California';
 
     dateLine.append(dateMain, dateLocation);
+    return dateLine;
+  };
 
-    const note = document.createElement('p');
-    note.className = 'countdown-note save-date-note';
-    note.textContent = 'Formal invite to follow';
-
+  /**
+   * Creates the action buttons for the save the date interface
+   * @returns {HTMLElement} The actions container with all buttons
+   */
+  const createSaveTheDateActions = () => {
     const actions = document.createElement('div');
     actions.className = 'save-date-actions';
 
+    // Wedding website link
     const websiteLink = createSaveTheDateActionButton({
       label: 'Wedding website',
       iconPath: 'M12 4a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3h1V8a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v1h4V8a2 2 0 0 0-2-2zm5 5H8a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1z',
@@ -534,13 +561,14 @@
     });
     websiteLink.setAttribute('aria-label', 'Visit our wedding website (opens in a new tab)');
 
+    // Replay video button
     const replayButton = createSaveTheDateActionButton({
       label: 'Replay celebration video',
-      iconPath:
-        'M12 5.5V2L5.5 8.5 12 15V10.6c3.15 0 5.9 2.55 5.9 5.9s-2.55 5.9-5.9 5.9-5.9-2.55-5.9-5.9h-2c0 4.36 3.54 7.9 7.9 7.9s7.9-3.54 7.9-7.9S16.36 8.6 12 8.6z',
+      iconPath: 'M12 5.5V2L5.5 8.5 12 15V10.6c3.15 0 5.9 2.55 5.9 5.9s-2.55 5.9-5.9 5.9-5.9-2.55-5.9-5.9h-2c0 4.36 3.54 7.9 7.9 7.9s7.9-3.54 7.9-7.9S16.36 8.6 12 8.6z',
     });
     replayButton.setAttribute('aria-label', 'Replay celebration video');
 
+    // Venue sneak peek button
     const sneakPeekButton = createSaveTheDateActionButton({
       label: 'Venue sneak peek',
       iconPath: 'M8 5.5v13l11-6.5-11-6.5z',
@@ -549,7 +577,37 @@
     sneakPeekButton.setAttribute('aria-label', 'Play the venue sneak peek video');
 
     actions.append(websiteLink, replayButton, sneakPeekButton);
+    return { actions, websiteLink, replayButton, sneakPeekButton };
+  };
 
+  /**
+   * Builds the complete save the date details interface
+   * @returns {Object} Object containing wrapper and interactive elements
+   */
+  const buildSaveTheDateDetails = () => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'countdown-wrapper has-details';
+
+    // Create header
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'eyebrow';
+    eyebrow.textContent = 'Save the Date';
+
+    // Create title section
+    const title = createSaveTheDateTitle();
+
+    // Create date/location section
+    const dateLine = createSaveTheDateInfo();
+
+    // Create note
+    const note = document.createElement('p');
+    note.className = 'countdown-note save-date-note';
+    note.textContent = 'Formal invite to follow';
+
+    // Create action buttons
+    const { actions, websiteLink, replayButton, sneakPeekButton } = createSaveTheDateActions();
+
+    // Assemble the interface
     wrapper.appendChild(eyebrow);
     wrapper.appendChild(title);
     wrapper.appendChild(dateLine);
@@ -559,6 +617,12 @@
     return { wrapper, title, replayButton, sneakPeekButton, websiteLink };
   };
 
+  /**
+   * Reveals save the date details with optional celebration effects
+   * @param {Object} elements - Object containing title element
+   * @param {Object} options - Options object
+   * @param {boolean} [options.withCelebrateEffects=false] - Whether to play celebration effects
+   */
   const revealSaveTheDateDetails = ({ title }, { withCelebrateEffects = false } = {}) => {
     if (withCelebrateEffects && !prefersReducedMotion) {
       window.requestAnimationFrame(() => {
@@ -572,6 +636,10 @@
     }
   };
 
+  /**
+   * Creates a back to details button for navigation
+   * @returns {HTMLElement} The back button element
+   */
   const createBackToDetailsButton = () =>
     createSaveTheDateActionButton({
       label: 'Back to details',
@@ -579,6 +647,13 @@
       additionalClassName: 'save-date-action--ghost save-date-back-button',
     });
 
+  /**
+   * Wires up event handlers for save the date action buttons
+   * @param {Object} elements - Object containing button elements
+   * @param {Object} handlers - Object containing callback functions
+   * @param {Function} [handlers.onReplay] - Replay button click handler
+   * @param {Function} [handlers.onSneakPeek] - Sneak peek button click handler
+   */
   const wireSaveTheDateActions = (
     { replayButton, sneakPeekButton },
     { onReplay, onSneakPeek } = {}
@@ -592,17 +667,22 @@
     }
   };
 
+  /**
+   * Shows the save the date details interface in the specified container
+   * @param {Object} options - Configuration options
+   * @param {HTMLElement} [options.targetContainer] - Container element
+   * @param {boolean} [options.withCelebrateEffects=false] - Whether to show celebration effects
+   */
   const showSaveTheDateDetails = ({
     targetContainer = cardShell,
     withCelebrateEffects = false,
   } = {}) => {
-    if (!targetContainer) {
-      return;
-    }
+    if (!targetContainer) return;
 
     const elements = buildSaveTheDateDetails();
     targetContainer.innerHTML = '';
     targetContainer.appendChild(elements.wrapper);
+    
     wireSaveTheDateActions(elements, {
       onReplay: () => {
         showCelebrationVideo({ targetContainer, withCelebrateEffectsOnComplete: false });
@@ -611,10 +691,18 @@
         showSneakPeekVideo({ targetContainer });
       },
     });
+    
     revealSaveTheDateDetails(elements, { withCelebrateEffects });
   };
 
-  // Video helpers -----------------------------------------------------
+  // =====================================================================
+  // VIDEO INTERFACE BUILDERS
+  // =====================================================================
+
+  /**
+   * Builds the celebration video interface
+   * @returns {Object} Object containing wrapper and video elements
+   */
   const buildCelebrationVideo = () => {
     const wrapper = document.createElement('div');
     wrapper.className = 'countdown-wrapper has-video';
@@ -642,6 +730,10 @@
     return { wrapper, celebrationVideo };
   };
 
+  /**
+   * Builds the venue sneak peek video interface
+   * @returns {Object} Object containing wrapper, video, and back button elements
+   */
   const buildSneakPeekVideo = () => {
     const wrapper = document.createElement('div');
     wrapper.className = 'countdown-wrapper has-video sneak-peek-wrapper';
@@ -677,34 +769,25 @@
     return { wrapper, video, backButton };
   };
 
-  const safelyPlayVideo = (videoElement) => {
-    if (!videoElement) {
-      return;
-    }
+  // =====================================================================
+  // VIDEO DISPLAY CONTROLLERS
+  // =====================================================================
 
-    const attemptVideoPlayback = () => {
-      const playPromise = videoElement.play();
-      if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => {});
-      }
-    };
-
-    if (videoElement.readyState >= 2) {
-      attemptVideoPlayback();
-    } else {
-      videoElement.addEventListener('canplay', attemptVideoPlayback, { once: true });
-    }
-  };
-
+  /**
+   * Shows the celebration video in the specified container
+   * @param {Object} options - Configuration options
+   * @param {HTMLElement} [options.targetContainer] - Target container element
+   * @param {Function} [options.onVideoEnded] - Callback when video ends
+   * @param {Function} [options.onVideoError] - Callback on video error
+   * @param {boolean} [options.withCelebrateEffectsOnComplete=true] - Whether to show effects
+   */
   const showCelebrationVideo = ({
     targetContainer = cardShell,
     onVideoEnded,
     onVideoError,
     withCelebrateEffectsOnComplete = true,
   } = {}) => {
-    if (!targetContainer) {
-      return;
-    }
+    if (!targetContainer) return;
 
     clearOrientationPrompt();
 
@@ -740,10 +823,13 @@
     safelyPlayVideo(celebrationVideo);
   };
 
+  /**
+   * Shows the venue sneak peek video in the specified container
+   * @param {Object} options - Configuration options
+   * @param {HTMLElement} [options.targetContainer] - Target container element
+   */
   const showSneakPeekVideo = ({ targetContainer = cardShell } = {}) => {
-    if (!targetContainer) {
-      return;
-    }
+    if (!targetContainer) return;
 
     clearOrientationPrompt();
 
