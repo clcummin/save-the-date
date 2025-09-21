@@ -395,7 +395,7 @@
   /**
    * Calculates display duration for mobile photos based on position
    * @param {Object} params - Parameters object
-   * @param {number} params.cycleIndex - Current cycle iteration (unused but kept for compatibility)
+   * @param {number} params.cycleIndex - Current cycle iteration (accepted for compatibility, but unused)
    * @param {number} params.photoIndex - Index of photo in sequence
    * @returns {number} Duration in milliseconds
    */
