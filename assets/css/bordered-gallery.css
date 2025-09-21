@@ -254,7 +254,7 @@ body {
 }
 
 /* Horizontal images in mobile frames: anchor at top to preserve subjects */
-.mobile-frame--photo img[src*="AUG4849_bw.jpg"] {
+.mobile-frame--photo img.mobile-frame--photo-top {
   object-position: center top;
 }
 
