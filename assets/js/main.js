@@ -797,23 +797,34 @@
       summary.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     };
 
-    // Removed mouseenter and mouseleave event listeners for accessibility compliance.
-    summary.addEventListener('focus', () => {
-      details.open = true;
-      setExpanded(true);
+    // Let native <details> element handle click behavior while maintaining accessibility.
+    // The toggle event handles both click and keyboard activation.
+    details.addEventListener('toggle', () => {
+      setExpanded(details.open);
     });
 
+    // Handle keyboard accessibility - only for keyboard navigation
+    summary.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        // Let the native behavior handle this, just ensure it's open
+        if (!details.open) {
+          details.open = true;
+        }
+      }
+    });
+
+    // Close dropdown when clicking outside or navigating away
+    document.addEventListener('click', (event) => {
+      if (details.open && !details.contains(event.target)) {
+        details.open = false;
+      }
+    });
+
+    // Close dropdown when focus moves outside the details element
     details.addEventListener('focusout', (event) => {
       if (!details.contains(event.relatedTarget)) {
         details.open = false;
         setExpanded(false);
-      }
-    });
-
-    details.addEventListener('toggle', () => {
-      setExpanded(details.open);
-      if (!details.open) {
-        summary.blur();
       }
     });
 
