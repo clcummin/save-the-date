@@ -1218,11 +1218,6 @@
    * @param {Function} [handlers.onReplay] - Replay button click handler
    * @param {Function} [handlers.onSneakPeek] - Sneak peek button click handler
    */
-  /**
-   * Wires up save the date action buttons with event listeners
-   * @param {Object} elements - Button elements
-   * @param {Object} handlers - Event handler functions
-   */
   const wireSaveTheDateActions = (
     { replayButton, sneakPeekButton },
     { onReplay, onSneakPeek } = {}
