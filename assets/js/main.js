@@ -821,12 +821,19 @@
   };
 
   /**
-   * Creates (or returns a cached) object URL for the ICS download with enhanced mobile support
+   * Creates a fresh object URL for the ICS download with enhanced mobile support
+   * Revokes any previous blob URL to ensure each download uses a valid URL
    * @returns {string} Object URL pointing to ICS data
    */
   const getCalendarIcsUrl = () => {
+    // Revoke any previously cached blob URL before creating a new one
     if (cachedCalendarBlobUrl) {
-      return cachedCalendarBlobUrl;
+      try {
+        window.URL.revokeObjectURL(cachedCalendarBlobUrl);
+      } catch (e) {
+        // Silently handle revocation errors (URL might already be revoked)
+      }
+      cachedCalendarBlobUrl = null;
     }
 
     const icsContent = createCalendarIcsContent();
