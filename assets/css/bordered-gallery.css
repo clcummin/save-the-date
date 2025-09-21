@@ -142,8 +142,7 @@ body {
   align-self: center;
   justify-self: center;
   width: min(560px, 100%);
-  height: clamp(320px, 58vw, 520px);
-  max-height: 520px;
+  min-height: clamp(320px, 58vw, 520px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,7 +150,6 @@ body {
 
 .card-shell > * {
   width: 100%;
-  height: 100%;
 }
 
 .mobile-experience {
@@ -416,8 +414,8 @@ body {
   background: rgba(255, 255, 255, 0.96);
   border: 1.5px solid rgba(12, 44, 29, 0.12);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
-  padding: clamp(30px, 4.8vw, 48px);
-  gap: clamp(12px, 3.8vw, 24px);
+  padding: clamp(26px, 4.4vw, 42px);
+  gap: clamp(12px, 3vw, 20px);
   align-items: center;
 }
 
@@ -473,7 +471,7 @@ body {
 
 .save-date-title {
   font-family: var(--countdown-font);
-  font-size: clamp(1.8rem, 6vw, 3.05rem);
+  font-size: clamp(1.72rem, 5.6vw, 2.88rem);
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--text-dark);
@@ -516,14 +514,14 @@ body {
 }
 
 .save-date-title .save-date-amp {
-  font-size: clamp(2.1rem, 7vw, 3.5rem);
+  font-size: clamp(2rem, 6.4vw, 3.2rem);
   letter-spacing: 0.38em;
   margin-block: clamp(4px, 1vw, 10px);
 }
 
 .save-date-date {
   margin: 0;
-  font-size: clamp(0.95rem, 2.2vw, 1.18rem);
+  font-size: clamp(0.9rem, 2vw, 1.12rem);
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: rgba(12, 44, 29, 0.82);
@@ -538,12 +536,155 @@ body {
 }
 
 .save-date-date-location {
-  font-size: clamp(0.85rem, 2vw, 1rem);
+  font-size: clamp(0.82rem, 1.9vw, 0.96rem);
   letter-spacing: 0.16em;
 }
 
 .save-date-note {
-  font-size: clamp(0.92rem, 2vw, 1.1rem);
+  font-size: clamp(0.88rem, 1.9vw, 1.04rem);
+}
+
+.save-date-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(10px, 2.4vw, 16px);
+  width: 100%;
+}
+
+.save-date-action {
+  font: inherit;
+  font-size: clamp(0.82rem, 2vw, 0.96rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1.5px solid rgba(12, 44, 29, 0.24);
+  background: rgba(12, 63, 43, 0.08);
+  color: var(--text-dark);
+  padding: clamp(9px, 2.4vw, 12px) clamp(16px, 5.2vw, 24px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(9px, 2.6vw, 12px);
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease,
+    border-color 0.25s ease;
+  text-decoration: none;
+  min-width: clamp(200px, 58%, 260px);
+}
+
+.save-date-action:hover,
+.save-date-action:focus-visible {
+  background: rgba(12, 63, 43, 0.16);
+  border-color: rgba(12, 44, 29, 0.38);
+  box-shadow: 0 12px 26px rgba(3, 40, 28, 0.22);
+  transform: translateY(-1px);
+}
+
+.save-date-action:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.save-date-action__icon {
+  width: clamp(34px, 5.6vw, 42px);
+  height: clamp(34px, 5.6vw, 42px);
+  border-radius: 50%;
+  background: var(--emerald-mid);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 10px 20px rgba(3, 40, 28, 0.28);
+}
+
+.save-date-action__icon-graphic {
+  width: clamp(16px, 3.2vw, 18px);
+  height: clamp(16px, 3.2vw, 18px);
+}
+
+.save-date-action__label {
+  white-space: normal;
+  text-align: left;
+  text-wrap: balance;
+}
+
+.save-date-action--secondary {
+  background: rgba(255, 227, 162, 0.24);
+  border-color: rgba(12, 44, 29, 0.22);
+}
+
+.save-date-action--secondary:hover,
+.save-date-action--secondary:focus-visible {
+  background: rgba(255, 227, 162, 0.36);
+  border-color: rgba(12, 44, 29, 0.32);
+}
+
+.save-date-action--ghost {
+  background: transparent;
+  border-color: rgba(12, 44, 29, 0.16);
+  box-shadow: none;
+}
+
+.save-date-action--ghost .save-date-action__icon {
+  background: rgba(12, 63, 43, 0.12);
+  color: var(--emerald-mid);
+  box-shadow: none;
+}
+
+.save-date-action--ghost:hover,
+.save-date-action--ghost:focus-visible {
+  background: rgba(12, 63, 43, 0.08);
+  border-color: rgba(12, 44, 29, 0.26);
+  box-shadow: none;
+}
+
+.save-date-back-button {
+  align-self: center;
+}
+
+@media (min-width: 560px) {
+  .save-date-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .save-date-action {
+    min-width: auto;
+  }
+}
+
+.sneak-peek-wrapper {
+  align-items: center;
+  gap: clamp(12px, 3vw, 22px);
+}
+
+.sneak-peek-hashtag {
+  letter-spacing: 0.36em;
+}
+
+.countdown-video-frame.sneak-peek-frame {
+  position: relative;
+  padding-top: 56.25%;
+  display: block;
+}
+
+.sneak-peek-embed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.sneak-peek-caption {
+  max-width: 32ch;
+  margin-inline: auto;
+}
+
+.sneak-peek-wrapper .save-date-back-button {
+  margin-top: clamp(4px, 1.6vw, 12px);
 }
 
 .confetti-container {

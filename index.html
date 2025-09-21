@@ -67,6 +67,8 @@
         { start: 2000, step: 140, min: 1200 },
         { start: 1100, step: 160, min: 420 },
       ];
+      const VENUE_SNEAK_PEEK_EMBED_URL =
+        'https://www.youtube.com/embed/KbofD7ztBwQ?rel=0&modestbranding=1';
 
       // Media state --------------------------------------------------------
       let sharedCelebrationVideoElement = null;
@@ -462,6 +464,42 @@
       };
 
       // Save-the-date builders -------------------------------------------
+      const createSaveTheDateActionButton = ({
+        label,
+        iconPath,
+        additionalClassName = '',
+        viewBox = '0 0 24 24',
+      }) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `save-date-action${
+          additionalClassName ? ` ${additionalClassName}` : ''
+        }`;
+
+        const icon = document.createElement('span');
+        icon.className = 'save-date-action__icon';
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', viewBox);
+        svg.setAttribute('aria-hidden', 'true');
+        svg.classList.add('save-date-action__icon-graphic');
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', iconPath);
+        path.setAttribute('fill', 'currentColor');
+
+        svg.appendChild(path);
+        icon.appendChild(svg);
+
+        const labelEl = document.createElement('span');
+        labelEl.className = 'save-date-action__label';
+        labelEl.textContent = label;
+
+        button.append(icon, labelEl);
+
+        return button;
+      };
+
       const buildSaveTheDateDetails = () => {
         const wrapper = document.createElement('div');
         wrapper.className = 'countdown-wrapper has-details';
@@ -502,12 +540,32 @@
         note.className = 'countdown-note save-date-note';
         note.textContent = 'Formal invite to follow';
 
+        const actions = document.createElement('div');
+        actions.className = 'save-date-actions';
+
+        const replayButton = createSaveTheDateActionButton({
+          label: 'Replay celebration video',
+          iconPath:
+            'M12 5.5V2L5.5 8.5 12 15V10.6c3.15 0 5.9 2.55 5.9 5.9s-2.55 5.9-5.9 5.9-5.9-2.55-5.9-5.9h-2c0 4.36 3.54 7.9 7.9 7.9s7.9-3.54 7.9-7.9S16.36 8.6 12 8.6z',
+        });
+        replayButton.setAttribute('aria-label', 'Replay celebration video');
+
+        const sneakPeekButton = createSaveTheDateActionButton({
+          label: 'Venue sneak peek',
+          iconPath: 'M8 5.5v13l11-6.5-11-6.5z',
+          additionalClassName: 'save-date-action--secondary',
+        });
+        sneakPeekButton.setAttribute('aria-label', 'Play the venue sneak peek video');
+
+        actions.append(replayButton, sneakPeekButton);
+
         wrapper.appendChild(eyebrow);
         wrapper.appendChild(title);
         wrapper.appendChild(dateLine);
         wrapper.appendChild(note);
+        wrapper.appendChild(actions);
 
-        return { wrapper, title };
+        return { wrapper, title, replayButton, sneakPeekButton };
       };
 
       const revealSaveTheDateDetails = ({ title }, { withCelebrateEffects = false } = {}) => {
@@ -523,6 +581,26 @@
         }
       };
 
+      const createBackToDetailsButton = () =>
+        createSaveTheDateActionButton({
+          label: 'Back to details',
+          iconPath: 'M14.5 6.5 8.5 12l6 5.5V6.5z',
+          additionalClassName: 'save-date-action--ghost save-date-back-button',
+        });
+
+      const wireSaveTheDateActions = (
+        { replayButton, sneakPeekButton },
+        { onReplay, onSneakPeek } = {}
+      ) => {
+        if (replayButton && typeof onReplay === 'function') {
+          replayButton.addEventListener('click', onReplay);
+        }
+
+        if (sneakPeekButton && typeof onSneakPeek === 'function') {
+          sneakPeekButton.addEventListener('click', onSneakPeek);
+        }
+      };
+
       const showSaveTheDateDetails = ({
         targetContainer = cardShell,
         withCelebrateEffects = false,
@@ -534,6 +612,14 @@
         const elements = buildSaveTheDateDetails();
         targetContainer.innerHTML = '';
         targetContainer.appendChild(elements.wrapper);
+        wireSaveTheDateActions(elements, {
+          onReplay: () => {
+            showCelebrationVideo({ targetContainer, withCelebrateEffectsOnComplete: false });
+          },
+          onSneakPeek: () => {
+            showSneakPeekVideo({ targetContainer });
+          },
+        });
         revealSaveTheDateDetails(elements, { withCelebrateEffects });
       };
 
@@ -563,6 +649,42 @@
         wrapper.appendChild(videoFrame);
 
         return { wrapper, celebrationVideo };
+      };
+
+      const buildSneakPeekVideo = () => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'countdown-wrapper has-video sneak-peek-wrapper';
+
+        const videoHashtag = document.createElement('p');
+        videoHashtag.className = 'video-hashtag sneak-peek-hashtag';
+        videoHashtag.textContent = 'Venue sneak peek';
+
+        const videoFrame = document.createElement('div');
+        videoFrame.className = 'countdown-video-frame sneak-peek-frame';
+
+        const embed = document.createElement('iframe');
+        embed.className = 'sneak-peek-embed';
+        embed.src = VENUE_SNEAK_PEEK_EMBED_URL;
+        embed.title = 'Sneak peek of the celebration venue';
+        embed.allow =
+          'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        embed.setAttribute('allowfullscreen', '');
+        embed.setAttribute('loading', 'lazy');
+
+        videoFrame.appendChild(embed);
+
+        const caption = document.createElement('p');
+        caption.className = 'countdown-note sneak-peek-caption';
+        caption.textContent = 'Take a quick tour of where we will celebrate together!';
+
+        const backButton = createBackToDetailsButton();
+
+        wrapper.appendChild(videoHashtag);
+        wrapper.appendChild(videoFrame);
+        wrapper.appendChild(caption);
+        wrapper.appendChild(backButton);
+
+        return { wrapper, embed, backButton };
       };
 
       const safelyPlayVideo = (videoElement) => {
@@ -628,6 +750,24 @@
         safelyPlayVideo(celebrationVideo);
       };
 
+      const showSneakPeekVideo = ({ targetContainer = cardShell } = {}) => {
+        if (!targetContainer) {
+          return;
+        }
+
+        clearOrientationPrompt();
+
+        const { wrapper, backButton } = buildSneakPeekVideo();
+        targetContainer.innerHTML = '';
+        targetContainer.appendChild(wrapper);
+
+        if (backButton) {
+          backButton.addEventListener('click', () => {
+            showSaveTheDateDetails({ targetContainer });
+          });
+        }
+      };
+
       // Mobile experience helpers ----------------------------------------
       const createMobileFrame = (additionalClassName = '') => {
         const frame = document.createElement('div');
@@ -675,6 +815,15 @@
 
         swapMobileFrame(frame);
 
+        wireSaveTheDateActions(elements, {
+          onReplay: () => {
+            showMobileVideo();
+          },
+          onSneakPeek: () => {
+            showMobileSneakPeek();
+          },
+        });
+
         const reveal = () => {
           revealSaveTheDateDetails(elements, { withCelebrateEffects });
         };
@@ -711,6 +860,25 @@
         });
 
         safelyPlayVideo(celebrationVideo);
+      };
+
+      const showMobileSneakPeek = () => {
+        if (!mobileStage) {
+          showSneakPeekVideo({ targetContainer: cardShell });
+          return;
+        }
+
+        const { wrapper, backButton } = buildSneakPeekVideo();
+        const frame = createMobileFrame('mobile-frame--video');
+        frame.appendChild(wrapper);
+
+        swapMobileFrame(frame);
+
+        if (backButton) {
+          backButton.addEventListener('click', () => {
+            showMobileSaveTheDate({ withCelebrateEffects: false });
+          });
+        }
       };
 
       const showMobilePhotoAtIndex = (index, cycleIndex = 0) => {
