@@ -761,17 +761,7 @@
       summary.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     };
 
-    details.addEventListener('mouseenter', () => {
-      details.open = true;
-      setExpanded(true);
-    });
-
-    details.addEventListener('mouseleave', () => {
-      details.open = false;
-      setExpanded(false);
-      summary.blur();
-    });
-
+    // Removed mouseenter and mouseleave event listeners for accessibility compliance.
     summary.addEventListener('focus', () => {
       details.open = true;
       setExpanded(true);
