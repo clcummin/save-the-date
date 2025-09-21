@@ -411,6 +411,116 @@ body {
   padding: clamp(26px, 4.4vw, 42px);
   gap: clamp(12px, 3vw, 20px);
   align-items: center;
+  position: relative;
+}
+
+.save-date-calendar {
+  position: absolute;
+  top: clamp(16px, 3.6vw, 28px);
+  right: clamp(16px, 3.6vw, 28px);
+  text-align: left;
+}
+
+.save-date-calendar-details {
+  position: relative;
+  display: inline-block;
+}
+
+.save-date-calendar-summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--emerald-mid);
+  color: var(--cream);
+  font-weight: 600;
+  font-size: clamp(0.8rem, 1.8vw, 1rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.55em 1.4em 0.5em;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+  user-select: none;
+}
+
+.save-date-calendar-summary::-webkit-details-marker {
+  display: none;
+}
+
+.save-date-calendar-details[open] .save-date-calendar-summary {
+  background: var(--emerald-dark);
+  transform: translateY(1px);
+}
+
+.save-date-calendar-summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.save-date-calendar-menu {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(12, 44, 29, 0.18);
+  min-width: clamp(220px, 32vw, 240px);
+  z-index: 4;
+}
+
+.save-date-calendar-details:not([open]) .save-date-calendar-menu {
+  display: none;
+}
+
+.save-date-calendar-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0.55em 0.85em 0.45em;
+  border-radius: 12px;
+  font-weight: 600;
+  color: var(--emerald-mid);
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition), transform var(--transition);
+}
+
+.save-date-calendar-link:hover,
+.save-date-calendar-link:focus-visible {
+  background: rgba(12, 63, 43, 0.08);
+  color: var(--emerald-dark);
+  outline: none;
+  transform: translateX(4px);
+}
+
+@media (max-width: 680px) {
+  .save-date-calendar {
+    position: static;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .save-date-calendar-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .save-date-calendar-menu {
+    position: static;
+    width: min(100%, 320px);
+    margin-top: 14px;
+  }
 }
 
 .countdown-number {
