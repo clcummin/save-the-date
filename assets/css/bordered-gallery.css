@@ -511,7 +511,7 @@ body {
   position: absolute;
   top: calc(100% + 14px);
   left: 50%;
-  transform: translate3d(-50%, 8px, 0);
+  transform: translate3d(-50%, -8px, 0);
   display: flex;
   flex-direction: column;
   gap: 10px;
