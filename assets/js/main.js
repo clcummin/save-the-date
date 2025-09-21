@@ -217,10 +217,6 @@
    * Primes video playback for mobile devices by attempting a silent play
    * This helps with autoplay restrictions on mobile browsers
    */
-  /**
-   * Primes video playback for mobile devices to improve reliability
-   * @returns {void}
-   */
   const primeMobileCelebrationVideoPlayback = () => {
     if (hasPrimedMobileVideoPlayback) return;
 
