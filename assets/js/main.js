@@ -22,6 +22,18 @@
   const CELEBRATION_CONFETTI_COLORS = ['#03281c', '#000000', '#ffffff'];
   const CELEBRATION_CONFETTI_LIFETIME_MS = 4200;
 
+  // Calendar invite settings
+  const CALENDAR_EVENT = {
+    title: 'Wedding Weekend: Victoria & Christopher',
+    location: 'Chalet View Lodge, 72056 CA-70, Blairsden-Graeagle, CA 96103',
+    website: 'https://becomingcummings.love',
+    description:
+      'Join us for our wedding weekend celebration. Visit https://becomingcummings.love for details.',
+    startDate: '20260911',
+    endDateExclusive: '20260914',
+    uid: 'wedding-weekend-20260911@becomingcummings.love',
+  };
+
   // Mobile photo sequence settings
   const MOBILE_PHOTO_DEFAULT_DURATION_MS = 1600;
   const MOBILE_PHOTO_TRANSITION_BUFFER_MS = 80;
@@ -581,6 +593,168 @@
   };
 
   /**
+   * Builds a URL safe text string for calendar services
+   * @param {string} value - Text to encode
+   * @returns {string} Encoded text string
+   */
+  const encodeCalendarText = (value) =>
+    encodeURIComponent(value.replace(/\s+/g, ' ').trim());
+
+  let cachedCalendarBlobUrl = null;
+
+  /**
+   * Escapes text according to ICS specification requirements
+   * @param {string} value - Text to escape
+   * @returns {string} Escaped text value
+   */
+  const escapeIcsText = (value) =>
+    value
+      .replace(/\\/g, '\\\\')
+      .replace(/;/g, '\\;')
+      .replace(/,/g, '\\,')
+      .replace(/\n/g, '\\n');
+
+  /**
+   * Formats a date instance to an ICS timestamp in UTC
+   * @param {Date} date - Date instance to format
+   * @returns {string} Formatted timestamp string
+   */
+  const formatIcsTimestamp = (date) =>
+    date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+
+  /**
+   * Creates the ICS file contents for the wedding event
+   * @returns {string} ICS file data
+   */
+  const createCalendarIcsContent = () => {
+    const lines = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Becoming Cummings//Save The Date//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `DTSTAMP:${formatIcsTimestamp(new Date())}`,
+      `DTSTART;VALUE=DATE:${CALENDAR_EVENT.startDate}`,
+      `DTEND;VALUE=DATE:${CALENDAR_EVENT.endDateExclusive}`,
+      `SUMMARY:${escapeIcsText(CALENDAR_EVENT.title)}`,
+      `DESCRIPTION:${escapeIcsText(CALENDAR_EVENT.description)}`,
+      `LOCATION:${escapeIcsText(CALENDAR_EVENT.location)}`,
+      `UID:${escapeIcsText(CALENDAR_EVENT.uid)}`,
+      `URL:${CALENDAR_EVENT.website}`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ];
+
+    return `${lines.join('\r\n')}\r\n`;
+  };
+
+  /**
+   * Creates (or returns a cached) object URL for the ICS download
+   * @returns {string} Object URL pointing to ICS data
+   */
+  const getCalendarIcsUrl = () => {
+    if (cachedCalendarBlobUrl) {
+      return cachedCalendarBlobUrl;
+    }
+
+    const icsContent = createCalendarIcsContent();
+    const blob = new Blob([icsContent], { type: 'text/calendar' });
+    cachedCalendarBlobUrl = window.URL.createObjectURL(blob);
+    return cachedCalendarBlobUrl;
+  };
+
+  window.addEventListener('beforeunload', () => {
+    if (cachedCalendarBlobUrl) {
+      window.URL.revokeObjectURL(cachedCalendarBlobUrl);
+      cachedCalendarBlobUrl = null;
+    }
+  });
+
+  /**
+   * Builds the Google Calendar template URL
+   * @returns {string} Google Calendar URL
+   */
+  const buildGoogleCalendarUrl = () => {
+    const baseUrl = 'https://www.google.com/calendar/render?action=TEMPLATE';
+    const params = [
+      `text=${encodeCalendarText(CALENDAR_EVENT.title)}`,
+      `details=${encodeCalendarText(CALENDAR_EVENT.description)}`,
+      `location=${encodeCalendarText(CALENDAR_EVENT.location)}`,
+      `dates=${CALENDAR_EVENT.startDate}/${CALENDAR_EVENT.endDateExclusive}`,
+      `ctz=America/Los_Angeles`,
+    ];
+
+    return `${baseUrl}&${params.join('&')}`;
+  };
+
+  /**
+   * Creates a calendar option link element
+   * @param {Object} options - Link configuration options
+   * @param {string} options.label - The text label for the link
+   * @param {string} options.href - The destination URL
+   * @param {boolean} [options.download] - Whether to trigger a download
+   * @returns {HTMLAnchorElement} Configured anchor element
+   */
+  const createCalendarOptionLink = ({ label, href, download = false }) => {
+    const link = document.createElement('a');
+    link.className = 'save-date-calendar-link';
+    link.textContent = label;
+    link.href = href;
+    if (download) {
+      link.setAttribute('download', 'wedding-weekend.ics');
+      link.setAttribute('type', 'text/calendar');
+    } else {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noreferrer noopener');
+    }
+    return link;
+  };
+
+  /**
+   * Creates the Add to calendar control for the save the date details
+   * @returns {Object} Object containing container and interactive elements
+   */
+  const createCalendarInviteControls = () => {
+    const container = document.createElement('div');
+    container.className = 'save-date-calendar';
+
+    const details = document.createElement('details');
+    details.className = 'save-date-calendar-details';
+
+    const summary = document.createElement('summary');
+    summary.className = 'save-date-calendar-summary';
+    summary.textContent = 'Add to calendar';
+    summary.setAttribute('aria-label', 'Add the wedding weekend to your calendar');
+
+    const menu = document.createElement('div');
+    menu.className = 'save-date-calendar-menu';
+
+    const googleLink = createCalendarOptionLink({
+      label: 'Google Calendar',
+      href: buildGoogleCalendarUrl(),
+    });
+
+    const universalLink = createCalendarOptionLink({
+      label: 'Apple, Outlook & others (ICS)',
+      href: getCalendarIcsUrl(),
+      download: true,
+    });
+
+    menu.append(googleLink, universalLink);
+    details.append(summary, menu);
+    container.append(details);
+
+    details.addEventListener('toggle', () => {
+      if (!details.open) {
+        summary.blur();
+      }
+    });
+
+    return { container, details };
+  };
+
+  /**
    * Builds the complete save the date details interface
    * @returns {Object} Object containing wrapper and interactive elements
    */
@@ -605,9 +779,11 @@
     note.textContent = 'Formal invite to follow';
 
     // Create action buttons
+    const calendarControls = createCalendarInviteControls();
     const { actions, websiteLink, replayButton, sneakPeekButton } = createSaveTheDateActions();
 
     // Assemble the interface
+    wrapper.appendChild(calendarControls.container);
     wrapper.appendChild(eyebrow);
     wrapper.appendChild(title);
     wrapper.appendChild(dateLine);
