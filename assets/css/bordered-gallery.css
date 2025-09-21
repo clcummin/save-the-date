@@ -119,7 +119,7 @@ body {
 }
 
 /* Horizontal images: anchor at top to preserve subjects */
-.border-cell.middle-left-tall img {
+.border-cell.is-horizontal img {
   object-position: center top;
 }
 
