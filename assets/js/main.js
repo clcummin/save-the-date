@@ -504,9 +504,6 @@
 
     button.className = buttonClassNames.join(' ');
 
-    if (!ariaLabel && isIconOnly) {
-      button.setAttribute('aria-label', label);
-    }
 
     const tooltipLabel = tooltipText || (isIconOnly ? label : '');
     if (tooltipLabel) {
