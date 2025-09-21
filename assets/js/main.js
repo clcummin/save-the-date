@@ -24,7 +24,7 @@
 
   // Calendar invite settings
   const CALENDAR_EVENT = {
-    title: 'Wedding Weekend: Victoria & Christopher',
+    title: 'Wedding Weekend: Lorraine & Christopher',
     location: 'Chalet View Lodge, 72056 CA-70, Blairsden-Graeagle, CA 96103',
     website: 'https://becomingcummings.love',
     description:
