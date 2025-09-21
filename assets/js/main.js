@@ -1351,6 +1351,11 @@
         startOverlay.classList.add('hidden');
         startOverlay.setAttribute('aria-hidden', 'true');
         startOverlay.setAttribute('tabindex', '-1');
+        window.setTimeout(() => {
+          if (startOverlay.parentElement) {
+            startOverlay.remove();
+          }
+        }, START_OVERLAY_CLEAR_DELAY_MS);
       }, START_OVERLAY_CLEAR_DELAY_MS);
     }
 
