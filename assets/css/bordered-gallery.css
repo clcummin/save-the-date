@@ -38,6 +38,20 @@
   border: 0;
 }
 
+.noscript-note {
+  margin: clamp(16px, 5vw, 32px) auto;
+  max-width: min(480px, 90vw);
+  padding: clamp(12px, 4vw, 18px) clamp(16px, 6vw, 24px);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-dark);
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
 html, body {
   height: 100%;
   min-height: 100%;
@@ -54,6 +68,18 @@ body {
   min-height: 100vh;
   min-height: 100svh;
   min-height: 100dvh;
+}
+
+main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  width: 100%;
+}
+
+main > .page-border {
+  flex: 1 1 auto;
 }
 
 /* MAIN LAYOUT GRID
