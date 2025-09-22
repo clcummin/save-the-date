@@ -559,8 +559,8 @@
   const initialCountdownWrapper = cardShell?.querySelector('.countdown-wrapper');
   // Store a clone of the initial countdown wrapper for reset purposes
   const initialCountdownWrapperClone = initialCountdownWrapper?.cloneNode(true);
-  const countdownNumber = document.getElementById('countdownNumber');
-  const countdownNote = initialCountdownWrapper?.querySelector('.countdown-note');
+  let countdownNumber = document.getElementById('countdownNumber');
+  let countdownNote = initialCountdownWrapper?.querySelector('.countdown-note');
   const countdownStart = borderCells.length > 0 ? borderCells.length : COUNTDOWN_START_FALLBACK;
   
   let currentValue = countdownStart;
@@ -1798,18 +1798,19 @@
       const freshClone = initialCountdownWrapperClone.cloneNode(true);
       cardShell.appendChild(freshClone);
       
-      // Reset countdown display - find elements again after DOM restoration
-      const resetCountdownNumber = document.getElementById('countdownNumber');
-      const resetCountdownNote = freshClone.querySelector('.countdown-note');
+      // Re-bind countdown references to the new DOM elements
+      countdownNumber = document.getElementById('countdownNumber');
+      countdownNote = freshClone.querySelector('.countdown-note');
       
-      if (resetCountdownNumber) {
-        resetCountdownNumber.textContent = String(countdownStart);
-        resetCountdownNumber.setAttribute('aria-label', `Countdown starting`);
-        resetCountdownNumber.classList.remove('is-transitioning');
+      // Reset countdown display
+      if (countdownNumber) {
+        countdownNumber.textContent = String(countdownStart);
+        countdownNumber.setAttribute('aria-label', `Countdown starting`);
+        countdownNumber.classList.remove('is-transitioning');
       }
       
-      if (resetCountdownNote) {
-        resetCountdownNote.textContent = 'Counting down the final moments until the big day.';
+      if (countdownNote) {
+        countdownNote.textContent = 'Counting down the final moments until the big day.';
       }
     }
 
