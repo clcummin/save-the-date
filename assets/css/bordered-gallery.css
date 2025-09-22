@@ -198,11 +198,17 @@ main > .page-border {
   transform: scale3d(1.05, 1.05, 1);
   transition: transform var(--transition), filter var(--transition);
   filter: saturate(0.75) contrast(1.05);
-  will-change: transform, filter;
+  will-change: auto;
   /* Prevent layout shift during loading */
   aspect-ratio: 4 / 3;
 }
 
+/* Apply will-change only during interaction */
+.border-cell:hover img,
+.border-cell:focus img,
+.border-cell:active img {
+  will-change: transform, filter;
+}
 /* Specific aspect ratios for tall cells */
 .border-cell.middle-left-tall img,
 .border-cell.right-tall img {
