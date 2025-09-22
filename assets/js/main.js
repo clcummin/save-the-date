@@ -62,6 +62,34 @@
   });
 
   // =====================================================================
+  // FONT LOADING MODULE
+  // =====================================================================
+
+  /**
+   * Handles async font loading with proper fallback
+   */
+  const handleFontLoading = () => {
+    const fontPreload = document.getElementById('font-preload');
+    if (fontPreload) {
+      // Convert preload to stylesheet
+      const loadFont = () => {
+        fontPreload.rel = 'stylesheet';
+        fontPreload.onload = null; // Clean up after conversion
+      };
+      
+      // Use requestAnimationFrame to ensure DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadFont);
+      } else {
+        requestAnimationFrame(loadFont);
+      }
+    }
+  };
+
+  // Initialize font loading
+  handleFontLoading();
+
+  // =====================================================================
   // CONFIGURATION CONSTANTS
   // =====================================================================
 
