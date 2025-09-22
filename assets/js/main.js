@@ -1666,7 +1666,8 @@
       return;
     }
 
-    if (!countdownNumber || !initialCountdownWrapperClone) {
+    const liveWrapper = cardShell?.querySelector('.countdown-wrapper');
+    if (!countdownNumber || !liveWrapper) {
       showCelebrationVideo();
       return;
     }
