@@ -934,6 +934,10 @@
       // Improved MIME type for better mobile compatibility
       link.setAttribute('type', 'text/calendar; charset=utf-8');
       const clickCleanup = eventListenerManager.add(link, 'click', (event) => {
+        // Add loading state
+        link.setAttribute('aria-busy', 'true');
+        link.style.pointerEvents = 'none';
+        
         // Generate a fresh blob URL for each download attempt
         const freshBlobUrl = getCalendarIcsUrl();
         // Revoke previous blob URL if present to prevent memory leaks
@@ -952,6 +956,12 @@
           event.preventDefault();
           window.open(freshBlobUrl, '_blank');
         }
+        
+        // Remove loading state after a brief delay
+        setTimeout(() => {
+          link.removeAttribute('aria-busy');
+          link.style.pointerEvents = '';
+        }, 500);
       });
       // Store cleanup function for potential cleanup
       link._eventCleanup = clickCleanup;
@@ -1188,7 +1198,7 @@
     });
 
   /**
-   * Wires up event handlers for save the date action buttons
+   * Wires up event handlers for save the date action buttons with enhanced feedback
    * @param {Object} elements - Object containing button elements
    * @param {Object} handlers - Object containing callback functions
    * @param {Function} [handlers.onReplay] - Replay button click handler
@@ -1199,11 +1209,39 @@
     { onReplay, onSneakPeek } = {}
   ) => {
     if (replayButton && typeof onReplay === 'function') {
-      eventListenerManager.add(replayButton, 'click', onReplay);
+      eventListenerManager.add(replayButton, 'click', (event) => {
+        // Add loading state and feedback
+        replayButton.setAttribute('aria-busy', 'true');
+        replayButton.style.pointerEvents = 'none';
+        
+        try {
+          onReplay(event);
+        } finally {
+          // Remove loading state after content loads
+          setTimeout(() => {
+            replayButton.removeAttribute('aria-busy');
+            replayButton.style.pointerEvents = '';
+          }, 800);
+        }
+      });
     }
 
     if (sneakPeekButton && typeof onSneakPeek === 'function') {
-      eventListenerManager.add(sneakPeekButton, 'click', onSneakPeek);
+      eventListenerManager.add(sneakPeekButton, 'click', (event) => {
+        // Add loading state and feedback
+        sneakPeekButton.setAttribute('aria-busy', 'true');
+        sneakPeekButton.style.pointerEvents = 'none';
+        
+        try {
+          onSneakPeek(event);
+        } finally {
+          // Remove loading state after content loads
+          setTimeout(() => {
+            sneakPeekButton.removeAttribute('aria-busy');
+            sneakPeekButton.style.pointerEvents = '';
+          }, 800);
+        }
+      });
     }
   };
 

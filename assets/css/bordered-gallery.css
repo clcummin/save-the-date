@@ -1224,6 +1224,10 @@ h1 {
   body {
     display: block;
     overflow-y: auto;
+    /* Improve mobile font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   .page-border {
@@ -1247,6 +1251,27 @@ h1 {
     align-items: stretch;
     justify-content: stretch;
     margin: 0;
+  }
+  
+  /* Enhanced mobile button interactions */
+  .countdown-overlay-button {
+    min-height: 48px;
+    min-width: 120px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Better mobile navigation */
+  .skip-link {
+    position: fixed;
+    z-index: 1001;
+  }
+  
+  /* Optimize mobile calendar interactions */
+  .save-date-action {
+    min-height: 48px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .mobile-frame {
