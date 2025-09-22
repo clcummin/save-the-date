@@ -557,10 +557,8 @@
   // DOM references and countdown state
   const cardShell = document.getElementById('cardShell');
   const initialCountdownWrapper = cardShell?.querySelector('.countdown-wrapper');
-  // Store a clone of the initial countdown wrapper for reset purposes
-  const initialCountdownWrapperClone = initialCountdownWrapper?.cloneNode(true);
-  let countdownNumber = document.getElementById('countdownNumber');
-  let countdownNote = initialCountdownWrapper?.querySelector('.countdown-note');
+  const countdownNumber = document.getElementById('countdownNumber');
+  const countdownNote = initialCountdownWrapper?.querySelector('.countdown-note');
   const countdownStart = borderCells.length > 0 ? borderCells.length : COUNTDOWN_START_FALLBACK;
   
   let currentValue = countdownStart;
@@ -570,9 +568,9 @@
 
 
   // Overlay control elements
-  let startOverlay = document.getElementById('startOverlay');
-  let startOverlayContent = startOverlay?.querySelector('.countdown-overlay-content') ?? null;
-  let startButton = document.getElementById('startCountdownButton');
+  const startOverlay = document.getElementById('startOverlay');
+  const startOverlayContent = startOverlay?.querySelector('.countdown-overlay-content') ?? null;
+  const startButton = document.getElementById('startCountdownButton');
 
   /**
    * Reveals the next border cell in sequence during countdown
@@ -1666,8 +1664,7 @@
       return;
     }
 
-    const liveWrapper = cardShell?.querySelector('.countdown-wrapper');
-    if (!countdownNumber || !liveWrapper) {
+    if (!countdownNumber || !initialCountdownWrapper) {
       showCelebrationVideo();
       return;
     }
@@ -1732,155 +1729,6 @@
       startExperience();
     }
   };
-
-  // =====================================================================
-  // RESET MECHANISM FOR WINDOW RESIZE
-  // =====================================================================
-
-  /**
-   * Silently resets the experience to its initial state
-   * Only triggered on desktop during active animation
-   */
-  const resetExperienceToInitialState = () => {
-    // Only reset if experience has started and not on mobile
-    if (!hasStarted || isMobileExperienceActive) {
-      return;
-    }
-
-    // Clear countdown interval
-    if (countdownIntervalId) {
-      window.clearInterval(countdownIntervalId);
-      countdownIntervalId = null;
-    }
-
-    // Reset state variables
-    hasStarted = false;
-    currentValue = countdownStart;
-    revealedCells = 0;
-
-    // Reset video state
-    if (sharedCelebrationVideoElement) {
-      try {
-        sharedCelebrationVideoElement.pause();
-        sharedCelebrationVideoElement.currentTime = 0;
-      } catch (error) {
-        // Silently handle video reset errors
-      }
-      sharedCelebrationVideoElement = null;
-    }
-    hasPrimedMobileVideoPlayback = false;
-
-    // Stop any audio context
-    if (audioCtx) {
-      try {
-        audioCtx.close();
-      } catch (error) {
-        // Silently handle audio context close errors
-      }
-      audioCtx = null;
-    }
-
-    // Reset DOM elements
-    // Hide border cells
-    borderCells.forEach((cell) => {
-      cell.classList.remove('is-visible');
-    });
-
-    // Clear mobile stage if present
-    if (mobileStage) {
-      mobileStage.replaceChildren();
-    }
-
-    // Reset card shell to initial countdown state
-    if (cardShell && initialCountdownWrapperClone) {
-      cardShell.innerHTML = '';
-      // Use a fresh clone each time to avoid DOM manipulation issues
-      const freshClone = initialCountdownWrapperClone.cloneNode(true);
-      cardShell.appendChild(freshClone);
-      
-      // Re-bind countdown references to the new DOM elements
-      countdownNumber = document.getElementById('countdownNumber');
-      countdownNote = freshClone.querySelector('.countdown-note');
-      
-      // Reset countdown display
-      if (countdownNumber) {
-        countdownNumber.textContent = String(countdownStart);
-        countdownNumber.setAttribute('aria-label', `Countdown starting`);
-        countdownNumber.classList.remove('is-transitioning');
-      }
-      
-      if (countdownNote) {
-        countdownNote.textContent = 'Counting down the final moments until the big day.';
-      }
-    }
-
-    // Recreate and show start overlay
-    if (!document.getElementById('startOverlay')) {
-      const body = document.body;
-      const newOverlay = document.createElement('div');
-      newOverlay.className = 'countdown-overlay start-prompt';
-      newOverlay.id = 'startOverlay';
-      newOverlay.setAttribute('role', 'button');
-      newOverlay.setAttribute('tabindex', '0');
-      newOverlay.setAttribute('aria-label', 'Start the countdown experience - Press Enter or Space to begin');
-      newOverlay.setAttribute('aria-controls', 'mainContent');
-      newOverlay.setAttribute('aria-describedby', 'startInstructions');
-
-      const overlayContent = document.createElement('div');
-      overlayContent.className = 'countdown-overlay-content';
-      
-      const topLine = document.createElement('span');
-      topLine.className = 'countdown-overlay-line countdown-overlay-line--top';
-      topLine.textContent = 'get ready';
-      
-      const button = document.createElement('button');
-      button.className = 'countdown-overlay-button';
-      button.id = 'startCountdownButton';
-      button.type = 'button';
-      button.textContent = 'click here';
-      
-      const bottomLine = document.createElement('span');
-      bottomLine.className = 'countdown-overlay-line countdown-overlay-line--bottom';
-      bottomLine.textContent = 'to party';
-      
-      const instructions = document.createElement('span');
-      instructions.id = 'startInstructions';
-      instructions.className = 'visually-hidden';
-      instructions.textContent = 'This will start an interactive countdown and photo experience for Lorraine and Christopher\'s wedding celebration';
-      
-      overlayContent.appendChild(topLine);
-      overlayContent.appendChild(button);
-      overlayContent.appendChild(bottomLine);
-      overlayContent.appendChild(instructions);
-      newOverlay.appendChild(overlayContent);
-      
-      // Insert at the beginning of body
-      body.insertBefore(newOverlay, body.firstChild);
-      
-      // Re-bind overlay references to the new DOM elements
-      startOverlay = newOverlay;
-      startOverlayContent = overlayContent;
-      startButton = button;
-      
-      // Re-wire event listeners for new overlay
-      eventListenerManager.add(button, 'click', startExperience);
-      eventListenerManager.add(newOverlay, 'click', startExperience);
-      eventListenerManager.add(newOverlay, 'keydown', handleOverlayKeyDown);
-    }
-  };
-
-  /**
-   * Handles window resize events during animation
-   */
-  const handleWindowResize = () => {
-    // Only reset during active animation on desktop
-    if (hasStarted && !isMobileExperienceActive) {
-      resetExperienceToInitialState();
-    }
-  };
-
-  // Set up resize listener with proper cleanup tracking
-  eventListenerManager.add(window, 'resize', handleWindowResize);
 
   // Wire up interactions with proper event management --------------
   if (startButton) {
