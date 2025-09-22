@@ -4,12 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; img-src 'self' data:; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="description" content="Celebrate Lorraine and Christopher's upcoming wedding weekend with an immersive countdown experience and venue preview.">
+  <meta name="theme-color" content="#03281c">
   <title>Save the Date</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="assets/favicon.png">
-    <link rel="stylesheet" href="assets/css/bordered-gallery.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="assets/css/bordered-gallery.css">
 </head>
 <body>
   <div
@@ -18,6 +20,7 @@
     role="button"
     tabindex="0"
     aria-label="Start the countdown"
+    aria-controls="mainContent"
   >
     <div class="countdown-overlay-content">
       <span class="countdown-overlay-line countdown-overlay-line--top">get ready</span>
@@ -25,28 +28,33 @@
       <span class="countdown-overlay-line countdown-overlay-line--bottom">to party</span>
     </div>
   </div>
-  <div class="page-border">
-    <div class="border-cell top-left-wide" data-reveal-index="1"><img src="assets/images/AUG4710_bw.jpg" alt="Couple laughing together" style="object-position: center 35%;"></div>
-    <div class="border-cell top-center" data-reveal-index="2"><img src="assets/images/AUG4726_bw.jpg" alt="Holding hands" style="object-position: center 15%;"></div>
-    <div class="border-cell top-right" data-reveal-index="3"><img src="assets/images/AUG4759_bw.jpg" alt="Sharing a quiet moment together style="object-position: center 15%;""></div>
+  <main id="mainContent">
+    <div class="page-border">
+      <div class="border-cell top-left-wide" data-reveal-index="1"><img src="assets/images/AUG4710_bw.jpg" alt="Couple laughing together" loading="lazy" decoding="async" style="object-position: center 35%;"></div>
+      <div class="border-cell top-center" data-reveal-index="2"><img src="assets/images/AUG4726_bw.jpg" alt="Holding hands" loading="lazy" decoding="async" style="object-position: center 15%;"></div>
+      <div class="border-cell top-right" data-reveal-index="3"><img src="assets/images/AUG4759_bw.jpg" alt="Sharing a quiet moment together" loading="lazy" decoding="async" style="object-position: center 15%;"></div>
 
-    <div class="border-cell middle-left-tall" data-reveal-index="4"><img src="assets/images/AUG4849_bw.jpg" alt="Walking through the forest"></div>
-    <div class="card-shell" id="cardShell">
-      <div class="countdown-wrapper" aria-live="polite">
-        <p class="eyebrow">Celebration Countdown</p>
-        <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown starting">10</div>
-        <p class="countdown-note">Counting down the final moments until the big day.</p>
+      <div class="border-cell middle-left-tall" data-reveal-index="4"><img src="assets/images/AUG4849_bw.jpg" alt="Walking through the forest" loading="lazy" decoding="async"></div>
+      <div class="card-shell" id="cardShell">
+        <div class="countdown-wrapper" aria-live="polite">
+          <p class="eyebrow">Celebration Countdown</p>
+          <div class="countdown-number" id="countdownNumber" role="status" aria-label="Countdown starting">10</div>
+          <p class="countdown-note">Counting down the final moments until the big day.</p>
+        </div>
       </div>
-    </div>
-    <div class="border-cell right-tall" data-reveal-index="5"><img src="assets/images/AUG5177_bw.jpg" alt="Laughing in the field"></div>
+      <div class="border-cell right-tall" data-reveal-index="5"><img src="assets/images/AUG5177_bw.jpg" alt="Laughing in the field" loading="lazy" decoding="async"></div>
 
-    <div class="border-cell bottom-left" data-reveal-index="6"><img src="assets/images/AUG5106_bw.jpg" alt="Smiling under the trees"></div>
-    <div class="border-cell bottom-wide" data-reveal-index="7"><img src="assets/images/AUG5127_bw.jpg" alt="Holding close" style="object-position: center 28%;"></div>
-    <div class="border-cell bottom-right" data-reveal-index="8"><img src="assets/images/AUG5201_bw.jpg" alt="Strolling along the shoreline"></div>
-  </div>
-  <div class="mobile-experience" id="mobileExperience" aria-live="polite" aria-label="Slideshow of our memories">
-    <div class="mobile-stage" id="mobileStage"></div>
-  </div>
+      <div class="border-cell bottom-left" data-reveal-index="6"><img src="assets/images/AUG5106_bw.jpg" alt="Smiling under the trees" loading="lazy" decoding="async"></div>
+      <div class="border-cell bottom-wide" data-reveal-index="7"><img src="assets/images/AUG5127_bw.jpg" alt="Holding close" loading="lazy" decoding="async" style="object-position: center 28%;"></div>
+      <div class="border-cell bottom-right" data-reveal-index="8"><img src="assets/images/AUG5201_bw.jpg" alt="Strolling along the shoreline" loading="lazy" decoding="async"></div>
+    </div>
+    <div class="mobile-experience" id="mobileExperience" aria-live="polite" aria-label="Slideshow of our memories">
+      <div class="mobile-stage" id="mobileStage"></div>
+    </div>
+    <noscript>
+      <p class="noscript-note">Enable JavaScript to enjoy the interactive countdown and mobile slideshow experience.</p>
+    </noscript>
+  </main>
   <script src="assets/js/main.js"></script>
 </body>
 </html>
