@@ -888,110 +888,47 @@
   };
 
   /**
-   * Shows a hint message for ICS downloads with improved mobile support
-   * @param {HTMLElement} container - Container element to append the hint to
-   */
-  const showDownloadHint = (container) => {
-    // Remove any existing hint to prevent duplicates
-    const existingHint = container.querySelector('.download-hint');
-    if (existingHint) {
-      existingHint.remove();
-    }
-
-    const hint = document.createElement('div');
-    hint.className = 'download-hint';
-    hint.id = 'calendar-download-hint';
-    hint.setAttribute('role', 'status');
-    hint.setAttribute('aria-live', 'polite');
-    hint.setAttribute('aria-atomic', 'true');
-    
-    // Platform-specific messaging for better UX
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isAndroidDevice = /Android/.test(navigator.userAgent);
-    
-    let hintText;
-    if (isIOSDevice) {
-      hintText = "Tap the file in Safari's downloads or open your Files app to add the event to your calendar.";
-    } else if (isAndroidDevice) {
-      hintText = "Check your downloads or notification panel. Tap the file to add the event to your calendar.";
-    } else {
-      hintText = "If your event didn't open automatically, check your downloads folder and open the file to add it to your calendar.";
-    }
-    
-    hint.textContent = hintText;
-    container.appendChild(hint);
-
-    // Auto-hide the hint after appropriate duration based on text length
-    const hideDelay = hintText.length > 80 ? 8000 : 6000;
-    
-    setTimeout(() => {
-      if (hint.parentNode) {
-        hint.classList.add('download-hint--hiding');
-        // Remove from DOM after fade animation
-        setTimeout(() => {
-          if (hint.parentNode) {
-            hint.remove();
-          }
-        }, 300);
-      }
-    }, hideDelay);
-  };
-
-  /**
    * Creates a calendar option link element
    * @param {Object} options - Link configuration options
    * @param {string} options.label - The text label for the link
    * @param {string} options.href - The destination URL
    * @param {boolean} [options.download] - Whether to trigger a download
-   * @param {HTMLElement} [options.hintContainer] - Container for showing download hints
    * @returns {HTMLAnchorElement} Configured anchor element
    */
-  const createCalendarOptionLink = ({ label, href, download = false, hintContainer = null }) => {
+  const createCalendarOptionLink = ({ label, href, download = false }) => {
     const link = document.createElement('a');
     link.className = 'save-date-calendar-link';
     link.setAttribute('role', 'menuitem');
     link.textContent = label;
-    link.href = "#";
-    
+    link.href = '#';
+
     if (download) {
       // For download links, don't set href initially - it will be set fresh on each click
       link.setAttribute('download', 'wedding-weekend.ics');
       // Improved MIME type for better mobile compatibility
       link.setAttribute('type', 'text/calendar; charset=utf-8');
-      link.setAttribute('aria-describedby', 'calendar-download-hint');
-      
-      // Enhanced click handler with better mobile support
-      if (hintContainer) {
-        const clickCleanup = eventListenerManager.add(link, 'click', (event) => {
-          // Generate a fresh blob URL for each download attempt
-          const freshBlobUrl = getCalendarIcsUrl();
-          // Revoke previous blob URL if present to prevent memory leaks
-          if (link.href && link.href.startsWith('blob:')) {
-            URL.revokeObjectURL(link.href);
-          }
-          link.href = freshBlobUrl;
-          
-          // For iOS Safari, we need to handle the download differently
-          const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
-                             /Safari/.test(navigator.userAgent) && 
-                             !/CriOS|FxiOS|OPiOS|mercury/.test(navigator.userAgent);
-          
-          if (isIOSSafari) {
-            // iOS Safari needs special handling - open in new window
-            event.preventDefault();
-            window.open(freshBlobUrl, '_blank');
-          }
-          
-          // Show hint with appropriate delay for different platforms
-          const delay = isIOSSafari ? 200 : 100;
-          setTimeout(() => {
-            showDownloadHint(hintContainer);
-          }, delay);
-        });
-        
-        // Store cleanup function for potential cleanup
-        link._eventCleanup = clickCleanup;
-      }
+      const clickCleanup = eventListenerManager.add(link, 'click', (event) => {
+        // Generate a fresh blob URL for each download attempt
+        const freshBlobUrl = getCalendarIcsUrl();
+        // Revoke previous blob URL if present to prevent memory leaks
+        if (link.href && link.href.startsWith('blob:')) {
+          URL.revokeObjectURL(link.href);
+        }
+        link.href = freshBlobUrl;
+
+        // For iOS Safari, we need to handle the download differently
+        const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+                           /Safari/.test(navigator.userAgent) &&
+                           !/CriOS|FxiOS|OPiOS|mercury/.test(navigator.userAgent);
+
+        if (isIOSSafari) {
+          // iOS Safari needs special handling - open in new window
+          event.preventDefault();
+          window.open(freshBlobUrl, '_blank');
+        }
+      });
+      // Store cleanup function for potential cleanup
+      link._eventCleanup = clickCleanup;
     } else {
       // For non-download links (like Google Calendar), set href normally
       link.href = href;
@@ -1047,7 +984,6 @@
     const universalLink = createCalendarOptionLink({
       label: 'Apple, Outlook & others (ICS)',
       download: true,
-      hintContainer: container,
     });
 
     menu.append(googleLink, universalLink);
