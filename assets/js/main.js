@@ -78,7 +78,7 @@
       
       // Use requestAnimationFrame to ensure DOM is ready
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadFont);
+        eventListenerManager.add(document, 'DOMContentLoaded', loadFont);
       } else {
         requestAnimationFrame(loadFont);
       }
