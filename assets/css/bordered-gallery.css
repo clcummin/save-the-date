@@ -845,9 +845,8 @@ main > .page-border {
   }
 }
 
-.save-date-title > span {
 .save-date-title span {
-  display: block;
+  display: inline-block;
   margin: 0;
 }
 
