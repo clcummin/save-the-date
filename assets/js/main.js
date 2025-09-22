@@ -74,7 +74,6 @@
       // Convert preload to stylesheet
       const loadFont = () => {
         fontPreload.rel = 'stylesheet';
-        fontPreload.onload = null; // Clean up after conversion
       };
       
       // Use requestAnimationFrame to ensure DOM is ready
