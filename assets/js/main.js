@@ -21,7 +21,7 @@
      */
     add(target, event, handler, options = {}) {
       if (!target || !event || !handler) {
-        console.warn('Invalid event listener parameters');
+        console.warn('Event listener manager: Invalid parameters provided');
         return () => {};
       }
 
@@ -33,7 +33,10 @@
           target.removeEventListener(event, handler, options);
           this.listeners.delete(key);
         } catch (error) {
-          console.debug('Event listener cleanup error:', error.message);
+          // Only log in development mode
+          if (process?.env?.NODE_ENV === 'development') {
+            console.debug('Event listener cleanup error:', error.message);
+          }
         }
       };
       
@@ -49,7 +52,10 @@
         try {
           listener.cleanup();
         } catch (error) {
-          console.debug('Event listener cleanup error:', error.message);
+          // Only log in development mode
+          if (process?.env?.NODE_ENV === 'development') {
+            console.debug('Event listener cleanup error:', error.message);
+          }
         }
       }
       this.listeners.clear();
@@ -186,23 +192,33 @@
   /**
    * Attempts to play video safely with proper error handling
    * @param {HTMLVideoElement} videoElement - The video to play
+   * @param {Object} options - Playback options
+   * @param {Function} [options.onError] - Error callback
+   * @param {Function} [options.onSuccess] - Success callback
    */
-  const safelyPlayVideo = (videoElement) => {
+  const safelyPlayVideo = (videoElement, { onError, onSuccess } = {}) => {
     if (!videoElement || typeof videoElement.play !== 'function') {
-      console.warn('Invalid video element for playback');
+      console.error('Video playback: Invalid video element provided');
+      onError?.('Invalid video element');
       return;
     }
 
     const attemptVideoPlayback = () => {
       const playPromise = videoElement.play();
       if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch((error) => {
-          console.debug('Video playback failed:', error.message);
-          // Handle autoplay policy restrictions gracefully
-          if (error.name === 'NotAllowedError') {
-            console.debug('Video autoplay was prevented by browser policy');
-          }
-        });
+        playPromise
+          .then(() => {
+            onSuccess?.();
+          })
+          .catch((error) => {
+            // Handle autoplay policy restrictions gracefully
+            if (error.name === 'NotAllowedError') {
+              console.info('Video autoplay was prevented by browser policy - this is expected behavior');
+            } else {
+              console.warn('Video playback failed:', error.message);
+            }
+            onError?.(error);
+          });
       }
     };
 
@@ -319,49 +335,55 @@
   };
 
   /**
-   * Plays a subtle transition sound effect
+   * Plays a subtle transition sound effect with graceful fallback
    */
   const playTransitionSound = () => {
-    const context = getAudioContext();
-    if (!context) return;
+    try {
+      const context = getAudioContext();
+      if (!context) return;
 
-    resumeContextIfSuspended(context);
+      resumeContextIfSuspended(context);
 
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(82, context.currentTime);
-    oscillator.connect(gain);
-    gain.connect(context.destination);
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(82, context.currentTime);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
 
-    const now = context.currentTime;
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(1.3, now + 0.012);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
-    
-    oscillator.start(now);
-    oscillator.stop(now + 0.34);
+      const now = context.currentTime;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(1.3, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+      
+      oscillator.start(now);
+      oscillator.stop(now + 0.34);
+    } catch (error) {
+      // Audio not available or blocked - gracefully continue without sound
+      console.info('Audio not available, continuing silently');
+    }
   };
 
   /**
-   * Plays a celebratory boom sound effect
+   * Plays a celebratory boom sound effect with graceful fallback
    */
   const playBoom = () => {
-    const context = getAudioContext();
-    if (!context) return;
+    try {
+      const context = getAudioContext();
+      if (!context) return;
 
-    resumeContextIfSuspended(context);
+      resumeContextIfSuspended(context);
 
-    const now = context.currentTime;
-    const duration = 0.82;
+      const now = context.currentTime;
+      const duration = 0.82;
 
-    // Create tone oscillator
-    const toneOscillator = context.createOscillator();
-    const toneGain = context.createGain();
-    toneOscillator.type = 'sine';
-    toneOscillator.frequency.setValueAtTime(180, now);
-    toneOscillator.frequency.exponentialRampToValueAtTime(52, now + duration);
+      // Create tone oscillator
+      const toneOscillator = context.createOscillator();
+      const toneGain = context.createGain();
+      toneOscillator.type = 'sine';
+      toneOscillator.frequency.setValueAtTime(180, now);
+      toneOscillator.frequency.exponentialRampToValueAtTime(52, now + duration);
     toneGain.gain.setValueAtTime(0.0001, now);
     toneGain.gain.exponentialRampToValueAtTime(1.1, now + 0.02);
     toneGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
@@ -389,6 +411,10 @@
 
     noiseSource.start(now);
     noiseSource.stop(now + duration);
+    } catch (error) {
+      // Audio not available or blocked - gracefully continue without sound
+      console.info('Audio celebration not available, continuing silently');
+    }
   };
 
   // =====================================================================
@@ -908,6 +934,10 @@
       // Improved MIME type for better mobile compatibility
       link.setAttribute('type', 'text/calendar; charset=utf-8');
       const clickCleanup = eventListenerManager.add(link, 'click', (event) => {
+        // Add loading state
+        link.setAttribute('aria-busy', 'true');
+        link.style.pointerEvents = 'none';
+        
         // Generate a fresh blob URL for each download attempt
         const freshBlobUrl = getCalendarIcsUrl();
         // Revoke previous blob URL if present to prevent memory leaks
@@ -926,6 +956,12 @@
           event.preventDefault();
           window.open(freshBlobUrl, '_blank');
         }
+        
+        // Remove loading state after a brief delay
+        setTimeout(() => {
+          link.removeAttribute('aria-busy');
+          link.style.pointerEvents = '';
+        }, 500);
       });
       // Store cleanup function for potential cleanup
       link._eventCleanup = clickCleanup;
@@ -1162,7 +1198,7 @@
     });
 
   /**
-   * Wires up event handlers for save the date action buttons
+   * Wires up event handlers for save the date action buttons with enhanced feedback
    * @param {Object} elements - Object containing button elements
    * @param {Object} handlers - Object containing callback functions
    * @param {Function} [handlers.onReplay] - Replay button click handler
@@ -1173,11 +1209,39 @@
     { onReplay, onSneakPeek } = {}
   ) => {
     if (replayButton && typeof onReplay === 'function') {
-      eventListenerManager.add(replayButton, 'click', onReplay);
+      eventListenerManager.add(replayButton, 'click', (event) => {
+        // Add loading state and feedback
+        replayButton.setAttribute('aria-busy', 'true');
+        replayButton.style.pointerEvents = 'none';
+        
+        try {
+          onReplay(event);
+        } finally {
+          // Remove loading state after content loads
+          setTimeout(() => {
+            replayButton.removeAttribute('aria-busy');
+            replayButton.style.pointerEvents = '';
+          }, 800);
+        }
+      });
     }
 
     if (sneakPeekButton && typeof onSneakPeek === 'function') {
-      eventListenerManager.add(sneakPeekButton, 'click', onSneakPeek);
+      eventListenerManager.add(sneakPeekButton, 'click', (event) => {
+        // Add loading state and feedback
+        sneakPeekButton.setAttribute('aria-busy', 'true');
+        sneakPeekButton.style.pointerEvents = 'none';
+        
+        try {
+          onSneakPeek(event);
+        } finally {
+          // Remove loading state after content loads
+          setTimeout(() => {
+            sneakPeekButton.removeAttribute('aria-busy');
+            sneakPeekButton.style.pointerEvents = '';
+          }, 800);
+        }
+      });
     }
   };
 
@@ -1542,11 +1606,21 @@
 
     if (currentValue <= 0) {
       countdownNumber.textContent = '0';
-      countdownNumber.setAttribute('aria-label', 'Countdown finished');
+      countdownNumber.setAttribute('aria-label', 'Countdown finished - celebration begins now!');
+      
+      // Announce completion to screen readers
+      const announcement = document.createElement('div');
+      announcement.textContent = 'Countdown complete! The celebration video is now playing.';
+      announcement.setAttribute('aria-live', 'polite');
+      announcement.setAttribute('role', 'status');
+      announcement.className = 'visually-hidden';
+      document.body.appendChild(announcement);
+      setTimeout(() => announcement.remove(), 3000);
+      
       window.clearInterval(countdownIntervalId);
       revealNextBorderCell();
       if (countdownNote) {
-        countdownNote.textContent = 'Counting down the final moments until the big day.';
+        countdownNote.textContent = 'Get ready for the celebration!';
       }
       window.setTimeout(() => {
         showCelebrationVideo();

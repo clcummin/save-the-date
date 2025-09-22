@@ -1,5 +1,6 @@
 /* ===================================================================
    SAVE THE DATE WEBSITE STYLES
+   Critical CSS optimized for performance and accessibility
    ================================================================= */
 
 /* CSS CUSTOM PROPERTIES (VARIABLES)
@@ -14,10 +15,45 @@
   --accent: #ffe3a2;
   
   /* Layout and effects */
+  --transition-fast: 0.2s ease;
   --transition: 0.35s ease;
+  --transition-slow: 0.45s ease;
   --card-radius: clamp(20px, 4vw, 36px);
   --card-border: rgba(12, 44, 29, 0.14);
   --countdown-font: 'Cinzel Decorative', serif;
+  
+  /* Performance optimizations */
+  --gpu-acceleration: translateZ(0);
+}
+
+/* FOCUS MANAGEMENT & ACCESSIBILITY
+   ================================================================= */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* High contrast focus for interactive elements */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 1px var(--text-dark);
+}
+
+/* Ensure sufficient color contrast */
+@media (prefers-contrast: high) {
+  :root {
+    --text-muted: var(--text-dark);
+    --card-border: rgba(12, 44, 29, 0.3);
+  }
 }
 
 /* GLOBAL RESET & BASE STYLES
@@ -36,6 +72,24 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--accent);
+  color: var(--text-dark);
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  z-index: 1000;
+  transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+  top: 6px;
 }
 
 .noscript-note {
@@ -106,24 +160,26 @@ main > .page-border {
 /* BORDER CELL PHOTO GALLERY
    ================================================================= */
 
-/* Base border cell styles */
+/* Base border cell styles - optimized for performance */
 .border-cell {
   position: relative;
   overflow: hidden;
   isolation: isolate;
   z-index: 1;
   opacity: 0;
-  transform: translateY(24px) scale(0.94);
+  transform: translate3d(0, 24px, 0) scale(0.94);
   transition: opacity 0.9s ease, transform 0.9s ease;
+  will-change: opacity, transform;
 }
 
 /* Overlay effect for photos */
 .border-cell.is-visible {
   opacity: 1;
-  transform: none;
+  transform: translate3d(0, 0, 0) scale(1);
+  will-change: auto;
 }
 
-/* Image styling and hover effects */
+/* Image styling and hover effects - GPU accelerated */
 .border-cell::after {
   content: '';
   position: absolute;
@@ -139,9 +195,30 @@ main > .page-border {
   object-fit: cover;
   object-position: center center;
   display: block;
-  transform: scale(1.05);
+  transform: scale3d(1.05, 1.05, 1);
   transition: transform var(--transition), filter var(--transition);
   filter: saturate(0.75) contrast(1.05);
+  will-change: auto;
+  /* Prevent layout shift during loading */
+  aspect-ratio: 4 / 3;
+}
+
+/* Apply will-change only during interaction */
+.border-cell:hover img,
+.border-cell:focus img,
+.border-cell:active img {
+  will-change: transform, filter;
+}
+/* Specific aspect ratios for tall cells */
+.border-cell.middle-left-tall img,
+.border-cell.right-tall img {
+  aspect-ratio: 2 / 3;
+}
+
+/* Wide cells */
+.border-cell.top-left-wide img,
+.border-cell.bottom-wide img {
+  aspect-ratio: 16 / 9;
 }
 
 
@@ -196,6 +273,32 @@ main > .page-border {
     opacity: 1;
     transform: none;
   }
+  
+  /* Reduce all animations for motion sensitivity */
+  .countdown-number {
+    transition: none;
+  }
+  
+  .save-date-action {
+    transition: none;
+  }
+  
+  .save-date-action:hover,
+  .save-date-action:focus-visible {
+    transform: none;
+  }
+  
+  .save-date-title--spiral {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  
+  /* Confetti falls instantly for reduced motion */
+  .confetti-piece {
+    animation-duration: 0.1s;
+  }
 }
 
 .card-shell {
@@ -245,18 +348,20 @@ main > .page-border {
   background: rgba(0, 0, 0, 0.82);
   box-shadow: 0 24px 52px rgba(0, 0, 0, 0.38);
   opacity: 0;
-  transform: translateY(16px) scale(0.98);
-  transition: opacity 0.45s ease, transform 0.45s ease;
+  transform: translate3d(0, 16px, 0) scale(0.98);
+  transition: opacity var(--transition-slow), transform var(--transition-slow);
   position: relative;
   display: flex;
   align-items: stretch;
   justify-content: stretch;
   height: 100dvh;
+  will-change: opacity, transform;
 }
 
 .mobile-frame.is-visible {
   opacity: 1;
-  transform: none;
+  transform: translate3d(0, 0, 0) scale(1);
+  will-change: auto;
 }
 
 .mobile-frame > * {
@@ -881,9 +986,39 @@ main > .page-border {
   transform: translateY(-1px);
 }
 
+.save-date-action:active {
+  transform: translateY(0);
+  transition-duration: 0.1s;
+}
+
 .save-date-action:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 4px;
+}
+
+/* Loading state for buttons */
+.save-date-action[aria-busy="true"] {
+  pointer-events: none;
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.save-date-action[aria-busy="true"]::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--text-muted);
+  border-top-color: var(--emerald-dark);
+  border-radius: 50%;
+  animation: button-loading 1s linear infinite;
+}
+
+@keyframes button-loading {
+  to { transform: rotate(360deg); }
 }
 
 .save-date-action__icon {
@@ -1095,6 +1230,10 @@ h1 {
   body {
     display: block;
     overflow-y: auto;
+    /* Improve mobile font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   .page-border {
@@ -1118,6 +1257,27 @@ h1 {
     align-items: stretch;
     justify-content: stretch;
     margin: 0;
+  }
+  
+  /* Enhanced mobile button interactions */
+  .countdown-overlay-button {
+    min-height: 48px;
+    min-width: 120px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Better mobile navigation */
+  .skip-link {
+    position: fixed;
+    z-index: 1001;
+  }
+  
+  /* Optimize mobile calendar interactions */
+  .save-date-action {
+    min-height: 48px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .mobile-frame {
