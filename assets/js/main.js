@@ -33,10 +33,7 @@
           target.removeEventListener(event, handler, options);
           this.listeners.delete(key);
         } catch (error) {
-          // Only log in development mode
-          if (process?.env?.NODE_ENV === 'development') {
-            console.debug('Event listener cleanup error:', error.message);
-          }
+          // Silently handle cleanup errors to avoid browser console noise
         }
       };
       
@@ -52,10 +49,7 @@
         try {
           listener.cleanup();
         } catch (error) {
-          // Only log in development mode
-          if (process?.env?.NODE_ENV === 'development') {
-            console.debug('Event listener cleanup error:', error.message);
-          }
+          // Silently handle cleanup errors to avoid browser console noise
         }
       }
       this.listeners.clear();
