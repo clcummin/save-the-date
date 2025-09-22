@@ -927,7 +927,6 @@
           window.open(freshBlobUrl, '_blank');
         }
       });
-
       // Store cleanup function for potential cleanup
       link._eventCleanup = clickCleanup;
     } else {
