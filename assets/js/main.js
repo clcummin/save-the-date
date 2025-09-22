@@ -570,9 +570,9 @@
 
 
   // Overlay control elements
-  const startOverlay = document.getElementById('startOverlay');
-  const startOverlayContent = startOverlay?.querySelector('.countdown-overlay-content') ?? null;
-  const startButton = document.getElementById('startCountdownButton');
+  let startOverlay = document.getElementById('startOverlay');
+  let startOverlayContent = startOverlay?.querySelector('.countdown-overlay-content') ?? null;
+  let startButton = document.getElementById('startCountdownButton');
 
   /**
    * Reveals the next border cell in sequence during countdown
@@ -1857,12 +1857,14 @@
       // Insert at the beginning of body
       body.insertBefore(newOverlay, body.firstChild);
       
+      // Re-bind overlay references to the new DOM elements
+      startOverlay = newOverlay;
+      startOverlayContent = overlayContent;
+      startButton = button;
+      
       // Re-wire event listeners for new overlay
       eventListenerManager.add(button, 'click', startExperience);
-      eventListenerManager.add(newOverlay, 'click', (e) => {
-        if (e.target.closest('#startCountdownButton')) return;
-        startExperience(e);
-      });
+      eventListenerManager.add(newOverlay, 'click', startExperience);
       eventListenerManager.add(newOverlay, 'keydown', handleOverlayKeyDown);
     }
   };
