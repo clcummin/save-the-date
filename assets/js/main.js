@@ -1857,7 +1857,10 @@
       
       // Re-wire event listeners for new overlay
       eventListenerManager.add(button, 'click', startExperience);
-      eventListenerManager.add(newOverlay, 'click', startExperience);
+      eventListenerManager.add(newOverlay, 'click', (e) => {
+        if (e.target.closest('#startCountdownButton')) return;
+        startExperience(e);
+      });
       eventListenerManager.add(newOverlay, 'keydown', handleOverlayKeyDown);
     }
   };
