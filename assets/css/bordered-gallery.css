@@ -846,7 +846,7 @@ main > .page-border {
 }
 
 .save-date-title span {
-  display: inline-block;
+  display: block;
   margin: 0;
 }
 
