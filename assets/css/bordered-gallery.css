@@ -76,7 +76,7 @@ a:focus-visible,
 
 .skip-link {
   position: absolute;
-  top: -40px;
+  top: 6px;
   left: 6px;
   background: var(--accent);
   color: var(--text-dark);
@@ -85,11 +85,13 @@ a:focus-visible,
   border-radius: 4px;
   font-weight: 600;
   z-index: 1000;
-  transition: top 0.3s ease;
+  transform: translateY(-180%);
+  transition: transform 0.3s ease;
 }
 
-.skip-link:focus {
-  top: 6px;
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
 }
 
 .noscript-note {
