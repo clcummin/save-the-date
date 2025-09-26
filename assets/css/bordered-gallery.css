@@ -383,6 +383,28 @@ main > .page-border {
   display: block;
 }
 
+.mobile-frame--photo-final {
+  position: relative;
+}
+
+.mobile-frame__image--final {
+  animation: mobileFinalPhotoZoom 4.56s cubic-bezier(0.18, 0, 0.12, 1) forwards;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes mobileFinalPhotoZoom {
+  0% {
+    transform: scale(0.7);
+  }
+  42% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.45);
+  }
+}
+
 
 
 .mobile-frame--video {
@@ -418,6 +440,10 @@ main > .page-border {
   object-fit: cover;
   object-position: center center; /* Center for videos */
   display: block;
+}
+
+.mobile-frame--video.mobile-frame--video-slow-reveal {
+  transition: opacity 1.2s ease, transform 1.2s ease;
 }
 
 .mobile-frame--card {

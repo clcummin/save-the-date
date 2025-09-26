@@ -128,6 +128,8 @@
     { start: 2000, step: 140, min: 1200 },
     { start: 1100, step: 160, min: 420 },
   ];
+  const MOBILE_FINAL_PHOTO_ANIMATION_DURATION_MS = 4560;
+  const MOBILE_FINAL_PHOTO_ADDITIONAL_DELAY_MS = 360;
 
   // Content settings
   const COUNTDOWN_START_FALLBACK = 10;
@@ -1522,13 +1524,16 @@
     }
   };
 
-  const showMobileVideo = () => {
+  const showMobileVideo = ({ isFromFinalPhoto = false } = {}) => {
     if (!mobileStage) {
       return;
     }
 
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
     const frame = createMobileFrame('mobile-frame--video');
+    if (!prefersReducedMotion && isFromFinalPhoto) {
+      frame.classList.add('mobile-frame--video-slow-reveal');
+    }
     frame.appendChild(wrapper);
 
     swapMobileFrame(frame);
@@ -1597,6 +1602,14 @@
     const image = document.createElement('img');
     image.src = photoDetails.src;
     image.alt = photoDetails.alt || '';
+    const isFinalPhoto =
+      !prefersReducedMotion &&
+      cycleIndex === mobilePhotoLoopCount - 1 &&
+      index === mobilePhotoDetails.length - 1;
+    if (isFinalPhoto) {
+      frame.classList.add('mobile-frame--photo-final');
+      image.classList.add('mobile-frame__image--final');
+    }
     frame.appendChild(image);
 
     swapMobileFrame(frame);
@@ -1607,6 +1620,17 @@
       ? transitionDelay + MOBILE_PHOTO_TRANSITION_BUFFER_MS
       : 0;
     const scheduleDelay = Math.max(displayDuration, minimumDelay);
+
+    if (isFinalPhoto) {
+      const finalDelay = Math.max(
+        MOBILE_FINAL_PHOTO_ANIMATION_DURATION_MS + MOBILE_FINAL_PHOTO_ADDITIONAL_DELAY_MS,
+        scheduleDelay
+      );
+      window.setTimeout(() => {
+        showMobileVideo({ isFromFinalPhoto: true });
+      }, finalDelay);
+      return;
+    }
 
     window.setTimeout(() => {
       showMobilePhotoAtIndex(index + 1, cycleIndex);
