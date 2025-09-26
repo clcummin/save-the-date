@@ -446,10 +446,6 @@ main > .page-border {
   transition: opacity 1.2s ease, transform 1.2s ease;
 }
 
-.mobile-frame--video.mobile-frame--video-slow-reveal.is-visible {
-  transition: opacity 1.2s ease, transform 1.2s ease;
-}
-
 .mobile-frame--card {
   background: transparent;
   box-shadow: none;
