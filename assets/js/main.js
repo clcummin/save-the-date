@@ -128,7 +128,7 @@
     { start: 2000, step: 140, min: 1200 },
     { start: 1100, step: 160, min: 420 },
   ];
-  const MOBILE_FINAL_PHOTO_ANIMATION_DURATION_MS = 4200;
+  const MOBILE_FINAL_PHOTO_ANIMATION_DURATION_MS = 4560;
   const MOBILE_FINAL_PHOTO_ADDITIONAL_DELAY_MS = 360;
 
   // Content settings
