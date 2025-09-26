@@ -815,7 +815,7 @@
     iconActions.append(replayButton, websiteLink);
 
     actions.append(sneakPeekButton, hotelButton, iconActions);
-    return { actions, websiteLink, replayButton, sneakPeekButton };
+    return { actions, websiteLink, replayButton, sneakPeekButton, hotelButton };
   };
 
   /**
