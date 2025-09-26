@@ -804,17 +804,18 @@
       label: 'Hotel reservations',
       iconPath:
         'M4 11h16c1.1 0 2 .9 2 2v5h-2v-3H4v3H2v-9c0-1.1.9-2 2-2h1V7c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v2h3v2h-3V9H7v2H4z',
-      additionalClassName: 'save-date-action--secondary save-date-action--full',
       element: 'a',
       href: 'https://booking.chaletviewlodge.com/#/booking/step-1?group=becomingcummings',
       ariaLabel: 'Book hotel reservations (opens in a new tab)',
+      isIconOnly: true,
+      tooltipText: 'Hotel reservations',
     });
 
     const iconActions = document.createElement('div');
     iconActions.className = 'save-date-action-icons';
-    iconActions.append(replayButton, websiteLink);
+    iconActions.append(replayButton, websiteLink, hotelButton);
 
-    actions.append(sneakPeekButton, hotelButton, iconActions);
+    actions.append(sneakPeekButton, iconActions);
     return { actions, websiteLink, replayButton, sneakPeekButton, hotelButton };
   };
 
