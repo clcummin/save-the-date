@@ -799,12 +799,23 @@
     });
     sneakPeekButton.setAttribute('aria-label', 'Play the venue sneak peek video');
 
+    // Hotel reservations button
+    const hotelButton = createSaveTheDateActionButton({
+      label: 'Hotel reservations',
+      iconPath:
+        'M4 11h16c1.1 0 2 .9 2 2v5h-2v-3H4v3H2v-9c0-1.1.9-2 2-2h1V7c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v2h3v2h-3V9H7v2H4z',
+      additionalClassName: 'save-date-action--secondary save-date-action--full',
+      element: 'a',
+      href: "https://booking.chaletviewlodge.com/#/booking/step-1?data=('h6hd!'chalet-view-lodge'~a7dt*fs.~r6at!2~cn!0~cg.~al4po*co*gp!'becomingcummings'~rn5ry*rk*re.~rr*ss5ax!0~cy*ds!('p7ls*as*st*he1)~my4s7c7ne1)*1~.3%5D1!null3!%5B4!false~5.)%5D~6s3('7e*%01765431.*_",
+      ariaLabel: 'Book hotel reservations (opens in a new tab)',
+    });
+
     const iconActions = document.createElement('div');
     iconActions.className = 'save-date-action-icons';
     iconActions.append(replayButton, websiteLink);
 
-    actions.append(sneakPeekButton, iconActions);
-    return { actions, websiteLink, replayButton, sneakPeekButton };
+    actions.append(sneakPeekButton, hotelButton, iconActions);
+    return { actions, websiteLink, replayButton, sneakPeekButton, hotelButton };
   };
 
   /**
