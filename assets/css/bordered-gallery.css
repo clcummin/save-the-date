@@ -572,7 +572,7 @@ main > .page-border {
   margin: 0;
 }
 
-.countdown-overlay-hint span {
+.countdown-overlay-hint [aria-hidden] {
   font-size: 1.2em;
   line-height: 1;
 }
