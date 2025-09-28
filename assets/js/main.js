@@ -770,8 +770,8 @@
     }
 
     const controllingVideo = activeCelebrationVideoElement;
-    if (controllingVideo && !controllingVideo.muted) {
-      audio.muted = false;
+    if (controllingVideo) {
+      audio.muted = !controllingVideo.muted;
     }
 
     if (!audio.paused && !audio.ended) {
