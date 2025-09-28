@@ -151,6 +151,7 @@
   let cleanupCelebrationMediaSync = null;
   let hasPrimedCelebrationAudioPlayback = false;
   let sharedSneakPeekAudioElement = null;
+  let hasPrimedSneakPeekAudioPlayback = false;
 
   /**
    * Creates a new celebration video element with appropriate settings
@@ -174,6 +175,47 @@
    * Creates a new celebration audio element with appropriate settings
    * @returns {HTMLAudioElement} The configured audio element
    */
+  const ensureMediaUtilityContainer = () => {
+    const body = document.body;
+    if (!body) {
+      return null;
+    }
+
+    let container = body.querySelector('[data-role="media-utility-container"]');
+    if (container) {
+      return container;
+    }
+
+    container = document.createElement('div');
+    container.dataset.role = 'media-utility-container';
+    container.setAttribute('aria-hidden', 'true');
+    container.style.position = 'fixed';
+    container.style.width = '1px';
+    container.style.height = '1px';
+    container.style.overflow = 'hidden';
+    container.style.pointerEvents = 'none';
+    container.style.opacity = '0';
+    container.style.zIndex = '-1';
+
+    body.appendChild(container);
+    return container;
+  };
+
+  const registerSharedAudioElement = (audio) => {
+    if (!audio) {
+      return;
+    }
+
+    const container = ensureMediaUtilityContainer();
+    if (!container) {
+      return;
+    }
+
+    if (!container.contains(audio)) {
+      container.appendChild(audio);
+    }
+  };
+
   const createCelebrationAudioElement = () => {
     const audio = document.createElement('audio');
     audio.src = CELEBRATION_AUDIO_SOURCE;
@@ -185,6 +227,7 @@
     audio.setAttribute('playsinline', '');
     audio.setAttribute('aria-hidden', 'true');
     audio.dataset.role = 'celebration-audio';
+    registerSharedAudioElement(audio);
     return audio;
   };
 
@@ -241,6 +284,7 @@
     audio.setAttribute('playsinline', '');
     audio.setAttribute('aria-hidden', 'true');
     audio.dataset.role = 'sneak-peek-audio';
+    registerSharedAudioElement(audio);
     return audio;
   };
 
@@ -670,15 +714,20 @@
    * This helps with autoplay restrictions on mobile browsers
    */
   const primeMobileCelebrationVideoPlayback = () => {
-    if (hasPrimedMobileVideoPlayback) return;
+    if (hasPrimedMobileVideoPlayback) {
+      return;
+    }
 
     const video = getCelebrationVideoElement();
-    if (!video || (!video.paused && !video.ended)) return;
+    if (!video || (!video.paused && !video.ended)) {
+      return;
+    }
 
     const body = document.body;
-    if (!body) return;
+    if (!body) {
+      return;
+    }
 
-    // Create a hidden container for the priming attempt
     const primerContainer = document.createElement('div');
     primerContainer.style.position = 'fixed';
     primerContainer.style.width = '1px';
@@ -698,28 +747,122 @@
     const finalizePrimer = (wasSuccessful) => {
       try {
         video.pause();
+      } catch (error) {
+        // Ignore pause errors during primer cleanup
+      }
+
+      try {
         video.currentTime = 0;
-        video.muted = originalMuted;
+      } catch (error) {
+        // Ignore rewind errors during primer cleanup
+      }
+
+      video.muted = originalMuted;
+
+      try {
         if (primerContainer.parentNode) {
           primerContainer.remove();
         }
-
-        if (wasSuccessful) {
-          hasPrimedMobileVideoPlayback = true;
-          console.debug('Mobile video playback primed successfully');
-        } else {
-          console.debug('Mobile video priming failed, but continuing gracefully');
-        }
-      } catch (error) {
-        console.debug('Mobile video primer cleanup error:', error.message);
-        // Attempt cleanup even if error occurred
-        try {
-          if (primerContainer.parentNode) {
-            primerContainer.remove();
-          }
-        } catch (cleanupError) {
-          // Ignore cleanup errors
+      } catch (cleanupError) {
+        // Ignore cleanup errors
       }
+
+      if (wasSuccessful) {
+        hasPrimedMobileVideoPlayback = true;
+        console.debug('Mobile video playback primed successfully');
+      } else {
+        console.debug('Mobile video priming failed, but continuing gracefully');
+      }
+    };
+
+    const handlePrimerFailure = (error) => {
+      if (error?.message) {
+        console.debug('Mobile video primer play failed:', error.message);
+      } else if (error) {
+        console.debug('Mobile video primer play failed:', error);
+      } else {
+        console.debug('Mobile video primer play failed');
+      }
+      finalizePrimer(false);
+    };
+
+    try {
+      const playPromise = video.play();
+
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise
+          .then(() => {
+            finalizePrimer(true);
+          })
+          .catch((error) => {
+            handlePrimerFailure(error);
+          });
+      } else {
+        finalizePrimer(true);
+      }
+    } catch (error) {
+      handlePrimerFailure(error);
+    }
+  };
+
+  /**
+   * Primes the sneak peek audio element to satisfy autoplay policies
+   */
+  const primeSneakPeekAudioPlayback = () => {
+    if (hasPrimedSneakPeekAudioPlayback) {
+      return;
+    }
+
+    const audio = getSneakPeekAudioElement();
+    if (!audio) {
+      return;
+    }
+
+    const originalMutedState = audio.muted;
+
+    const finalizePrimer = (wasSuccessful) => {
+      try {
+        audio.pause();
+      } catch (error) {
+        // Ignore pause errors during primer cleanup
+      }
+
+      try {
+        audio.currentTime = 0;
+      } catch (error) {
+        // Ignore rewind errors during primer cleanup
+      }
+
+      audio.muted = originalMutedState;
+
+      if (wasSuccessful) {
+        hasPrimedSneakPeekAudioPlayback = true;
+      }
+    };
+
+    try {
+      audio.muted = true;
+      const playPromise = audio.play();
+
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise
+          .then(() => {
+            finalizePrimer(true);
+          })
+          .catch(() => {
+            finalizePrimer(false);
+          });
+      } else {
+        setTimeout(() => {
+          if (!audio.paused) {
+            finalizePrimer(true);
+          } else {
+            finalizePrimer(false);
+          }
+        }, 100);
+      }
+    } catch (error) {
+      finalizePrimer(false);
     }
   };
 
@@ -748,21 +891,8 @@
     }
   };
 
-    const playPromise = video.play();
-    if (playPromise && typeof playPromise.then === 'function') {
-      playPromise
-        .then(() => finalizePrimer(true))
-        .catch((error) => {
-          console.debug('Mobile video primer play failed:', error.message);
-          finalizePrimer(false);
-        });
-    } else {
-      finalizePrimer(true);
-    }
-  };
-
   // =====================================================================
-  // AUDIO MANAGEMENT MODULE  
+  // AUDIO MANAGEMENT MODULE
   // =====================================================================
 
   const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
@@ -2248,6 +2378,7 @@
     const context = getAudioContext();
     resumeContextIfSuspended(context);
     primeCelebrationAudioPlayback();
+    primeSneakPeekAudioPlayback();
 
     if (isMobileExperienceActive) {
       primeMobileCelebrationVideoPlayback();
