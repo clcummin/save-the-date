@@ -384,6 +384,36 @@
   };
 
   /**
+   * Waits until the associated video is actively playing before attempting to
+   * start linked audio playback. This helps avoid scenarios where audio begins
+   * before video frames are visible on mobile browsers.
+   * @param {Object} options - Configuration options
+   * @param {HTMLVideoElement} options.video - The controlling video element
+   * @param {Function} options.ensureAudioPlayback - Function that triggers the
+   *   paired audio playback
+   */
+  const ensureAudioPlaybackWhenVideoActive = ({ video, ensureAudioPlayback }) => {
+    if (!video || typeof ensureAudioPlayback !== 'function') {
+      return;
+    }
+
+    if (!video.paused && !video.ended) {
+      ensureAudioPlayback();
+      return;
+    }
+
+    let cleanup = null;
+    const handlePlaying = () => {
+      ensureAudioPlayback();
+      if (typeof cleanup === 'function') {
+        cleanup();
+      }
+    };
+
+    cleanup = eventListenerManager.add(video, 'playing', handlePlaying, { once: true });
+  };
+
+  /**
    * Synchronizes the celebration audio element with the provided video
    * @param {HTMLVideoElement} video - The video element to sync from
    * @param {HTMLAudioElement} audio - The audio element to sync to
@@ -461,6 +491,11 @@
           // Allow audio playback failures to silently fall back
         });
       }
+
+      ensureAudioPlaybackWhenVideoActive({
+        video,
+        ensureAudioPlayback: ensureCelebrationAudioPlayback,
+      });
     };
 
     const handleVideoPause = () => {
@@ -554,12 +589,18 @@
       }
     };
 
-    eventListenerManager.add(video, 'play', () => {
+    const syncAndResumeAudio = () => {
       applyVolumeState();
       applyPlaybackRate();
       syncTime();
       ensureSneakPeekAudioPlayback();
+    };
+
+    eventListenerManager.add(video, 'play', () => {
+      syncAndResumeAudio();
     });
+
+/* Removed redundant 'playing' event handler; audio sync is now handled by ensureAudioPlaybackWhenVideoActive in the 'play' handler. */
 
     eventListenerManager.add(video, 'pause', () => {
       pauseSneakPeekAudio();
@@ -2011,7 +2052,12 @@
     });
 
     safelyPlayVideo(celebrationVideo, {
-      onSuccess: ensureCelebrationAudioPlayback,
+      onSuccess: () => {
+        ensureAudioPlaybackWhenVideoActive({
+          video: celebrationVideo,
+          ensureAudioPlayback: ensureCelebrationAudioPlayback,
+        });
+      },
       onError: () => {
         resolvedOnError();
       },
@@ -2159,7 +2205,12 @@
     });
 
     safelyPlayVideo(celebrationVideo, {
-      onSuccess: ensureCelebrationAudioPlayback,
+      onSuccess: () => {
+        ensureAudioPlaybackWhenVideoActive({
+          video: celebrationVideo,
+          ensureAudioPlayback: ensureCelebrationAudioPlayback,
+        });
+      },
       onError: () => {
         showMobileSaveTheDate({ withCelebrateEffects: false });
       },
