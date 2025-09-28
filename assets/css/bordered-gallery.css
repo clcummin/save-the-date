@@ -965,7 +965,7 @@ main > .page-border {
   }
 }
 
-.save-date-title span {
+.save-date-title > span {
   display: block;
   margin: 0;
 }
@@ -993,7 +993,7 @@ main > .page-border {
   align-self: center;
 }
 
-.save-date-date span {
+.save-date-date > span {
   display: block;
 }
 
