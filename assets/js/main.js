@@ -134,12 +134,8 @@
   // Content settings
   const COUNTDOWN_START_FALLBACK = 10;
   const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/ChaletView.mp4';
-  const CELEBRATION_AUDIO_SOURCE = 'assets/ReelAudio-33714.mp3';
+  const CELEBRATION_VIDEO_SOURCE = VENUE_SNEAK_PEEK_VIDEO_SOURCE;
   const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
-  const SOUND_PERMISSION_VISIBLE_CLASS = 'sound-permission--visible';
-  const SOUND_PERMISSION_ROLE = 'celebration-sound-permission';
-  const SOUND_PERMISSION_BUTTON_LABEL = 'Enable sound';
-  const SOUND_PERMISSION_MESSAGE = 'Sound is paused until you enable it.';
 
   // =====================================================================
   // VIDEO MANAGEMENT MODULE
@@ -150,15 +146,6 @@
   let sharedCelebrationVideoEndedHandler = null;
   let sharedCelebrationVideoErrorHandler = null;
   let hasPrimedMobileVideoPlayback = false;
-  let sharedCelebrationAudioElement = null;
-  let cleanupCelebrationMediaSync = null;
-  let hasPrimedCelebrationAudioPlayback = false;
-  let activeCelebrationVideoElement = null;
-  let celebrationAudioPermissionContainer = null;
-  let celebrationAudioPermissionButton = null;
-  let celebrationAudioPermissionMessage = null;
-  let isCelebrationAudioPlaybackBlocked = false;
-  let currentCelebrationVideoWrapper = null;
 
   /**
    * Creates a new celebration video element with appropriate settings
@@ -167,7 +154,7 @@
   const createCelebrationVideoElement = () => {
     const video = document.createElement('video');
     video.className = 'countdown-video';
-    video.src = 'assets/video.mp4';
+    video.src = CELEBRATION_VIDEO_SOURCE;
     video.preload = 'auto';
     video.autoplay = true;
     video.muted = true;
@@ -182,150 +169,6 @@
    * Creates a new celebration audio element with appropriate settings
    * @returns {HTMLAudioElement} The configured audio element
    */
-  const ensureMediaUtilityContainer = () => {
-    const body = document.body;
-    if (!body) {
-      console.error('Main: document.body not found - media utility container cannot be created');
-      return null;
-    }
-
-    let container = body.querySelector('[data-role="media-utility-container"]');
-    if (container) {
-      return container;
-    }
-
-    container = document.createElement('div');
-    container.dataset.role = 'media-utility-container';
-    container.setAttribute('aria-hidden', 'true');
-    container.style.position = 'fixed';
-    container.style.width = '1px';
-    container.style.height = '1px';
-    container.style.overflow = 'hidden';
-    container.style.pointerEvents = 'none';
-    container.style.opacity = '0';
-    container.style.zIndex = '-1';
-
-    body.appendChild(container);
-    return container;
-  };
-
-  const registerSharedAudioElement = (audio) => {
-    if (!audio) {
-      return;
-    }
-
-    const container = ensureMediaUtilityContainer();
-    if (!container) {
-      return;
-    }
-
-    if (!container.contains(audio)) {
-      container.appendChild(audio);
-    }
-  };
-
-  function ensureCelebrationAudioPermissionUi(wrapper) {
-    if (!wrapper) {
-      return;
-    }
-
-    if (
-      celebrationAudioPermissionContainer &&
-      celebrationAudioPermissionContainer.parentElement !== wrapper
-    ) {
-      celebrationAudioPermissionContainer.remove();
-      celebrationAudioPermissionContainer = null;
-      celebrationAudioPermissionButton = null;
-      celebrationAudioPermissionMessage = null;
-    }
-
-    if (!celebrationAudioPermissionContainer) {
-      const container = document.createElement('div');
-      container.className = 'sound-permission';
-      container.dataset.role = SOUND_PERMISSION_ROLE;
-      container.hidden = true;
-      container.setAttribute('aria-live', 'polite');
-      container.setAttribute('aria-atomic', 'true');
-      container.setAttribute('aria-hidden', 'true');
-
-      const message = document.createElement('span');
-      message.className = 'sound-permission__message';
-      message.textContent = SOUND_PERMISSION_MESSAGE;
-
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'sound-permission__button';
-      button.textContent = SOUND_PERMISSION_BUTTON_LABEL;
-      button.setAttribute('aria-label', 'Enable sound for the celebration video');
-
-      container.appendChild(message);
-      container.appendChild(button);
-      wrapper.appendChild(container);
-
-      celebrationAudioPermissionContainer = container;
-      celebrationAudioPermissionButton = button;
-      celebrationAudioPermissionMessage = message;
-
-      eventListenerManager.add(button, 'click', () => {
-        ensureCelebrationAudioPlayback({ initiatedByUser: true, forceRetry: true });
-      });
-    } else if (!wrapper.contains(celebrationAudioPermissionContainer)) {
-      wrapper.appendChild(celebrationAudioPermissionContainer);
-    }
-
-    if (celebrationAudioPermissionMessage) {
-      celebrationAudioPermissionMessage.textContent = SOUND_PERMISSION_MESSAGE;
-    }
-  }
-
-  function showCelebrationAudioPermissionUi() {
-    if (!currentCelebrationVideoWrapper) {
-      return;
-    }
-
-    ensureCelebrationAudioPermissionUi(currentCelebrationVideoWrapper);
-
-    if (!celebrationAudioPermissionContainer) {
-      return;
-    }
-
-    celebrationAudioPermissionContainer.hidden = false;
-    celebrationAudioPermissionContainer.setAttribute('aria-hidden', 'false');
-    window.requestAnimationFrame(() => {
-      celebrationAudioPermissionContainer.classList.add(SOUND_PERMISSION_VISIBLE_CLASS);
-    });
-  }
-
-  function hideCelebrationAudioPermissionUi() {
-    if (!celebrationAudioPermissionContainer) {
-      return;
-    }
-
-    celebrationAudioPermissionContainer.classList.remove(SOUND_PERMISSION_VISIBLE_CLASS);
-    celebrationAudioPermissionContainer.setAttribute('aria-hidden', 'true');
-
-    window.setTimeout(() => {
-      if (celebrationAudioPermissionContainer) {
-        celebrationAudioPermissionContainer.hidden = true;
-      }
-    }, 200);
-  }
-
-  const createCelebrationAudioElement = () => {
-    const audio = document.createElement('audio');
-    audio.src = CELEBRATION_AUDIO_SOURCE;
-    audio.preload = 'auto';
-    audio.autoplay = false;
-    audio.loop = false;
-    audio.controls = false;
-    audio.muted = false;
-    audio.setAttribute('playsinline', '');
-    audio.setAttribute('aria-hidden', 'true');
-    audio.dataset.role = 'celebration-audio';
-    registerSharedAudioElement(audio);
-    return audio;
-  };
-
   /**
    * Gets or creates the shared celebration video element
    * @returns {HTMLVideoElement} The shared video element
@@ -338,33 +181,18 @@
   };
 
   /**
-   * Gets or creates the shared celebration audio element
-   * @returns {HTMLAudioElement|null} The audio element
+   * Stops playback of the shared celebration video element if it exists
    */
-  const getCelebrationAudioElement = () => {
-    if (!sharedCelebrationAudioElement) {
-      sharedCelebrationAudioElement = createCelebrationAudioElement();
-    }
-    return sharedCelebrationAudioElement;
-  };
-
-  /**
-   * Stops and rewinds the shared celebration audio
-   */
-  const stopCelebrationAudio = () => {
-    if (!sharedCelebrationAudioElement) {
+  const stopCelebrationVideoPlayback = () => {
+    if (!sharedCelebrationVideoElement) {
       return;
     }
 
     try {
-      sharedCelebrationAudioElement.pause();
-      sharedCelebrationAudioElement.currentTime = 0;
+      sharedCelebrationVideoElement.pause();
     } catch (error) {
-      // Ignore errors while attempting to reset audio state
+      // Ignore pause errors during cleanup
     }
-
-    isCelebrationAudioPlaybackBlocked = false;
-    hideCelebrationAudioPermissionUi();
   };
 
   /**
@@ -403,342 +231,6 @@
     if (typeof onError === 'function') {
       sharedCelebrationVideoErrorHandler = onError;
       video.addEventListener('error', sharedCelebrationVideoErrorHandler, { once: true });
-    }
-  };
-
-  /**
-   * Removes any existing media sync handlers between the video and audio
-   */
-  const resetCelebrationMediaSync = () => {
-    if (typeof cleanupCelebrationMediaSync === 'function') {
-      try {
-        cleanupCelebrationMediaSync();
-      } catch (error) {
-        // Ignore cleanup errors to avoid interrupting flow
-      }
-      cleanupCelebrationMediaSync = null;
-    }
-
-    activeCelebrationVideoElement = null;
-    currentCelebrationVideoWrapper = null;
-    hideCelebrationAudioPermissionUi();
-  };
-
-  /**
-   * Waits until the associated video is actively playing before attempting to
-   * start linked audio playback. This helps avoid scenarios where audio begins
-   * before video frames are visible on mobile browsers.
-   * @param {Object} options - Configuration options
-   * @param {HTMLVideoElement} options.video - The controlling video element
-   * @param {Function} options.ensureAudioPlayback - Function that triggers the
-   *   paired audio playback
-   */
-  const ensureAudioPlaybackWhenVideoActive = ({ video, ensureAudioPlayback }) => {
-    if (!video || typeof ensureAudioPlayback !== 'function') {
-      return;
-    }
-
-    if (!video.paused && !video.ended) {
-      ensureAudioPlayback();
-      return;
-    }
-
-    let cleanup = null;
-    const handlePlaying = () => {
-      ensureAudioPlayback();
-      if (typeof cleanup === 'function') {
-        cleanup();
-      }
-    };
-
-    cleanup = eventListenerManager.add(video, 'playing', handlePlaying, { once: true });
-  };
-
-  /**
-   * Synchronizes the celebration audio element with the provided video
-   * @param {HTMLVideoElement} video - The video element to sync from
-   * @param {HTMLAudioElement} audio - The audio element to sync to
-   */
-  const setupCelebrationMediaSync = ({ video, audio }) => {
-    if (!video || !audio) {
-      return;
-    }
-
-    resetCelebrationMediaSync();
-
-    activeCelebrationVideoElement = video;
-    isCelebrationAudioPlaybackBlocked = false;
-    hideCelebrationAudioPermissionUi();
-
-    const resolvedWrapper = video.closest('.countdown-wrapper');
-    if (resolvedWrapper) {
-      currentCelebrationVideoWrapper = resolvedWrapper;
-      ensureCelebrationAudioPermissionUi(resolvedWrapper);
-    }
-
-    let hasUserAdjustedVolume = false;
-
-    const ensureAudioSync = () => {
-      try {
-        const videoTime = Number(video.currentTime);
-        if (!Number.isFinite(videoTime)) {
-          return;
-        }
-
-        const audioTime = Number(audio.currentTime);
-        if (!Number.isFinite(audioTime) || Math.abs(audioTime - videoTime) > 0.35) {
-          audio.currentTime = videoTime;
-        }
-      } catch (error) {
-        // Ignore sync errors; browser will handle gracefully
-      }
-    };
-
-    const applyVolumeState = () => {
-      audio.muted = video.muted;
-      const resolvedVolume = Number.isFinite(video.volume) ? video.volume : 1;
-      audio.volume = resolvedVolume;
-    };
-
-    const applyPlaybackRate = () => {
-      try {
-        audio.playbackRate = video.playbackRate || 1;
-      } catch (error) {
-        // Ignore playback rate sync errors
-      }
-    };
-
-    const ensureAudioAudibleWhenVideoMuted = () => {
-      if (!video.muted || hasUserAdjustedVolume) {
-        return;
-      }
-
-      audio.muted = false;
-      const resolvedVolume = Number.isFinite(video.volume) ? video.volume : 1;
-      audio.volume = resolvedVolume;
-    };
-
-    const handleVideoVolumeChange = (event) => {
-      if (event?.isTrusted) {
-        hasUserAdjustedVolume = true;
-      }
-
-      applyVolumeState();
-
-      if (!hasUserAdjustedVolume) {
-        ensureAudioAudibleWhenVideoMuted();
-      }
-    };
-
-    const handleVideoPlay = (event) => {
-      ensureAudioSync();
-      applyVolumeState();
-      ensureAudioAudibleWhenVideoMuted();
-      applyPlaybackRate();
-
-      const allowRetry = Boolean(event?.isTrusted);
-
-      const playPromise = audio.play();
-      if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => {
-          // Allow audio playback failures to silently fall back
-        });
-      }
-
-      ensureCelebrationAudioPlayback({ allowRetry, initiatedByUser: allowRetry });
-
-      ensureAudioPlaybackWhenVideoActive({
-        video,
-        ensureAudioPlayback: () =>
-          ensureCelebrationAudioPlayback({ allowRetry: true, initiatedByUser: allowRetry }),
-      });
-    };
-
-    const handleVideoPause = () => {
-      audio.pause();
-    };
-
-    const handleVideoEnded = () => {
-      audio.pause();
-      try {
-        audio.currentTime = 0;
-      } catch (error) {
-        // Ignore errors when rewinding audio
-      }
-    };
-
-    const cleanupFns = [];
-    const registerCleanup = (cleanup) => {
-      if (typeof cleanup === 'function') {
-        cleanupFns.push(cleanup);
-      }
-    };
-
-    audio.pause();
-    try {
-      audio.currentTime = 0;
-    } catch (error) {
-      // Ignore errors resetting audio currentTime
-    }
-
-    applyVolumeState();
-    ensureAudioAudibleWhenVideoMuted();
-    applyPlaybackRate();
-
-    registerCleanup(eventListenerManager.add(video, 'play', handleVideoPlay));
-    registerCleanup(eventListenerManager.add(video, 'pause', handleVideoPause));
-    registerCleanup(eventListenerManager.add(video, 'seeking', ensureAudioSync));
-    registerCleanup(eventListenerManager.add(video, 'timeupdate', ensureAudioSync));
-    registerCleanup(eventListenerManager.add(video, 'ratechange', applyPlaybackRate));
-    registerCleanup(eventListenerManager.add(video, 'volumechange', handleVideoVolumeChange));
-    registerCleanup(eventListenerManager.add(video, 'ended', handleVideoEnded));
-
-    cleanupCelebrationMediaSync = () => {
-      cleanupFns.forEach((cleanup) => {
-        try {
-          cleanup();
-        } catch (error) {
-          // Ignore cleanup errors to avoid interrupting flow
-        }
-      });
-      audio.pause();
-    };
-  };
-
-  /**
-   * Ensures the celebration audio track is playing and audible
-   * @param {Object} [options] - Playback configuration options
-   * @param {boolean} [options.allowRetry=false] - Whether to retry if playback was previously blocked
-   * @param {boolean} [options.initiatedByUser=false] - Indicates if the attempt was triggered by a trusted user action
-   * @param {boolean} [options.forceRetry=false] - Forces a retry even if playback is flagged as blocked
-   */
-  function ensureCelebrationAudioPlayback(options = {}) {
-    const normalizedOptions =
-      options && typeof options === 'object' ? options : {};
-
-    const {
-      allowRetry = false,
-      initiatedByUser = false,
-      forceRetry = false,
-    } = normalizedOptions;
-
-    const audio = getCelebrationAudioElement();
-    if (!audio) {
-      return;
-    }
-
-    if (isCelebrationAudioPlaybackBlocked && !allowRetry && !forceRetry) {
-      return;
-    }
-
-    const context = getAudioContext();
-    if (context) {
-      resumeContextIfSuspended(context);
-    }
-
-    const controllingVideo = activeCelebrationVideoElement;
-    if (controllingVideo) {
-      audio.muted = !controllingVideo.muted;
-    }
-
-    if (!audio.paused && !audio.ended) {
-      isCelebrationAudioPlaybackBlocked = false;
-      hideCelebrationAudioPermissionUi();
-      return;
-    }
-
-    const playPromise = audio.play();
-    if (playPromise && typeof playPromise.then === 'function') {
-      playPromise
-        .then(() => {
-          isCelebrationAudioPlaybackBlocked = false;
-          hideCelebrationAudioPermissionUi();
-        })
-        .catch((error) => {
-          isCelebrationAudioPlaybackBlocked = true;
-
-          const errorMessage = error?.message || error;
-          const isPolicyRestriction =
-            error?.name === 'NotAllowedError' ||
-            (typeof errorMessage === 'string' &&
-              /not\s+allowed/i.test(errorMessage));
-
-          if (isPolicyRestriction) {
-            showCelebrationAudioPermissionUi();
-          }
-
-          if (!initiatedByUser) {
-            console.info(
-              'Celebration audio playback could not start automatically:',
-              errorMessage
-            );
-          }
-        });
-    } else {
-      isCelebrationAudioPlaybackBlocked = false;
-      hideCelebrationAudioPermissionUi();
-    }
-  }
-
-  /**
-   * Primes the celebration audio element to satisfy autoplay policies
-   */
-  const primeCelebrationAudioPlayback = () => {
-    if (hasPrimedCelebrationAudioPlayback) {
-      return;
-    }
-
-    const audio = getCelebrationAudioElement();
-    if (!audio) {
-      return;
-    }
-
-    const originalMutedState = audio.muted;
-
-    const finalizePrimer = (wasSuccessful) => {
-      try {
-        audio.pause();
-      } catch (error) {
-        // Ignore pause errors during primer cleanup
-      }
-
-      try {
-        audio.currentTime = 0;
-      } catch (error) {
-        // Ignore rewind errors during primer cleanup
-      }
-
-      audio.muted = originalMutedState;
-
-      if (wasSuccessful) {
-        hasPrimedCelebrationAudioPlayback = true;
-      }
-    };
-
-    try {
-      audio.muted = true;
-      const playPromise = audio.play();
-
-      if (playPromise && typeof playPromise.then === 'function') {
-        playPromise
-          .then(() => {
-            finalizePrimer(true);
-          })
-          .catch(() => {
-            finalizePrimer(false);
-          });
-      } else {
-        // Defensive: check if playback actually started after a short delay
-        setTimeout(() => {
-          if (!audio.paused) {
-            finalizePrimer(true);
-          } else {
-            finalizePrimer(false);
-          }
-        }, 100);
-      }
-    } catch (error) {
-      finalizePrimer(false);
     }
   };
 
@@ -1864,8 +1356,7 @@
   } = {}) => {
     if (!targetContainer) return;
 
-    resetCelebrationMediaSync();
-    stopCelebrationAudio();
+    stopCelebrationVideoPlayback();
 
     const elements = buildSaveTheDateDetails();
     targetContainer.innerHTML = '';
@@ -1918,10 +1409,6 @@
     wrapper.appendChild(videoHashtag);
     wrapper.appendChild(videoFrame);
 
-    currentCelebrationVideoWrapper = wrapper;
-    ensureCelebrationAudioPermissionUi(wrapper);
-    hideCelebrationAudioPermissionUi();
-
     return { wrapper, celebrationVideo };
   };
 
@@ -1946,9 +1433,9 @@
     video.controls = true;
     video.preload = 'auto';
     video.autoplay = true;
-    video.muted = false;
-    video.defaultMuted = false;
-    video.removeAttribute('muted');
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('muted', '');
     video.setAttribute('playsinline', '');
     video.setAttribute('aria-label', 'Sneak peek of the celebration venue');
 
@@ -1989,11 +1476,8 @@
     if (!targetContainer) return;
 
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
-    const celebrationAudio = getCelebrationAudioElement();
     targetContainer.innerHTML = '';
     targetContainer.appendChild(wrapper);
-
-    setupCelebrationMediaSync({ video: celebrationVideo, audio: celebrationAudio });
 
     const resolvedOnEnded = typeof onVideoEnded === 'function'
       ? onVideoEnded
@@ -2021,12 +1505,6 @@
     });
 
     safelyPlayVideo(celebrationVideo, {
-      onSuccess: () => {
-        ensureAudioPlaybackWhenVideoActive({
-          video: celebrationVideo,
-          ensureAudioPlayback: ensureCelebrationAudioPlayback,
-        });
-      },
       onError: () => {
         resolvedOnError();
       },
@@ -2041,8 +1519,7 @@
   const showSneakPeekVideo = ({ targetContainer = cardShell } = {}) => {
     if (!targetContainer) return;
 
-    resetCelebrationMediaSync();
-    stopCelebrationAudio();
+    stopCelebrationVideoPlayback();
 
     const { wrapper, video, backButton } = buildSneakPeekVideo();
 
@@ -2057,9 +1534,6 @@
 
     if (video) {
       video.currentTime = 0;
-      video.muted = false;
-      video.defaultMuted = false;
-      video.removeAttribute('muted');
 
       safelyPlayVideo(video, {
         onError: (error) => {
@@ -2116,8 +1590,7 @@
       return;
     }
 
-    resetCelebrationMediaSync();
-    stopCelebrationAudio();
+    stopCelebrationVideoPlayback();
 
     const elements = buildSaveTheDateDetails();
     const frame = createMobileFrame('mobile-frame--card');
@@ -2151,7 +1624,6 @@
     }
 
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
-    const celebrationAudio = getCelebrationAudioElement();
     const frame = createMobileFrame('mobile-frame--video');
     if (!prefersReducedMotion && isFromFinalPhoto) {
       frame.classList.add('mobile-frame--video-slow-reveal');
@@ -2159,8 +1631,6 @@
     frame.appendChild(wrapper);
 
     swapMobileFrame(frame);
-
-    setupCelebrationMediaSync({ video: celebrationVideo, audio: celebrationAudio });
 
     attachCelebrationVideoHandlers(celebrationVideo, {
       onEnded: () => {
@@ -2174,12 +1644,6 @@
     });
 
     safelyPlayVideo(celebrationVideo, {
-      onSuccess: () => {
-        ensureAudioPlaybackWhenVideoActive({
-          video: celebrationVideo,
-          ensureAudioPlayback: ensureCelebrationAudioPlayback,
-        });
-      },
       onError: () => {
         showMobileSaveTheDate({ withCelebrateEffects: false });
       },
@@ -2192,8 +1656,7 @@
       return;
     }
 
-    resetCelebrationMediaSync();
-    stopCelebrationAudio();
+    stopCelebrationVideoPlayback();
 
     const { wrapper, video, backButton } = buildSneakPeekVideo();
 
@@ -2204,9 +1667,6 @@
 
     if (video) {
       video.currentTime = 0;
-      video.muted = false;
-      video.defaultMuted = false;
-      video.removeAttribute('muted');
 
       safelyPlayVideo(video, {
         onError: (error) => {
@@ -2395,7 +1855,6 @@
 
     const context = getAudioContext();
     resumeContextIfSuspended(context);
-    primeCelebrationAudioPlayback();
 
     if (isMobileExperienceActive) {
       primeMobileCelebrationVideoPlayback();
