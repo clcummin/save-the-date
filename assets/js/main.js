@@ -137,6 +137,10 @@
   const CELEBRATION_AUDIO_SOURCE = 'assets/ReelAudio-33714.mp3';
   const SNEAK_PEEK_AUDIO_SOURCE = 'assets/ReelAudio-71698.mp3';
   const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+  const SOUND_PERMISSION_VISIBLE_CLASS = 'sound-permission--visible';
+  const SOUND_PERMISSION_ROLE = 'celebration-sound-permission';
+  const SOUND_PERMISSION_BUTTON_LABEL = 'Enable sound';
+  const SOUND_PERMISSION_MESSAGE = 'Sound is paused until you enable it.';
 
   // =====================================================================
   // VIDEO MANAGEMENT MODULE
@@ -152,6 +156,12 @@
   let hasPrimedCelebrationAudioPlayback = false;
   let sharedSneakPeekAudioElement = null;
   let hasPrimedSneakPeekAudioPlayback = false;
+  let activeCelebrationVideoElement = null;
+  let celebrationAudioPermissionContainer = null;
+  let celebrationAudioPermissionButton = null;
+  let celebrationAudioPermissionMessage = null;
+  let isCelebrationAudioPlaybackBlocked = false;
+  let currentCelebrationVideoWrapper = null;
 
   /**
    * Creates a new celebration video element with appropriate settings
@@ -216,6 +226,93 @@
     }
   };
 
+  function ensureCelebrationAudioPermissionUi(wrapper) {
+    if (!wrapper) {
+      return;
+    }
+
+    if (
+      celebrationAudioPermissionContainer &&
+      celebrationAudioPermissionContainer.parentElement !== wrapper
+    ) {
+      celebrationAudioPermissionContainer.remove();
+      celebrationAudioPermissionContainer = null;
+      celebrationAudioPermissionButton = null;
+      celebrationAudioPermissionMessage = null;
+    }
+
+    if (!celebrationAudioPermissionContainer) {
+      const container = document.createElement('div');
+      container.className = 'sound-permission';
+      container.dataset.role = SOUND_PERMISSION_ROLE;
+      container.hidden = true;
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-atomic', 'true');
+      container.setAttribute('aria-hidden', 'true');
+
+      const message = document.createElement('span');
+      message.className = 'sound-permission__message';
+      message.textContent = SOUND_PERMISSION_MESSAGE;
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'sound-permission__button';
+      button.textContent = SOUND_PERMISSION_BUTTON_LABEL;
+      button.setAttribute('aria-label', 'Enable sound for the celebration video');
+
+      container.appendChild(message);
+      container.appendChild(button);
+      wrapper.appendChild(container);
+
+      celebrationAudioPermissionContainer = container;
+      celebrationAudioPermissionButton = button;
+      celebrationAudioPermissionMessage = message;
+
+      eventListenerManager.add(button, 'click', () => {
+        ensureCelebrationAudioPlayback({ initiatedByUser: true, forceRetry: true });
+      });
+    } else if (!wrapper.contains(celebrationAudioPermissionContainer)) {
+      wrapper.appendChild(celebrationAudioPermissionContainer);
+    }
+
+    if (celebrationAudioPermissionMessage) {
+      celebrationAudioPermissionMessage.textContent = SOUND_PERMISSION_MESSAGE;
+    }
+  }
+
+  function showCelebrationAudioPermissionUi() {
+    if (!currentCelebrationVideoWrapper) {
+      return;
+    }
+
+    ensureCelebrationAudioPermissionUi(currentCelebrationVideoWrapper);
+
+    if (!celebrationAudioPermissionContainer) {
+      return;
+    }
+
+    celebrationAudioPermissionContainer.hidden = false;
+    celebrationAudioPermissionContainer.setAttribute('aria-hidden', 'false');
+    window.requestAnimationFrame(() => {
+      celebrationAudioPermissionContainer.classList.add(SOUND_PERMISSION_VISIBLE_CLASS);
+    });
+  }
+
+  function hideCelebrationAudioPermissionUi() {
+    if (!celebrationAudioPermissionContainer) {
+      return;
+    }
+
+    celebrationAudioPermissionContainer.classList.remove(SOUND_PERMISSION_VISIBLE_CLASS);
+    celebrationAudioPermissionContainer.setAttribute('aria-hidden', 'true');
+
+    window.setTimeout(() => {
+      if (celebrationAudioPermissionContainer) {
+        celebrationAudioPermissionContainer.hidden = true;
+      }
+    }, 200);
+  }
+
   const createCelebrationAudioElement = () => {
     const audio = document.createElement('audio');
     audio.src = CELEBRATION_AUDIO_SOURCE;
@@ -267,6 +364,9 @@
     } catch (error) {
       // Ignore errors while attempting to reset audio state
     }
+
+    isCelebrationAudioPlaybackBlocked = false;
+    hideCelebrationAudioPermissionUi();
   };
 
   /**
@@ -381,6 +481,10 @@
       }
       cleanupCelebrationMediaSync = null;
     }
+
+    activeCelebrationVideoElement = null;
+    currentCelebrationVideoWrapper = null;
+    hideCelebrationAudioPermissionUi();
   };
 
   /**
@@ -424,6 +528,17 @@
     }
 
     resetCelebrationMediaSync();
+
+    activeCelebrationVideoElement = video;
+    isCelebrationAudioPlaybackBlocked = false;
+    hideCelebrationAudioPermissionUi();
+
+    const resolvedWrapper = video.closest('.countdown-wrapper');
+    if (resolvedWrapper) {
+      currentCelebrationVideoWrapper = resolvedWrapper;
+      ensureCelebrationAudioPermissionUi(resolvedWrapper);
+      hideCelebrationAudioPermissionUi();
+    }
 
     let hasUserAdjustedVolume = false;
 
@@ -479,11 +594,13 @@
       }
     };
 
-    const handleVideoPlay = () => {
+    const handleVideoPlay = (event) => {
       ensureAudioSync();
       applyVolumeState();
       ensureAudioAudibleWhenVideoMuted();
       applyPlaybackRate();
+
+      const allowRetry = Boolean(event?.isTrusted);
 
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.catch === 'function') {
@@ -492,9 +609,12 @@
         });
       }
 
+      ensureCelebrationAudioPlayback({ allowRetry, initiatedByUser: allowRetry });
+
       ensureAudioPlaybackWhenVideoActive({
         video,
-        ensureAudioPlayback: ensureCelebrationAudioPlayback,
+        ensureAudioPlayback: () =>
+          ensureCelebrationAudioPlayback({ allowRetry: true, initiatedByUser: allowRetry }),
       });
     };
 
@@ -620,31 +740,78 @@
 
   /**
    * Ensures the celebration audio track is playing and audible
+   * @param {Object} [options] - Playback configuration options
+   * @param {boolean} [options.allowRetry=false] - Whether to retry if playback was previously blocked
+   * @param {boolean} [options.initiatedByUser=false] - Indicates if the attempt was triggered by a trusted user action
+   * @param {boolean} [options.forceRetry=false] - Forces a retry even if playback is flagged as blocked
    */
-  const ensureCelebrationAudioPlayback = () => {
+  function ensureCelebrationAudioPlayback(options = {}) {
+    const normalizedOptions =
+      options && typeof options === 'object' ? options : {};
+
+    const {
+      allowRetry = false,
+      initiatedByUser = false,
+      forceRetry = false,
+    } = normalizedOptions;
+
     const audio = getCelebrationAudioElement();
     if (!audio) {
       return;
     }
 
-    if (audio.muted) {
+    if (isCelebrationAudioPlaybackBlocked && !allowRetry && !forceRetry) {
+      return;
+    }
+
+    const context = getAudioContext();
+    if (context) {
+      resumeContextIfSuspended(context);
+    }
+
+    const controllingVideo = activeCelebrationVideoElement;
+    if (controllingVideo && !controllingVideo.muted) {
       audio.muted = false;
     }
 
-    if (!audio.paused) {
+    if (!audio.paused && !audio.ended) {
+      isCelebrationAudioPlaybackBlocked = false;
+      hideCelebrationAudioPermissionUi();
       return;
     }
 
     const playPromise = audio.play();
     if (playPromise && typeof playPromise.then === 'function') {
-      playPromise.catch((error) => {
-        console.info(
-          'Celebration audio playback could not start automatically:',
-          error?.message || error
-        );
-      });
+      playPromise
+        .then(() => {
+          isCelebrationAudioPlaybackBlocked = false;
+          hideCelebrationAudioPermissionUi();
+        })
+        .catch((error) => {
+          isCelebrationAudioPlaybackBlocked = true;
+
+          const errorMessage = error?.message || error;
+          const isPolicyRestriction =
+            error?.name === 'NotAllowedError' ||
+            (typeof errorMessage === 'string' &&
+              /not\s+allowed/i.test(errorMessage));
+
+          if (isPolicyRestriction) {
+            showCelebrationAudioPermissionUi();
+          }
+
+          if (!initiatedByUser) {
+            console.info(
+              'Celebration audio playback could not start automatically:',
+              errorMessage
+            );
+          }
+        });
+    } else {
+      isCelebrationAudioPlaybackBlocked = false;
+      hideCelebrationAudioPermissionUi();
     }
-  };
+  }
 
   /**
    * Primes the celebration audio element to satisfy autoplay policies
@@ -1955,6 +2122,10 @@
 
     wrapper.appendChild(videoHashtag);
     wrapper.appendChild(videoFrame);
+
+    currentCelebrationVideoWrapper = wrapper;
+    ensureCelebrationAudioPermissionUi(wrapper);
+    hideCelebrationAudioPermissionUi();
 
     return { wrapper, celebrationVideo };
   };
