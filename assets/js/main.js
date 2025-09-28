@@ -185,6 +185,7 @@
   const ensureMediaUtilityContainer = () => {
     const body = document.body;
     if (!body) {
+      console.error('Main: document.body not found - media utility container cannot be created');
       return null;
     }
 
@@ -1050,6 +1051,9 @@
 
   // Mobile experience management
   const mobileStage = document.getElementById('mobileStage');
+  if (!mobileStage) {
+    console.warn('Main: mobileStage element not found - mobile experience may not work properly');
+  }
   const mobileBreakpointQuery = typeof window.matchMedia === 'function'
     ? window.matchMedia('(max-width: 640px), (max-height: 520px)')
     : null;
@@ -1114,8 +1118,14 @@
 
   // DOM references and countdown state
   const cardShell = document.getElementById('cardShell');
+  if (!cardShell) {
+    console.warn('Main: cardShell element not found - some functionality may be limited');
+  }
   const initialCountdownWrapper = cardShell?.querySelector('.countdown-wrapper');
   const countdownNumber = document.getElementById('countdownNumber');
+  if (!countdownNumber) {
+    console.warn('Main: countdownNumber element not found - countdown display may not work properly');
+  }
   const countdownNote = initialCountdownWrapper?.querySelector('.countdown-note');
   const countdownStart = borderCells.length > 0 ? borderCells.length : COUNTDOWN_START_FALLBACK;
   
@@ -1127,8 +1137,14 @@
 
   // Overlay control elements
   const startOverlay = document.getElementById('startOverlay');
+  if (!startOverlay) {
+    console.warn('Main: startOverlay element not found - start overlay may not function properly');
+  }
   const startOverlayContent = startOverlay?.querySelector('.countdown-overlay-content') ?? null;
   const startButton = document.getElementById('startCountdownButton');
+  if (!startButton) {
+    console.warn('Main: startCountdownButton element not found - manual start may not work');
+  }
 
   /**
    * Reveals the next border cell in sequence during countdown
