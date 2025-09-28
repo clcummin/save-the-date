@@ -537,7 +537,6 @@
     if (resolvedWrapper) {
       currentCelebrationVideoWrapper = resolvedWrapper;
       ensureCelebrationAudioPermissionUi(resolvedWrapper);
-      hideCelebrationAudioPermissionUi();
     }
 
     let hasUserAdjustedVolume = false;
