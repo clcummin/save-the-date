@@ -160,12 +160,10 @@
     video.defaultMuted = false;
     video.removeAttribute('muted');
 
-    if (typeof video.volume === 'number') {
-      try {
-        video.volume = 1;
-      } catch (error) {
-        // Ignore browsers that prevent direct volume manipulation
-      }
+    try {
+      video.volume = 1;
+    } catch (error) {
+      // Ignore browsers that prevent direct volume manipulation
     }
   };
 
