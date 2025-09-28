@@ -426,7 +426,7 @@
     }
 
     const playPromise = audio.play();
-    if (playPromise && typeof playPromise.catch === 'function') {
+    if (playPromise && typeof playPromise.then === 'function') {
       playPromise.catch((error) => {
         console.info(
           'Celebration audio playback could not start automatically:',
