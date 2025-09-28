@@ -729,7 +729,7 @@
     };
 
     eventListenerManager.add(video, 'play', () => {
-      if (!hasUnmutedOnPlay && video.muted) {
+      if (!hasUnmutedOnPlay) {
         unmuteMedia();
         hasUnmutedOnPlay = true;
       }
