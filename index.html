@@ -25,11 +25,15 @@
     tabindex="0"
     aria-label="Start the countdown experience - Press Enter or Space to begin"
     aria-controls="mainContent"
-    aria-describedby="startInstructions"
+    aria-describedby="startInstructions soundInstructions"
   >
     <div class="countdown-overlay-content">
       <span class="countdown-overlay-line countdown-overlay-line--top">get ready</span>
       <button class="countdown-overlay-button" id="startCountdownButton" type="button">click here</button>
+      <p class="countdown-overlay-hint" id="soundInstructions">
+        <span aria-hidden="true">🔊</span>
+        Turn your sound on for the full experience.
+      </p>
       <span class="countdown-overlay-line countdown-overlay-line--bottom">to party</span>
       <span id="startInstructions" class="visually-hidden">This will start an interactive countdown and photo experience for Lorraine and Christopher's wedding celebration</span>
     </div>

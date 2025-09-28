@@ -559,6 +559,24 @@ main > .page-border {
   outline-offset: 4px;
 }
 
+.countdown-overlay-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: 'Spectral', serif;
+  font-size: clamp(0.75rem, 2.2vw, 1rem);
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  margin: 0;
+}
+
+.countdown-overlay-hint [aria-hidden] {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
 .countdown-overlay-content.is-clearing {
   opacity: 0;
   transform: scale(0.97);
