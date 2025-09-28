@@ -148,6 +148,7 @@
   let hasPrimedMobileVideoPlayback = false;
   let sharedCelebrationAudioElement = null;
   let cleanupCelebrationMediaSync = null;
+  let hasPrimedCelebrationAudioPlayback = false;
 
   /**
    * Creates a new celebration video element with appropriate settings
@@ -408,6 +409,96 @@
   };
 
   /**
+   * Ensures the celebration audio track is playing and audible
+   */
+  const ensureCelebrationAudioPlayback = () => {
+    const audio = getCelebrationAudioElement();
+    if (!audio) {
+      return;
+    }
+
+    if (audio.muted) {
+      audio.muted = false;
+    }
+
+    if (!audio.paused) {
+      return;
+    }
+
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      playPromise.catch((error) => {
+        console.info(
+          'Celebration audio playback could not start automatically:',
+          error?.message || error
+        );
+      });
+    }
+  };
+
+  /**
+   * Primes the celebration audio element to satisfy autoplay policies
+   */
+  const primeCelebrationAudioPlayback = () => {
+    if (hasPrimedCelebrationAudioPlayback) {
+      return;
+    }
+
+    const audio = getCelebrationAudioElement();
+    if (!audio) {
+      return;
+    }
+
+    const originalMutedState = audio.muted;
+
+    const finalizePrimer = (wasSuccessful) => {
+      try {
+        audio.pause();
+      } catch (error) {
+        // Ignore pause errors during primer cleanup
+      }
+
+      try {
+        audio.currentTime = 0;
+      } catch (error) {
+        // Ignore rewind errors during primer cleanup
+      }
+
+      audio.muted = originalMutedState;
+
+      if (wasSuccessful) {
+        hasPrimedCelebrationAudioPlayback = true;
+      }
+    };
+
+    try {
+      audio.muted = true;
+      const playPromise = audio.play();
+
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise
+          .then(() => {
+            finalizePrimer(true);
+          })
+          .catch(() => {
+            finalizePrimer(false);
+          });
+      } else {
+        // Defensive: check if playback actually started after a short delay
+        setTimeout(() => {
+          if (!audio.paused) {
+            finalizePrimer(true);
+          } else {
+            finalizePrimer(false);
+          }
+        }, 100);
+      }
+    } catch (error) {
+      finalizePrimer(false);
+    }
+  };
+
+  /**
    * Attempts to play video safely with proper error handling
    * @param {HTMLVideoElement} videoElement - The video to play
    * @param {Object} options - Playback options
@@ -423,7 +514,7 @@
 
     const attemptVideoPlayback = () => {
       const playPromise = videoElement.play();
-      if (playPromise && typeof playPromise.catch === 'function') {
+      if (playPromise && typeof playPromise.then === 'function') {
         playPromise
           .then(() => {
             onSuccess?.();
@@ -437,6 +528,8 @@
             }
             onError?.(error);
           });
+      } else {
+        onSuccess?.();
       }
     };
 
@@ -1635,7 +1728,12 @@
       },
     });
 
-    safelyPlayVideo(celebrationVideo);
+    safelyPlayVideo(celebrationVideo, {
+      onSuccess: ensureCelebrationAudioPlayback,
+      onError: () => {
+        resolvedOnError();
+      },
+    });
   };
 
   /**
@@ -1762,7 +1860,12 @@
       },
     });
 
-    safelyPlayVideo(celebrationVideo);
+    safelyPlayVideo(celebrationVideo, {
+      onSuccess: ensureCelebrationAudioPlayback,
+      onError: () => {
+        showMobileSaveTheDate({ withCelebrateEffects: false });
+      },
+    });
   };
 
   const showMobileSneakPeek = () => {
@@ -1962,6 +2065,7 @@
 
     const context = getAudioContext();
     resumeContextIfSuspended(context);
+    primeCelebrationAudioPlayback();
 
     if (isMobileExperienceActive) {
       primeMobileCelebrationVideoPlayback();
