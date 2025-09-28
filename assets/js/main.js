@@ -484,7 +484,14 @@
             finalizePrimer(false);
           });
       } else {
-        finalizePrimer(true);
+        // Defensive: check if playback actually started after a short delay
+        setTimeout(() => {
+          if (!audio.paused) {
+            finalizePrimer(true);
+          } else {
+            finalizePrimer(false);
+          }
+        }, 100);
       }
     } catch (error) {
       finalizePrimer(false);
