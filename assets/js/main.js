@@ -600,9 +600,7 @@
       syncAndResumeAudio();
     });
 
-    eventListenerManager.add(video, 'playing', () => {
-      syncAndResumeAudio();
-    });
+/* Removed redundant 'playing' event handler; audio sync is now handled by ensureAudioPlaybackWhenVideoActive in the 'play' handler. */
 
     eventListenerManager.add(video, 'pause', () => {
       pauseSneakPeekAudio();
