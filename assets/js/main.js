@@ -527,11 +527,7 @@
 
     eventListenerManager.add(video, 'seeking', syncTime);
     eventListenerManager.add(video, 'seeked', syncTime);
-    eventListenerManager.add(video, 'timeupdate', () => {
-      if (video.paused) {
-        syncTime();
-      }
-    });
+    // Removed redundant timeupdate handler to avoid unnecessary syncTime() calls.
 
     eventListenerManager.add(video, 'volumechange', applyVolumeState);
     eventListenerManager.add(video, 'ratechange', applyPlaybackRate);
