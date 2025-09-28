@@ -162,7 +162,6 @@
     video.muted = true;
     video.defaultMuted = true;
     video.setAttribute('muted', '');
-    video.volume = 1;
     video.controls = true;
     video.setAttribute('playsinline', '');
     return video;
