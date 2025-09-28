@@ -148,6 +148,47 @@
   let hasPrimedMobileVideoPlayback = false;
 
   /**
+   * Enables audio output on a video element
+   * @param {HTMLVideoElement} video - Target video element
+   */
+  const setVideoSoundEnabled = (video) => {
+    if (!video) {
+      return;
+    }
+
+    video.muted = false;
+    video.defaultMuted = false;
+    video.removeAttribute('muted');
+
+    try {
+      video.volume = 1;
+    } catch (error) {
+      // Ignore browsers that prevent direct volume manipulation
+    }
+  };
+
+  /**
+   * Ensures a video's sound is enabled as soon as playback begins
+   * @param {HTMLVideoElement} video - Target video element
+   */
+  const enableSoundOnPlayback = (video) => {
+    if (!video) {
+      return;
+    }
+
+    const applySound = () => {
+      setVideoSoundEnabled(video);
+    };
+
+    if (!video.paused && !video.ended) {
+      applySound();
+      return;
+    }
+
+    video.addEventListener('play', applySound, { once: true });
+  };
+
+  /**
    * Creates a new celebration video element with appropriate settings
    * @returns {HTMLVideoElement} The configured video element
    */
@@ -1396,10 +1437,7 @@
     const celebrationVideo = getCelebrationVideoElement();
     celebrationVideo.pause();
     celebrationVideo.currentTime = 0;
-    celebrationVideo.muted = true;
-    celebrationVideo.defaultMuted = true;
-    celebrationVideo.setAttribute('muted', '');
-    celebrationVideo.volume = 1;
+    enableSoundOnPlayback(celebrationVideo);
     celebrationVideo.autoplay = true;
     celebrationVideo.controls = true;
     celebrationVideo.setAttribute('playsinline', '');
@@ -1433,11 +1471,9 @@
     video.controls = true;
     video.preload = 'auto';
     video.autoplay = true;
-    video.muted = true;
-    video.defaultMuted = true;
-    video.setAttribute('muted', '');
     video.setAttribute('playsinline', '');
     video.setAttribute('aria-label', 'Sneak peek of the celebration venue');
+    enableSoundOnPlayback(video);
 
     videoFrame.appendChild(video);
 
