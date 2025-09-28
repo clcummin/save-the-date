@@ -713,6 +713,8 @@
       video.defaultMuted = false;
       video.removeAttribute('muted');
       audio.muted = false;
+      audio.defaultMuted = false;
+      audio.removeAttribute('muted');
     };
 
     applyVolumeState();
