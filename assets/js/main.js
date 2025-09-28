@@ -2047,9 +2047,13 @@
 
       safelyPlayVideo(video, {
         onError: (error) => {
-          if (error) {
-            console.info('Sneak peek video playback could not start automatically.', error);
-          }
+          // Always log the error, regardless of its truthiness, and provide type context
+          console.info(
+            'Sneak peek video playback could not start automatically.',
+            typeof error === 'undefined'
+              ? '[no error provided]'
+              : error
+          );
         },
       });
     }
