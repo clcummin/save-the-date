@@ -134,7 +134,7 @@
   // Content settings
   const COUNTDOWN_START_FALLBACK = 10;
   const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/ChaletView480.mp4';
-  const CELEBRATION_AUDIO_SOURCE = 'assets/rec5.wav';
+  const CELEBRATION_AUDIO_SOURCE = 'assets/ReelAudio-71698.mp3';
   const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
   // =====================================================================
