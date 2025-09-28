@@ -708,6 +708,17 @@
       }
     };
 
+    const unmuteMedia = () => {
+      video.muted = false;
+      video.defaultMuted = false;
+      video.removeAttribute('muted');
+      audio.muted = false;
+    };
+
+    applyVolumeState();
+
+    let hasUnmutedOnPlay = false;
+
     const syncAndResumeAudio = () => {
       applyVolumeState();
       applyPlaybackRate();
@@ -716,6 +727,10 @@
     };
 
     eventListenerManager.add(video, 'play', () => {
+      if (!hasUnmutedOnPlay && video.muted) {
+        unmuteMedia();
+        hasUnmutedOnPlay = true;
+      }
       syncAndResumeAudio();
     });
 
@@ -2149,6 +2164,9 @@
     video.src = VENUE_SNEAK_PEEK_VIDEO_SOURCE;
     video.controls = true;
     video.preload = 'metadata';
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('muted', '');
     video.setAttribute('playsinline', '');
     video.setAttribute('aria-label', 'Sneak peek of the celebration venue');
 
@@ -2252,6 +2270,7 @@
     if (sneakPeekAudio) {
       try {
         sneakPeekAudio.currentTime = 0;
+        sneakPeekAudio.muted = true;
       } catch (error) {
         // Ignore errors while rewinding sneak peek audio
       }
