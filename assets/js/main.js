@@ -134,7 +134,8 @@
   // Content settings
   const COUNTDOWN_START_FALLBACK = 10;
   const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/ChaletView480.mp4';
-  const CELEBRATION_AUDIO_SOURCE = 'assets/ReelAudio-71698.mp3';
+  const CELEBRATION_AUDIO_SOURCE = 'assets/ReelAudio-33714.mp3';
+  const SNEAK_PEEK_AUDIO_SOURCE = 'assets/ReelAudio-71598.mp3';
   const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
   // =====================================================================
@@ -149,6 +150,7 @@
   let sharedCelebrationAudioElement = null;
   let cleanupCelebrationMediaSync = null;
   let hasPrimedCelebrationAudioPlayback = false;
+  let sharedSneakPeekAudioElement = null;
 
   /**
    * Creates a new celebration video element with appropriate settings
@@ -219,6 +221,66 @@
     try {
       sharedCelebrationAudioElement.pause();
       sharedCelebrationAudioElement.currentTime = 0;
+    } catch (error) {
+      // Ignore errors while attempting to reset audio state
+    }
+  };
+
+  /**
+   * Creates the sneak peek audio element
+   * @returns {HTMLAudioElement} The configured audio element
+   */
+  const createSneakPeekAudioElement = () => {
+    const audio = document.createElement('audio');
+    audio.src = SNEAK_PEEK_AUDIO_SOURCE;
+    audio.preload = 'auto';
+    audio.autoplay = false;
+    audio.loop = true;
+    audio.controls = false;
+    audio.muted = false;
+    audio.setAttribute('playsinline', '');
+    audio.setAttribute('aria-hidden', 'true');
+    audio.dataset.role = 'sneak-peek-audio';
+    return audio;
+  };
+
+  /**
+   * Gets or creates the shared sneak peek audio element
+   * @returns {HTMLAudioElement|null} The audio element
+   */
+  const getSneakPeekAudioElement = () => {
+    if (!sharedSneakPeekAudioElement) {
+      sharedSneakPeekAudioElement = createSneakPeekAudioElement();
+    }
+    return sharedSneakPeekAudioElement;
+  };
+
+  /**
+   * Pauses the sneak peek audio without resetting the playback position
+   */
+  const pauseSneakPeekAudio = () => {
+    if (!sharedSneakPeekAudioElement) {
+      return;
+    }
+
+    try {
+      sharedSneakPeekAudioElement.pause();
+    } catch (error) {
+      // Ignore pause errors while controlling sneak peek audio
+    }
+  };
+
+  /**
+   * Stops and rewinds the shared sneak peek audio
+   */
+  const stopSneakPeekAudio = () => {
+    if (!sharedSneakPeekAudioElement) {
+      return;
+    }
+
+    try {
+      sharedSneakPeekAudioElement.pause();
+      sharedSneakPeekAudioElement.currentTime = 0;
     } catch (error) {
       // Ignore errors while attempting to reset audio state
     }
@@ -409,6 +471,73 @@
   };
 
   /**
+   * Synchronizes sneak peek audio playback with the associated video element
+   * @param {HTMLVideoElement} video - The video element to mirror
+   * @param {HTMLAudioElement} audio - The audio element that provides the soundtrack
+   */
+  const setupSneakPeekMediaSync = ({ video, audio }) => {
+    if (!video || !audio) {
+      return;
+    }
+
+    const syncTime = () => {
+      try {
+        const videoTime = Number(video.currentTime);
+        if (!Number.isFinite(videoTime)) {
+          return;
+        }
+
+        const audioTime = Number(audio.currentTime);
+        if (!Number.isFinite(audioTime) || Math.abs(audioTime - videoTime) > 0.3) {
+          audio.currentTime = videoTime;
+        }
+      } catch (error) {
+        // Ignore sync errors; browser timing will settle naturally
+      }
+    };
+
+    const applyVolumeState = () => {
+      audio.muted = video.muted;
+      const resolvedVolume = Number.isFinite(video.volume) ? video.volume : 1;
+      audio.volume = resolvedVolume;
+    };
+
+    const applyPlaybackRate = () => {
+      try {
+        audio.playbackRate = video.playbackRate || 1;
+      } catch (error) {
+        // Ignore playback-rate sync errors
+      }
+    };
+
+    eventListenerManager.add(video, 'play', () => {
+      applyVolumeState();
+      applyPlaybackRate();
+      syncTime();
+      ensureSneakPeekAudioPlayback();
+    });
+
+    eventListenerManager.add(video, 'pause', () => {
+      pauseSneakPeekAudio();
+    });
+
+    eventListenerManager.add(video, 'ended', () => {
+      stopSneakPeekAudio();
+    });
+
+    eventListenerManager.add(video, 'seeking', syncTime);
+    eventListenerManager.add(video, 'seeked', syncTime);
+    eventListenerManager.add(video, 'timeupdate', () => {
+      if (video.paused) {
+        syncTime();
+      }
+    });
+
+    eventListenerManager.add(video, 'volumechange', applyVolumeState);
+    eventListenerManager.add(video, 'ratechange', applyPlaybackRate);
+  };
+
+  /**
    * Ensures the celebration audio track is playing and audible
    */
   const ensureCelebrationAudioPlayback = () => {
@@ -594,9 +723,34 @@
           }
         } catch (cleanupError) {
           // Ignore cleanup errors
-        }
       }
-    };
+    }
+  };
+
+  /**
+   * Ensures the sneak peek audio track is playing
+   */
+  const ensureSneakPeekAudioPlayback = () => {
+    const audio = getSneakPeekAudioElement();
+    if (!audio) {
+      return;
+    }
+
+    if (audio.muted) {
+      audio.muted = false;
+    }
+
+    if (!audio.paused) {
+      return;
+    }
+
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      playPromise.catch(() => {
+        // Allow playback failures to fail silently; user can retry by pressing play on the video
+      });
+    }
+  };
 
     const playPromise = video.play();
     if (playPromise && typeof playPromise.then === 'function') {
@@ -1582,6 +1736,7 @@
 
     resetCelebrationMediaSync();
     stopCelebrationAudio();
+    stopSneakPeekAudio();
 
     const elements = buildSaveTheDateDetails();
     targetContainer.innerHTML = '';
@@ -1696,6 +1851,7 @@
   } = {}) => {
     if (!targetContainer) return;
 
+    stopSneakPeekAudio();
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
     const celebrationAudio = getCelebrationAudioElement();
     targetContainer.innerHTML = '';
@@ -1746,8 +1902,19 @@
 
     resetCelebrationMediaSync();
     stopCelebrationAudio();
+    stopSneakPeekAudio();
 
     const { wrapper, video, backButton } = buildSneakPeekVideo();
+    const sneakPeekAudio = getSneakPeekAudioElement();
+
+    if (sneakPeekAudio) {
+      try {
+        sneakPeekAudio.currentTime = 0;
+      } catch (error) {
+        // Ignore errors while rewinding sneak peek audio
+      }
+    }
+
     targetContainer.innerHTML = '';
     targetContainer.appendChild(wrapper);
 
@@ -1759,6 +1926,9 @@
 
     if (video) {
       video.currentTime = 0;
+      if (sneakPeekAudio) {
+        setupSneakPeekMediaSync({ video, audio: sneakPeekAudio });
+      }
     }
   };
 
@@ -1805,6 +1975,7 @@
 
     resetCelebrationMediaSync();
     stopCelebrationAudio();
+    stopSneakPeekAudio();
 
     const elements = buildSaveTheDateDetails();
     const frame = createMobileFrame('mobile-frame--card');
@@ -1837,6 +2008,7 @@
       return;
     }
 
+    stopSneakPeekAudio();
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
     const celebrationAudio = getCelebrationAudioElement();
     const frame = createMobileFrame('mobile-frame--video');
@@ -1876,8 +2048,19 @@
 
     resetCelebrationMediaSync();
     stopCelebrationAudio();
+    stopSneakPeekAudio();
 
     const { wrapper, video, backButton } = buildSneakPeekVideo();
+    const sneakPeekAudio = getSneakPeekAudioElement();
+
+    if (sneakPeekAudio) {
+      try {
+        sneakPeekAudio.currentTime = 0;
+      } catch (error) {
+        // Ignore errors while rewinding sneak peek audio
+      }
+    }
+
     const frame = createMobileFrame('mobile-frame--video');
     frame.appendChild(wrapper);
 
@@ -1885,6 +2068,9 @@
 
     if (video) {
       video.currentTime = 0;
+      if (sneakPeekAudio) {
+        setupSneakPeekMediaSync({ video, audio: sneakPeekAudio });
+      }
     }
 
     if (backButton) {
