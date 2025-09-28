@@ -598,10 +598,6 @@
 
     eventListenerManager.add(video, 'play', () => {
       syncAndResumeAudio();
-      ensureAudioPlaybackWhenVideoActive({
-        video,
-        ensureAudioPlayback: ensureSneakPeekAudioPlayback,
-      });
     });
 
     eventListenerManager.add(video, 'playing', () => {
