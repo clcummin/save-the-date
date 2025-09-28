@@ -134,6 +134,7 @@
   // Content settings
   const COUNTDOWN_START_FALLBACK = 10;
   const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/ChaletView480.mp4';
+  const CELEBRATION_AUDIO_SOURCE = 'assets/rec5.wav';
   const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
   // =====================================================================
@@ -145,6 +146,8 @@
   let sharedCelebrationVideoEndedHandler = null;
   let sharedCelebrationVideoErrorHandler = null;
   let hasPrimedMobileVideoPlayback = false;
+  let sharedCelebrationAudioElement = null;
+  let cleanupCelebrationMediaSync = null;
 
   /**
    * Creates a new celebration video element with appropriate settings
@@ -156,10 +159,30 @@
     video.src = 'assets/video.mp4';
     video.preload = 'auto';
     video.autoplay = true;
-    video.muted = false;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('muted', '');
     video.controls = true;
     video.setAttribute('playsinline', '');
     return video;
+  };
+
+  /**
+   * Creates a new celebration audio element with appropriate settings
+   * @returns {HTMLAudioElement} The configured audio element
+   */
+  const createCelebrationAudioElement = () => {
+    const audio = document.createElement('audio');
+    audio.src = CELEBRATION_AUDIO_SOURCE;
+    audio.preload = 'auto';
+    audio.autoplay = false;
+    audio.loop = false;
+    audio.controls = false;
+    audio.muted = false;
+    audio.setAttribute('playsinline', '');
+    audio.setAttribute('aria-hidden', 'true');
+    audio.dataset.role = 'celebration-audio';
+    return audio;
   };
 
   /**
@@ -171,6 +194,33 @@
       sharedCelebrationVideoElement = createCelebrationVideoElement();
     }
     return sharedCelebrationVideoElement;
+  };
+
+  /**
+   * Gets or creates the shared celebration audio element
+   * @returns {HTMLAudioElement|null} The audio element
+   */
+  const getCelebrationAudioElement = () => {
+    if (!sharedCelebrationAudioElement) {
+      sharedCelebrationAudioElement = createCelebrationAudioElement();
+    }
+    return sharedCelebrationAudioElement;
+  };
+
+  /**
+   * Stops and rewinds the shared celebration audio
+   */
+  const stopCelebrationAudio = () => {
+    if (!sharedCelebrationAudioElement) {
+      return;
+    }
+
+    try {
+      sharedCelebrationAudioElement.pause();
+      sharedCelebrationAudioElement.currentTime = 0;
+    } catch (error) {
+      // Ignore errors while attempting to reset audio state
+    }
   };
 
   /**
@@ -210,6 +260,151 @@
       sharedCelebrationVideoErrorHandler = onError;
       video.addEventListener('error', sharedCelebrationVideoErrorHandler, { once: true });
     }
+  };
+
+  /**
+   * Removes any existing media sync handlers between the video and audio
+   */
+  const resetCelebrationMediaSync = () => {
+    if (typeof cleanupCelebrationMediaSync === 'function') {
+      try {
+        cleanupCelebrationMediaSync();
+      } catch (error) {
+        // Ignore cleanup errors to avoid interrupting flow
+      }
+      cleanupCelebrationMediaSync = null;
+    }
+  };
+
+  /**
+   * Synchronizes the celebration audio element with the provided video
+   * @param {HTMLVideoElement} video - The video element to sync from
+   * @param {HTMLAudioElement} audio - The audio element to sync to
+   */
+  const setupCelebrationMediaSync = ({ video, audio }) => {
+    if (!video || !audio) {
+      return;
+    }
+
+    resetCelebrationMediaSync();
+
+    let hasUserAdjustedVolume = false;
+
+    const ensureAudioSync = () => {
+      try {
+        const videoTime = Number(video.currentTime);
+        if (!Number.isFinite(videoTime)) {
+          return;
+        }
+
+        const audioTime = Number(audio.currentTime);
+        if (!Number.isFinite(audioTime) || Math.abs(audioTime - videoTime) > 0.35) {
+          audio.currentTime = videoTime;
+        }
+      } catch (error) {
+        // Ignore sync errors; browser will handle gracefully
+      }
+    };
+
+    const applyVolumeState = () => {
+      audio.muted = video.muted;
+      const resolvedVolume = Number.isFinite(video.volume) ? video.volume : 1;
+      audio.volume = resolvedVolume;
+    };
+
+    const applyPlaybackRate = () => {
+      try {
+        audio.playbackRate = video.playbackRate || 1;
+      } catch (error) {
+        // Ignore playback rate sync errors
+      }
+    };
+
+    const ensureAudioAudibleWhenVideoMuted = () => {
+      if (!video.muted || hasUserAdjustedVolume) {
+        return;
+      }
+
+      audio.muted = false;
+      const resolvedVolume = Number.isFinite(video.volume) ? video.volume : 1;
+      audio.volume = resolvedVolume;
+    };
+
+    const handleVideoVolumeChange = (event) => {
+      if (event?.isTrusted) {
+        hasUserAdjustedVolume = true;
+      }
+
+      applyVolumeState();
+
+      if (!hasUserAdjustedVolume) {
+        ensureAudioAudibleWhenVideoMuted();
+      }
+    };
+
+    const handleVideoPlay = () => {
+      ensureAudioSync();
+      applyVolumeState();
+      ensureAudioAudibleWhenVideoMuted();
+      applyPlaybackRate();
+
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {
+          // Allow audio playback failures to silently fall back
+        });
+      }
+    };
+
+    const handleVideoPause = () => {
+      audio.pause();
+    };
+
+    const handleVideoEnded = () => {
+      audio.pause();
+      try {
+        audio.currentTime = 0;
+      } catch (error) {
+        // Ignore errors when rewinding audio
+      }
+    };
+
+    const cleanupFns = [];
+    const registerCleanup = (cleanup) => {
+      if (typeof cleanup === 'function') {
+        cleanupFns.push(cleanup);
+      }
+    };
+
+    audio.pause();
+    try {
+      audio.currentTime = 0;
+    } catch (error) {
+      // Ignore errors resetting audio currentTime
+    }
+
+    applyVolumeState();
+    ensureAudioAudibleWhenVideoMuted();
+    applyPlaybackRate();
+
+    registerCleanup(eventListenerManager.add(video, 'play', handleVideoPlay));
+    registerCleanup(eventListenerManager.add(video, 'pause', handleVideoPause));
+    registerCleanup(eventListenerManager.add(video, 'seeking', ensureAudioSync));
+    registerCleanup(eventListenerManager.add(video, 'timeupdate', ensureAudioSync));
+    registerCleanup(eventListenerManager.add(video, 'ratechange', applyPlaybackRate));
+    registerCleanup(eventListenerManager.add(video, 'volumechange', handleVideoVolumeChange));
+    registerCleanup(eventListenerManager.add(video, 'ended', handleVideoEnded));
+
+    cleanupCelebrationMediaSync = () => {
+      cleanupFns.forEach((cleanup) => {
+        try {
+          cleanup();
+        } catch (error) {
+          // Ignore cleanup errors to avoid interrupting flow
+        }
+      });
+      audio.pause();
+    };
   };
 
   /**
@@ -1292,6 +1487,9 @@
   } = {}) => {
     if (!targetContainer) return;
 
+    resetCelebrationMediaSync();
+    stopCelebrationAudio();
+
     const elements = buildSaveTheDateDetails();
     targetContainer.innerHTML = '';
     targetContainer.appendChild(elements.wrapper);
@@ -1330,7 +1528,10 @@
     const celebrationVideo = getCelebrationVideoElement();
     celebrationVideo.pause();
     celebrationVideo.currentTime = 0;
-    celebrationVideo.muted = false;
+    celebrationVideo.muted = true;
+    celebrationVideo.defaultMuted = true;
+    celebrationVideo.setAttribute('muted', '');
+    celebrationVideo.volume = 1;
     celebrationVideo.autoplay = true;
     celebrationVideo.controls = true;
     celebrationVideo.setAttribute('playsinline', '');
@@ -1403,8 +1604,11 @@
     if (!targetContainer) return;
 
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
+    const celebrationAudio = getCelebrationAudioElement();
     targetContainer.innerHTML = '';
     targetContainer.appendChild(wrapper);
+
+    setupCelebrationMediaSync({ video: celebrationVideo, audio: celebrationAudio });
 
     const resolvedOnEnded = typeof onVideoEnded === 'function'
       ? onVideoEnded
@@ -1441,6 +1645,9 @@
    */
   const showSneakPeekVideo = ({ targetContainer = cardShell } = {}) => {
     if (!targetContainer) return;
+
+    resetCelebrationMediaSync();
+    stopCelebrationAudio();
 
     const { wrapper, video, backButton } = buildSneakPeekVideo();
     targetContainer.innerHTML = '';
@@ -1498,6 +1705,9 @@
       return;
     }
 
+    resetCelebrationMediaSync();
+    stopCelebrationAudio();
+
     const elements = buildSaveTheDateDetails();
     const frame = createMobileFrame('mobile-frame--card');
     frame.appendChild(elements.wrapper);
@@ -1530,6 +1740,7 @@
     }
 
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
+    const celebrationAudio = getCelebrationAudioElement();
     const frame = createMobileFrame('mobile-frame--video');
     if (!prefersReducedMotion && isFromFinalPhoto) {
       frame.classList.add('mobile-frame--video-slow-reveal');
@@ -1537,6 +1748,8 @@
     frame.appendChild(wrapper);
 
     swapMobileFrame(frame);
+
+    setupCelebrationMediaSync({ video: celebrationVideo, audio: celebrationAudio });
 
     attachCelebrationVideoHandlers(celebrationVideo, {
       onEnded: () => {
@@ -1557,6 +1770,9 @@
       showSneakPeekVideo({ targetContainer: cardShell });
       return;
     }
+
+    resetCelebrationMediaSync();
+    stopCelebrationAudio();
 
     const { wrapper, video, backButton } = buildSneakPeekVideo();
     const frame = createMobileFrame('mobile-frame--video');
