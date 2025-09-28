@@ -158,9 +158,7 @@
 
     video.muted = false;
     video.defaultMuted = false;
-    if (typeof video.removeAttribute === 'function') {
-      video.removeAttribute('muted');
-    }
+    video.removeAttribute('muted');
 
     if (typeof video.volume === 'number') {
       try {
