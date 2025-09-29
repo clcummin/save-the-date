@@ -133,7 +133,7 @@
 
   // Content settings
   const COUNTDOWN_START_FALLBACK = 10;
-  const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/ChaletView.mp4';
+  const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/CelebrationVideo.mp4';
   const CELEBRATION_VIDEO_SOURCE = VENUE_SNEAK_PEEK_VIDEO_SOURCE;
   const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
