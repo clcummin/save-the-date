@@ -133,8 +133,8 @@
 
   // Content settings
   const COUNTDOWN_START_FALLBACK = 10;
-  const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/CelebrationVideo.mp4';
-  const CELEBRATION_VIDEO_SOURCE = VENUE_SNEAK_PEEK_VIDEO_SOURCE;
+  const CELEBRATION_VIDEO_SOURCE = 'assets/CelebrationVideo.mp4';
+  const VENUE_SNEAK_PEEK_VIDEO_SOURCE = 'assets/ChaletView.mp4';
   const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
   // =====================================================================
@@ -194,7 +194,7 @@
    */
   const createCelebrationVideoElement = () => {
     const video = document.createElement('video');
-    video.className = 'countdown-video';
+    video.className = 'countdown-video countdown-video--embedded';
     video.src = CELEBRATION_VIDEO_SOURCE;
     video.preload = 'auto';
     video.autoplay = true;
@@ -1432,7 +1432,7 @@
     videoHashtag.textContent = '#BECOMINGCUMMINGS';
 
     const videoFrame = document.createElement('div');
-    videoFrame.className = 'countdown-video-frame';
+    videoFrame.className = 'countdown-video-frame countdown-video-frame--embedded';
 
     const celebrationVideo = getCelebrationVideoElement();
     celebrationVideo.pause();
@@ -1463,10 +1463,10 @@
     videoHashtag.textContent = 'Venue sneak peek';
 
     const videoFrame = document.createElement('div');
-    videoFrame.className = 'countdown-video-frame sneak-peek-frame';
+    videoFrame.className = 'countdown-video-frame countdown-video-frame--embedded sneak-peek-frame';
 
     const video = document.createElement('video');
-    video.className = 'sneak-peek-embed';
+    video.className = 'countdown-video countdown-video--embedded sneak-peek-embed';
     video.src = VENUE_SNEAK_PEEK_VIDEO_SOURCE;
     video.controls = true;
     video.preload = 'auto';
