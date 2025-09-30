@@ -1453,7 +1453,8 @@
 
     const celebrationVenue = document.createElement('p');
     celebrationVenue.className = 'countdown-note celebration-video-detail';
-    celebrationVenue.textContent = 'Chalet View Lodge';
+    // Make venue name configurable via data attribute, fallback to default
+    celebrationVenue.textContent = wrapper?.dataset?.venueName || 'Chalet View Lodge';
 
     const celebrationLocation = document.createElement('p');
     celebrationLocation.className = 'countdown-note celebration-video-detail';
