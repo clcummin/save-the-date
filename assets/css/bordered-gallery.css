@@ -888,6 +888,12 @@ main > .page-border {
   text-transform: uppercase;
 }
 
+@media (max-width: 640px) {
+  .celebration-video-detail {
+    color: #fff;
+  }
+}
+
 .video-hashtag {
   font-size: clamp(0.8rem, 1.8vw, 1rem);
   letter-spacing: 0.32em;
@@ -1282,7 +1288,7 @@ main > .page-border {
   letter-spacing: 0.35em;
   font-size: clamp(0.7rem, 1.4vw, 0.9rem);
   font-family: var(--countdown-font);
-  color: #fff;
+  color: var(--emerald-mid);
   margin-bottom: clamp(10px, 1.4vw, 16px);
 }
 
