@@ -873,6 +873,21 @@ main > .page-border {
   object-fit: contain;
 }
 
+.celebration-video-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(6px, 1.6vw, 14px);
+  margin: clamp(12px, 2.4vw, 20px) 0 0;
+}
+
+.celebration-video-detail {
+  color: var(--emerald-mid);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .video-hashtag {
   font-size: clamp(0.8rem, 1.8vw, 1rem);
   letter-spacing: 0.32em;

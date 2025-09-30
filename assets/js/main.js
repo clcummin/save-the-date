@@ -1444,8 +1444,28 @@
 
     videoFrame.appendChild(celebrationVideo);
 
+    const videoDetails = document.createElement('div');
+    videoDetails.className = 'celebration-video-details';
+
+    const celebrationDate = document.createElement('p');
+    celebrationDate.className = 'countdown-note celebration-video-detail';
+    celebrationDate.textContent = '9/12/2026';
+
+    const celebrationVenue = document.createElement('p');
+    celebrationVenue.className = 'countdown-note celebration-video-detail';
+    celebrationVenue.textContent = 'Chalet View Lodge';
+
+    const celebrationLocation = document.createElement('p');
+    celebrationLocation.className = 'countdown-note celebration-video-detail';
+    celebrationLocation.textContent = 'Portola CA';
+
+    videoDetails.appendChild(celebrationDate);
+    videoDetails.appendChild(celebrationVenue);
+    videoDetails.appendChild(celebrationLocation);
+
     wrapper.appendChild(videoHashtag);
     wrapper.appendChild(videoFrame);
+    wrapper.appendChild(videoDetails);
 
     return { wrapper, celebrationVideo };
   };
