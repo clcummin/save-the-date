@@ -871,6 +871,12 @@
   };
 
   /**
+   * Tracks cleanup for the most recently rendered save the date details
+   * @type {(() => void)|null}
+   */
+  let activeDetailsCleanup = null;
+
+  /**
    * Creates the action buttons for the save the date interface
    * @returns {HTMLElement} The actions container with all buttons
    */
@@ -923,7 +929,7 @@
     iconActions.append(replayButton, websiteLink, hotelButton);
 
     actions.append(sneakPeekButton, iconActions);
-    return { actions, websiteLink, replayButton, sneakPeekButton, hotelButton };
+    return { actions, replayButton, sneakPeekButton };
   };
 
   /**
@@ -1073,11 +1079,11 @@
       link.setAttribute('download', 'wedding-weekend.ics');
       // Improved MIME type for better mobile compatibility
       link.setAttribute('type', 'text/calendar; charset=utf-8');
-      const clickCleanup = eventListenerManager.add(link, 'click', (event) => {
+      link.addEventListener('click', (event) => {
         // Add loading state
         link.setAttribute('aria-busy', 'true');
         link.style.pointerEvents = 'none';
-        
+
         // Generate a fresh blob URL for each download attempt
         const freshBlobUrl = getCalendarIcsUrl();
         // Revoke previous blob URL if present to prevent memory leaks
@@ -1096,15 +1102,13 @@
           event.preventDefault();
           window.open(freshBlobUrl, '_blank');
         }
-        
+
         // Remove loading state after a brief delay
         setTimeout(() => {
           link.removeAttribute('aria-busy');
           link.style.pointerEvents = '';
         }, 500);
       });
-      // Store cleanup function for potential cleanup
-      link._eventCleanup = clickCleanup;
     } else {
       // For non-download links (like Google Calendar), set href normally
       link.href = href;
@@ -1170,24 +1174,8 @@
       summary.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     };
 
-    // Handle native details toggle event
-    const toggleCleanup = eventListenerManager.add(details, 'toggle', () => {
-      setExpanded(details.open);
-      
-      // Focus management for accessibility
-      if (details.open) {
-        // Focus first menu item when opened
-        requestAnimationFrame(() => {
-          const firstMenuItem = menu.querySelector('[role="menuitem"]');
-          if (firstMenuItem) {
-            firstMenuItem.focus();
-          }
-        });
-      }
-    });
-
     // Enhanced keyboard navigation
-    const summaryKeydownCleanup = eventListenerManager.add(summary, 'keydown', (event) => {
+    const summaryKeydownHandler = (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         details.open = !details.open;
@@ -1197,10 +1185,11 @@
           details.open = true;
         }
       }
-    });
+    };
+    summary.addEventListener('keydown', summaryKeydownHandler);
 
     // Menu keyboard navigation
-    const menuKeydownCleanup = eventListenerManager.add(menu, 'keydown', (event) => {
+    const menuKeydownHandler = (event) => {
       const menuItems = Array.from(menu.querySelectorAll('[role="menuitem"]'));
       const currentIndex = menuItems.indexOf(document.activeElement);
 
@@ -1227,18 +1216,27 @@
           }
           break;
       }
-    });
+    };
+    menu.addEventListener('keydown', menuKeydownHandler);
 
-    // Close dropdown when clicking outside
-    const handleOutsideClick = (event) => {
-      if (details.open && !details.contains(event.target)) {
-        details.open = false;
+    let removeOpenStateListeners = null;
+
+    const detachOpenStateListeners = () => {
+      if (typeof removeOpenStateListeners === 'function') {
+        removeOpenStateListeners();
+        removeOpenStateListeners = null;
       }
     };
 
-    // Improved focus management
-    const handleFocusOut = (event) => {
-      // Use setTimeout to allow for focus to settle
+    const handleOutsideClick = (event) => {
+      if (details.open && !details.contains(event.target)) {
+        details.open = false;
+        setExpanded(false);
+      }
+    };
+
+    const handleFocusOut = () => {
+      // Use setTimeout to allow focus to settle before checking the active element
       setTimeout(() => {
         if (!details.contains(document.activeElement)) {
           details.open = false;
@@ -1247,22 +1245,47 @@
       }, 0);
     };
 
-    const clickCleanup = eventListenerManager.add(document, 'click', handleOutsideClick);
-    const focusCleanup = eventListenerManager.add(details, 'focusout', handleFocusOut);
+    const attachOpenStateListeners = () => {
+      detachOpenStateListeners();
 
-    // Comprehensive cleanup function
-    const cleanup = () => {
-      toggleCleanup();
-      summaryKeydownCleanup();
-      menuKeydownCleanup();
-      clickCleanup();
-      focusCleanup();
+      const cleanups = [
+        eventListenerManager.add(document, 'click', handleOutsideClick),
+        eventListenerManager.add(details, 'focusout', handleFocusOut),
+      ];
+
+      removeOpenStateListeners = () => {
+        cleanups.forEach((cleanup) => cleanup());
+        removeOpenStateListeners = null;
+      };
     };
 
-    // Store cleanup function for potential future use
-    container._cleanup = cleanup;
+    const toggleHandler = () => {
+      setExpanded(details.open);
 
-    return { container, details };
+      if (details.open) {
+        attachOpenStateListeners();
+
+        // Focus first menu item when opened
+        requestAnimationFrame(() => {
+          const firstMenuItem = menu.querySelector('[role="menuitem"]');
+          if (firstMenuItem) {
+            firstMenuItem.focus();
+          }
+        });
+      } else {
+        detachOpenStateListeners();
+      }
+    };
+    details.addEventListener('toggle', toggleHandler);
+
+    const cleanup = () => {
+      detachOpenStateListeners();
+      summary.removeEventListener('keydown', summaryKeydownHandler);
+      menu.removeEventListener('keydown', menuKeydownHandler);
+      details.removeEventListener('toggle', toggleHandler);
+    };
+
+    return { container, cleanup };
   };
 
   /**
@@ -1290,12 +1313,12 @@
     note.textContent = 'Formal invite to follow';
 
     // Create action buttons
-    const calendarControls = createCalendarInviteControls();
-    const { actions, websiteLink, replayButton, sneakPeekButton } = createSaveTheDateActions();
+    const { container: calendarContainer, cleanup: calendarCleanup } = createCalendarInviteControls();
+    const { actions, replayButton, sneakPeekButton } = createSaveTheDateActions();
 
     const header = document.createElement('div');
     header.className = 'save-date-header';
-    header.append(calendarControls.container, eyebrow);
+    header.append(calendarContainer, eyebrow);
 
     // Assemble the interface
     wrapper.appendChild(header);
@@ -1304,7 +1327,11 @@
     wrapper.appendChild(note);
     wrapper.appendChild(actions);
 
-    return { wrapper, title, replayButton, sneakPeekButton, websiteLink };
+    const cleanup = () => {
+      calendarCleanup?.();
+    };
+
+    return { wrapper, title, replayButton, sneakPeekButton, cleanup };
   };
 
   /**
@@ -1348,12 +1375,14 @@
     { replayButton, sneakPeekButton },
     { onReplay, onSneakPeek } = {}
   ) => {
+    const cleanups = [];
+
     if (replayButton && typeof onReplay === 'function') {
-      eventListenerManager.add(replayButton, 'click', (event) => {
+      const cleanup = eventListenerManager.add(replayButton, 'click', (event) => {
         // Add loading state and feedback
         replayButton.setAttribute('aria-busy', 'true');
         replayButton.style.pointerEvents = 'none';
-        
+
         try {
           onReplay(event);
         } finally {
@@ -1364,14 +1393,15 @@
           }, 800);
         }
       });
+      cleanups.push(cleanup);
     }
 
     if (sneakPeekButton && typeof onSneakPeek === 'function') {
-      eventListenerManager.add(sneakPeekButton, 'click', (event) => {
+      const cleanup = eventListenerManager.add(sneakPeekButton, 'click', (event) => {
         // Add loading state and feedback
         sneakPeekButton.setAttribute('aria-busy', 'true');
         sneakPeekButton.style.pointerEvents = 'none';
-        
+
         try {
           onSneakPeek(event);
         } finally {
@@ -1382,7 +1412,18 @@
           }, 800);
         }
       });
+      cleanups.push(cleanup);
     }
+
+    return () => {
+      cleanups.splice(0).forEach((cleanup) => {
+        try {
+          cleanup();
+        } catch (error) {
+          // Ignore cleanup errors to avoid disrupting navigation
+        }
+      });
+    };
   };
 
   /**
@@ -1397,13 +1438,18 @@
   } = {}) => {
     if (!targetContainer) return;
 
+    if (activeDetailsCleanup) {
+      activeDetailsCleanup();
+      activeDetailsCleanup = null;
+    }
+
     stopCelebrationVideoPlayback();
 
     const elements = buildSaveTheDateDetails();
     targetContainer.innerHTML = '';
     targetContainer.appendChild(elements.wrapper);
-    
-    wireSaveTheDateActions(elements, {
+
+    const actionsCleanup = wireSaveTheDateActions(elements, {
       onReplay: () => {
         showCelebrationVideo({ targetContainer, withCelebrateEffectsOnComplete: false });
       },
@@ -1411,7 +1457,12 @@
         showSneakPeekVideo({ targetContainer });
       },
     });
-    
+
+    activeDetailsCleanup = () => {
+      actionsCleanup?.();
+      elements.cleanup?.();
+    };
+
     revealSaveTheDateDetails(elements, { withCelebrateEffects });
   };
 
@@ -1532,6 +1583,11 @@
   } = {}) => {
     if (!targetContainer) return;
 
+    if (activeDetailsCleanup) {
+      activeDetailsCleanup();
+      activeDetailsCleanup = null;
+    }
+
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
     targetContainer.innerHTML = '';
     targetContainer.appendChild(wrapper);
@@ -1576,6 +1632,11 @@
   const showSneakPeekVideo = ({ targetContainer = cardShell } = {}) => {
     if (!targetContainer) return;
 
+    if (activeDetailsCleanup) {
+      activeDetailsCleanup();
+      activeDetailsCleanup = null;
+    }
+
     stopCelebrationVideoPlayback();
 
     const { wrapper, video, backButton } = buildSneakPeekVideo();
@@ -1583,8 +1644,10 @@
     targetContainer.innerHTML = '';
     targetContainer.appendChild(wrapper);
 
+    let backButtonCleanup = null;
+
     if (backButton) {
-      eventListenerManager.add(backButton, 'click', () => {
+      backButtonCleanup = eventListenerManager.add(backButton, 'click', () => {
         showSaveTheDateDetails({ targetContainer });
       });
     }
@@ -1604,6 +1667,10 @@
         },
       });
     }
+
+    activeDetailsCleanup = () => {
+      backButtonCleanup?.();
+    };
   };
 
   // Mobile experience helpers ----------------------------------------
@@ -1647,6 +1714,11 @@
       return;
     }
 
+    if (activeDetailsCleanup) {
+      activeDetailsCleanup();
+      activeDetailsCleanup = null;
+    }
+
     stopCelebrationVideoPlayback();
 
     const elements = buildSaveTheDateDetails();
@@ -1655,7 +1727,7 @@
 
     swapMobileFrame(frame);
 
-    wireSaveTheDateActions(elements, {
+    const actionsCleanup = wireSaveTheDateActions(elements, {
       onReplay: () => {
         showMobileVideo();
       },
@@ -1663,6 +1735,11 @@
         showMobileSneakPeek();
       },
     });
+
+    activeDetailsCleanup = () => {
+      actionsCleanup?.();
+      elements.cleanup?.();
+    };
 
     const reveal = () => {
       revealSaveTheDateDetails(elements, { withCelebrateEffects });
@@ -1678,6 +1755,11 @@
   const showMobileVideo = ({ isFromFinalPhoto = false } = {}) => {
     if (!mobileStage) {
       return;
+    }
+
+    if (activeDetailsCleanup) {
+      activeDetailsCleanup();
+      activeDetailsCleanup = null;
     }
 
     const { wrapper, celebrationVideo } = buildCelebrationVideo();
@@ -1713,6 +1795,11 @@
       return;
     }
 
+    if (activeDetailsCleanup) {
+      activeDetailsCleanup();
+      activeDetailsCleanup = null;
+    }
+
     stopCelebrationVideoPlayback();
 
     const { wrapper, video, backButton } = buildSneakPeekVideo();
@@ -1721,6 +1808,8 @@
     frame.appendChild(wrapper);
 
     swapMobileFrame(frame);
+
+    let backButtonCleanup = null;
 
     if (video) {
       video.currentTime = 0;
@@ -1735,10 +1824,14 @@
     }
 
     if (backButton) {
-      eventListenerManager.add(backButton, 'click', () => {
+      backButtonCleanup = eventListenerManager.add(backButton, 'click', () => {
         showMobileSaveTheDate({ withCelebrateEffects: false });
       });
     }
+
+    activeDetailsCleanup = () => {
+      backButtonCleanup?.();
+    };
   };
 
   const showMobilePhotoAtIndex = (index, cycleIndex = 0) => {
