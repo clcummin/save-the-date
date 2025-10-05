@@ -1967,19 +1967,8 @@
 
     hasStarted = true;
 
-    if (startOverlay) {
-      startOverlay.removeEventListener('click', startExperience);
-      startOverlay.removeEventListener('keydown', handleOverlayKeyDown);
-    }
-
-    if (startButton) {
-      startButton.removeEventListener('click', startExperience);
-    }
-
-    if (skipIntroButton) {
-      skipIntroButton.removeEventListener('click', skipExperience);
-    }
-
+    // Clean up all tracked event listeners using the manager
+    eventListenerManager.cleanup();
     gracefullyHideStartOverlay();
 
     if (isMobileExperienceActive) {
