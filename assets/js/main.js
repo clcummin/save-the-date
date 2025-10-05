@@ -678,6 +678,38 @@
   if (!startButton) {
     console.warn('Main: startCountdownButton element not found - manual start may not work');
   }
+  const skipIntroButton = document.getElementById('skipIntroButton');
+  if (!skipIntroButton) {
+    console.warn('Main: skipIntroButton element not found - skip intro control unavailable');
+  }
+
+  const gracefullyHideStartOverlay = () => {
+    if (startOverlayContent) {
+      startOverlayContent.classList.add('is-clearing');
+    }
+
+    if (startButton) {
+      startButton.disabled = true;
+      startButton.setAttribute('tabindex', '-1');
+    }
+
+    if (skipIntroButton) {
+      skipIntroButton.disabled = true;
+      skipIntroButton.setAttribute('tabindex', '-1');
+    }
+
+    if (startOverlay) {
+      startOverlay.classList.add('is-counting');
+      window.setTimeout(() => {
+        startOverlay.classList.add('hidden');
+        startOverlay.setAttribute('aria-hidden', 'true');
+        startOverlay.setAttribute('tabindex', '-1');
+        if (startOverlay.parentElement) {
+          startOverlay.remove();
+        }
+      }, START_OVERLAY_CLEAR_DELAY_MS);
+    }
+  };
 
   /**
    * Reveals the next border cell in sequence during countdown
@@ -1886,29 +1918,20 @@
 
     hasStarted = true;
 
-    if (startOverlayContent) {
-      startOverlayContent.classList.add('is-clearing');
-    }
-
     if (startOverlay) {
       startOverlay.removeEventListener('click', startExperience);
       startOverlay.removeEventListener('keydown', handleOverlayKeyDown);
-      startOverlay.classList.add('is-counting');
-      window.setTimeout(() => {
-        startOverlay.classList.add('hidden');
-        startOverlay.setAttribute('aria-hidden', 'true');
-        startOverlay.setAttribute('tabindex', '-1');
-        if (startOverlay.parentElement) {
-          startOverlay.remove();
-        }
-      }, START_OVERLAY_CLEAR_DELAY_MS);
     }
 
     if (startButton) {
       startButton.removeEventListener('click', startExperience);
-      startButton.disabled = true;
-      startButton.setAttribute('tabindex', '-1');
     }
+
+    if (skipIntroButton) {
+      skipIntroButton.removeEventListener('click', skipExperience);
+    }
+
+    gracefullyHideStartOverlay();
 
     const context = getAudioContext();
     resumeContextIfSuspended(context);
@@ -1932,6 +1955,29 @@
     }
   };
 
+  const skipExperience = (event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    if (hasStarted) {
+      return;
+    }
+
+    hasStarted = true;
+
+    // Clean up all tracked event listeners using the manager
+    eventListenerManager.cleanup();
+    gracefullyHideStartOverlay();
+
+    if (isMobileExperienceActive) {
+      showMobileSaveTheDate({ withCelebrateEffects: false });
+    } else {
+      showSaveTheDateDetails({ withCelebrateEffects: false });
+    }
+  };
+
   // Wire up interactions with proper event management --------------
   if (startButton) {
     eventListenerManager.add(startButton, 'click', startExperience);
@@ -1940,6 +1986,10 @@
   if (startOverlay) {
     eventListenerManager.add(startOverlay, 'click', startExperience);
     eventListenerManager.add(startOverlay, 'keydown', handleOverlayKeyDown);
+  }
+
+  if (skipIntroButton) {
+    eventListenerManager.add(skipIntroButton, 'click', skipExperience);
   }
 
   if (!startOverlay || !startButton) {
